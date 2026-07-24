@@ -38,7 +38,6 @@
         .scrollbar-none::-webkit-scrollbar { display: none; }
         .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Mouse Drag & Touch Swipe Grab Cursor for Horizontal Tabs */
         .tab-scroll-drag {
             cursor: grab;
             user-select: none;
@@ -63,7 +62,7 @@
             min-height: auto !important;
         }
         .pc-mode-active .editor-tools-sidebar {
-            width: 460px !important;
+            width: 480px !important;
             height: 100% !important;
             max-height: none !important;
             border-left: 1px solid rgba(255, 255, 255, 0.1);
@@ -102,15 +101,15 @@
         .ios-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             background: #ffffff;
             border: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.3);
-            margin-top: -10px;
+            margin-top: -9px;
             cursor: grab;
-            transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1);
+            transition: transform 0.08s cubic-bezier(0.2, 0, 0, 1);
         }
         .ios-slider::-webkit-slider-thumb:active {
             transform: scale(1.25);
@@ -158,39 +157,215 @@
             background-color: rgba(245, 158, 11, 0.12) !important;
             box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
         }
+
+        /* Freeform Crop Handle Styles */
+        .crop-handle {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background-color: #f59e0b;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            touch-action: none;
+            z-index: 50;
+            box-shadow: 0 0 6px rgba(0,0,0,0.8);
+        }
+        /* Gallery Selection Mode */
+        .gallery-item-selected {
+            outline: 3px solid #ef4444;
+            outline-offset: -3px;
+        }
+        .gallery-item-selected::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(239, 68, 68, 0.15);
+            pointer-events: none;
+            border-radius: inherit;
+        }
+        .gallery-checkbox {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.6);
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.15s ease;
+            backdrop-filter: blur(4px);
+        }
+        .gallery-checkbox.checked {
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+        .gallery-checkbox i {
+            font-size: 10px;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        .gallery-checkbox.checked i {
+            opacity: 1;
+        }
+        .delete-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(24, 24, 27, 0.97);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid #ef4444;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 30;
+            transform: translateY(100%);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .delete-bar.active {
+            transform: translateY(0);
+        }
+
+        /* ============================================================
+           LANDSCAPE MODE — Maximize viewport on short-height screens
+           Targets iPhone landscape (~360px height) where camera,
+           editor and gallery all benefit from compact chrome.
+           ============================================================ */
+        @media (orientation: landscape) and (max-height: 600px) {
+            /* App header: slim down */
+            header {
+                height: 36px !important;
+            }
+            header h1, header span[class*="text-[9px]"] {
+                display: none !important;
+            }
+
+            /* Bottom nav: compact */
+            nav {
+                height: 40px !important;
+            }
+
+            /* Camera controls bar: collapse to single row */
+            #cameraControlsBar {
+                height: auto !important;
+                min-height: 50px;
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: center !important;
+                padding: 5px 10px !important;
+                gap: 12px;
+            }
+            #cameraControlsBar > div {
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 10px;
+            }
+            #cameraControlsBar > div:first-child {
+                order: -1;
+            }
+            /* Shutter: smaller */
+            #mainShutterBtn {
+                width: 46px !important;
+                height: 46px !important;
+                border-width: 3px !important;
+                flex-shrink: 0;
+            }
+            /* Side buttons: smaller */
+            #cameraControlsBar button[class*="w-12"] {
+                width: 38px !important;
+                height: 38px !important;
+                border-radius: 10px !important;
+            }
+            /* FOTO/VIDEO text: smaller */
+            #cameraControlsBar button[id^="typeBtn"] {
+                font-size: 9px !important;
+                padding-bottom: 0 !important;
+                border-bottom-width: 0 !important;
+            }
+
+            /* Camera top badges: tighter overlay */
+            #videoContainer > div[id] {
+                font-size: 10px !important;
+            }
+            /* Zoom bar: compact */
+            #zoomControlsBar {
+                bottom: 5px !important;
+                padding: 3px 6px !important;
+                gap: 3px !important;
+            }
+            #zoomControlsBar button {
+                width: 26px !important;
+                height: 26px !important;
+                font-size: 9px !important;
+            }
+            /* Focus ring: smaller */
+            #focusRing {
+                width: 48px !important;
+                height: 48px !important;
+            }
+            /* Camera video: fill container properly in landscape */
+            #cameraVideo {
+                object-fit: cover !important;
+            }
+        }
     </style>
 </head>
 <body class="h-full bg-black overflow-hidden flex flex-col justify-between viewport-full-mobile">
-    <div id="appContainer" class="w-full max-w-2xl mx-auto h-full flex flex-col bg-zinc-950 shadow-2xl relative overflow-hidden transition-all duration-300 border-x border-zinc-900/50">
+    <div id="appContainer" class="w-full max-w-3xl mx-auto h-full flex flex-col bg-zinc-950 shadow-2xl relative overflow-hidden transition-all duration-300 border-x border-zinc-900/50">
         
-        <!-- Top Navigation Bar -->
-        <header class="h-14 bg-zinc-900/95 backdrop-blur-md border-b border-zinc-800/80 px-4 flex items-center justify-between shrink-0 z-30 pt-safe">
-            <div class="flex items-center space-x-2.5">
-                <div class="w-7 h-7 rounded-full bg-amber-500 text-black flex items-center justify-center font-bold text-xs shadow-md tracking-tighter">
+        <!-- Top Navigation & Action Toolbar -->
+        <header class="h-14 bg-zinc-900/95 backdrop-blur-md border-b border-zinc-800/80 px-3 flex items-center justify-between shrink-0 z-30 pt-safe">
+            <div class="flex items-center space-x-2">
+                <div class="w-7 h-7 rounded-full bg-amber-500 text-black flex items-center justify-center font-bold text-xs shadow-md tracking-tighter shrink-0">
                     X
                 </div>
-                <div class="flex flex-col">
+                <div class="flex flex-col hidden sm:flex">
                     <span class="font-bold tracking-wider text-xs text-zinc-100 font-mono">Diego-X-Studio</span>
-                    <span class="text-[10px] text-zinc-400 font-mono tracking-tight uppercase">PRO CAMERA & EDITOR</span>
+                    <span class="text-[9px] text-zinc-400 font-mono tracking-tight uppercase">PRO CAMERA & EDITOR</span>
                 </div>
             </div>
 
-            <!-- Header Action Controls -->
-            <div class="flex items-center space-x-2">
-                <!-- Histogram Realtime Button -->
-                <button onclick="toggleHistogram()" title="Histograma Realtime" class="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700/70 flex items-center justify-center text-zinc-300 hover:text-white active:scale-95 transition">
-                    <i class="fa-solid fa-chart-simple text-xs"></i>
+            <!-- Top Header Action Line: Crop, Undo, Eyedropper, Histogram, Device Mode, Save -->
+            <div class="flex items-center space-x-1.5 overflow-x-auto scrollbar-none py-1">
+                <!-- Free Crop Tool Button -->
+                <button onclick="toggleCropTool()" id="btnHeaderCrop" title="Cortar Imagen de Forma Libre" class="px-2.5 h-8 rounded-lg bg-zinc-800 border border-zinc-700/80 flex items-center space-x-1 text-zinc-200 hover:text-white hover:bg-zinc-700 active:scale-95 transition text-xs font-mono">
+                    <i class="fa-solid fa-crop text-amber-400"></i>
+                    <span class="hidden md:inline">Cortar</span>
                 </button>
-                
-                <!-- Quick Export Button -->
-                <button onclick="exportEditedPhoto()" title="Exportar Foto" class="w-8 h-8 rounded-full bg-amber-500 hover:bg-amber-400 text-black flex items-center justify-center active:scale-95 transition shadow-md">
-                    <i class="fa-solid fa-download text-xs"></i>
+
+                <!-- Undo / Volver Atrás Button -->
+                <button onclick="undoLastAction()" id="btnHeaderUndo" title="Volver atrás (Deshacer)" class="px-2.5 h-8 rounded-lg bg-zinc-800 border border-zinc-700/80 flex items-center space-x-1 text-zinc-200 hover:text-white hover:bg-zinc-700 active:scale-95 transition text-xs font-mono disabled:opacity-40">
+                    <i class="fa-solid fa-rotate-left text-amber-400"></i>
+                    <span class="hidden md:inline">Deshacer</span>
+                </button>
+
+                <!-- Eyedropper / Gotario Button -->
+                <button onclick="toggleEyedropperTool()" id="btnHeaderEyedropper" title="Gotario (Medir Blancos, Grises y Negros)" class="px-2.5 h-8 rounded-lg bg-zinc-800 border border-zinc-700/80 flex items-center space-x-1 text-zinc-200 hover:text-white hover:bg-zinc-700 active:scale-95 transition text-xs font-mono">
+                    <i class="fa-solid fa-eye-dropper text-amber-400"></i>
+                    <span class="hidden md:inline">Gotario</span>
+                </button>
+
+                <!-- Histogram Realtime Button -->
+                <button onclick="toggleHistogram()" id="btnHeaderHistogram" title="Histograma Realtime" class="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-300 hover:text-white active:scale-95 transition">
+                    <i class="fa-solid fa-chart-simple text-xs text-amber-400"></i>
                 </button>
 
                 <!-- Phone / PC Mode Toggle Button -->
-                <button onclick="toggleDeviceMode()" id="btnDeviceMode" title="Modo Teléfono / PC" class="px-2.5 h-8 rounded-full bg-zinc-800 border border-zinc-700/70 flex items-center space-x-1.5 text-zinc-300 active:scale-95 transition">
-                    <i id="deviceModeIcon" class="fa-solid fa-mobile-screen-button text-[12px] text-amber-400"></i>
-                    <span id="deviceModeText" class="text-[11px] font-mono font-semibold">MÓVIL</span>
+                <button onclick="toggleDeviceMode()" id="btnDeviceMode" title="Modo Teléfono / PC" class="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-300 active:scale-95 transition">
+                    <i id="deviceModeIcon" class="fa-solid fa-mobile-screen-button text-xs text-amber-400"></i>
+                </button>
+
+                <!-- Quick Export Button (iPhone & Desktop Compatible) -->
+                <button onclick="exportEditedPhoto()" title="Guardar / Exportar Foto" class="px-3 h-8 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold font-mono text-xs flex items-center space-x-1.5 active:scale-95 transition shadow-md shrink-0">
+                    <i class="fa-solid fa-download text-xs"></i>
+                    <span>Guardar</span>
                 </button>
             </div>
         </header>
@@ -284,9 +459,68 @@
             <!-- 2. PHOTO EDITOR VIEWPORT -->
             <section id="editorView" class="absolute inset-0 hidden flex flex-col bg-black z-10 overflow-hidden">
                 
-                <!-- Edge-to-edge Canvas Container -->
-                <div class="editor-preview-container flex-1 min-h-[60px] bg-black relative flex items-center justify-center p-2 overflow-hidden transition-all duration-75 shrink-1">
-                    <canvas id="photoCanvas" class="max-w-full max-h-full object-contain shadow-2xl transition-all duration-75"></canvas>
+                <!-- Eyedropper Active Floating Banner -->
+                <div id="eyedropperBanner" class="hidden bg-amber-500 text-black px-4 py-2 flex items-center justify-between text-xs font-mono font-bold z-40 border-b border-amber-400 shadow-md">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-eye-dropper animate-bounce"></i>
+                        <span id="eyedropperStatusText">GOTARIO ACTIVO: Toca cualquier zona de la foto</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5">
+                        <button onclick="setEyedropperTarget('white')" id="btnEyedropperWhite" class="px-2 py-1 rounded bg-white text-black font-bold text-[10px]">Blanco</button>
+                        <button onclick="setEyedropperTarget('gray')" id="btnEyedropperGray" class="px-2 py-1 rounded bg-zinc-800 text-white font-bold text-[10px]">Gris Neutral</button>
+                        <button onclick="setEyedropperTarget('black')" id="btnEyedropperBlack" class="px-2 py-1 rounded bg-black text-amber-400 font-bold text-[10px]">Negro</button>
+                        <button onclick="toggleEyedropperTool(false)" class="ml-2 px-2 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded text-[10px]">Cerrar</button>
+                    </div>
+                </div>
+
+                <!-- Freeform Crop Interactive Banner & Controls -->
+                <div id="cropToolBanner" class="hidden bg-zinc-900 border-b border-zinc-800 px-4 py-2.5 flex items-center justify-between text-xs font-mono z-40">
+                    <div class="flex items-center space-x-2 text-zinc-200">
+                        <i class="fa-solid fa-crop text-amber-400"></i>
+                        <span class="font-bold text-amber-400">CORTE LIBRE:</span>
+                        <span class="text-zinc-400 text-[11px] hidden sm:inline">Ajusta las esquinas o bordes</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="cancelCropTool()" class="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold rounded-lg text-xs transition">
+                            Cancelar
+                        </button>
+                        <button onclick="applyCropTool()" class="px-3.5 py-1 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg text-xs transition shadow-md">
+                            <i class="fa-solid fa-check mr-1"></i>Aplicar Corte
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Edge-to-edge Canvas & Crop Container -->
+                <div id="canvasViewport" class="editor-preview-container flex-1 min-h-[60px] bg-black relative flex items-center justify-center p-2 overflow-hidden transition-all duration-75 shrink-1">
+                    
+                    <div class="relative max-w-full max-h-full flex items-center justify-center" id="canvasWrapper">
+                        <canvas id="photoCanvas" class="max-w-full max-h-full object-contain shadow-2xl transition-all duration-75" onclick="handleCanvasEyedropperClick(event)"></canvas>
+
+                        <!-- Freeform Interactive Crop Box Overlay -->
+                        <div id="cropOverlay" class="hidden absolute border-2 border-amber-400 bg-amber-400/10 pointer-events-auto touch-none shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]">
+                            <!-- Grid Lines -->
+                            <div class="w-full h-full grid grid-cols-3 grid-rows-3 pointer-events-none opacity-40">
+                                <div class="border-r border-b border-white"></div>
+                                <div class="border-r border-b border-white"></div>
+                                <div class="border-b border-white"></div>
+                                <div class="border-r border-b border-white"></div>
+                                <div class="border-r border-b border-white"></div>
+                                <div class="border-b border-white"></div>
+                                <div class="border-r border-white"></div>
+                                <div class="border-r border-white"></div>
+                                <div></div>
+                            </div>
+                            <!-- 8 Resizing Handles -->
+                            <div class="crop-handle" style="top: 0%; left: 0%; cursor: nwse-resize;" data-handle="tl"></div>
+                            <div class="crop-handle" style="top: 0%; left: 50%; cursor: ns-resize;" data-handle="tc"></div>
+                            <div class="crop-handle" style="top: 0%; left: 100%; cursor: nesw-resize;" data-handle="tr"></div>
+                            <div class="crop-handle" style="top: 50%; left: 0%; cursor: ew-resize;" data-handle="ml"></div>
+                            <div class="crop-handle" style="top: 50%; left: 100%; cursor: ew-resize;" data-handle="mr"></div>
+                            <div class="crop-handle" style="top: 100%; left: 0%; cursor: nesw-resize;" data-handle="bl"></div>
+                            <div class="crop-handle" style="top: 100%; left: 50%; cursor: ns-resize;" data-handle="bc"></div>
+                            <div class="crop-handle" style="top: 100%; left: 100%; cursor: nwse-resize;" data-handle="br"></div>
+                        </div>
+                    </div>
 
                     <!-- Compare Original Photo Quick Hold Button -->
                     <button id="btnHoldCompare" onmousedown="startComparingOriginal()" onmouseup="stopComparingOriginal()" onmouseleave="stopComparingOriginal()" ontouchstart="startComparingOriginal()" ontouchend="stopComparingOriginal()" class="absolute bottom-3 left-3 bg-black/75 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-[10px] font-mono font-bold text-amber-400 flex items-center space-x-1.5 shadow-xl hover:bg-black active:scale-95 transition z-30">
@@ -300,45 +534,44 @@
                     </div>
                 </div>
 
-                <!-- Editor Controls Vertical Drawer (Full Page Swipeable / Expandable) -->
-                <div id="editorToolsSidebar" class="editor-tools-sidebar bg-zinc-950/98 backdrop-blur-xl border-t border-zinc-800 flex flex-col shrink-0 z-20 transition-all duration-75 ease-out h-[60%] min-h-[120px] max-h-[96%] shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
+                <!-- Editor Controls Vertical Drawer -->
+                <div id="editorToolsSidebar" class="editor-tools-sidebar bg-zinc-950/98 backdrop-blur-xl border-t border-zinc-800 flex flex-col shrink-0 z-20 transition-all duration-75 ease-out h-[55%] min-h-[120px] max-h-[96%] shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
                     
                     <!-- Vertical Drag / Swipe Sheet Handle Area -->
-                    <div id="drawerHandleArea" class="drawer-handle-area w-full flex flex-col items-center justify-center pt-2.5 pb-2 cursor-ns-resize touch-none select-none bg-zinc-900/90 border-b border-zinc-800/60 hover:bg-zinc-800/60 transition">
-                        <div class="drawer-handle mb-1.5"></div>
+                    <div id="drawerHandleArea" class="drawer-handle-area w-full flex flex-col items-center justify-center pt-2 pb-1.5 cursor-ns-resize touch-none select-none bg-zinc-900/90 border-b border-zinc-800/60 hover:bg-zinc-800/60 transition shrink-0">
+                        <div class="drawer-handle mb-1"></div>
                         <div class="flex items-center justify-between w-full px-4 text-[10px] font-mono text-zinc-400">
                             <span class="flex items-center space-x-1.5 text-zinc-200 font-bold">
                                 <i class="fa-solid fa-arrows-up-down text-amber-400"></i>
-                                <span>DESLIZAR / SWIPE PANEL</span>
+                                <span>PANEL DE HERRAMIENTAS</span>
                             </span>
-                            <!-- Quick Height Presets for Full View -->
                             <div class="flex items-center space-x-1">
                                 <button onclick="setDrawerHeightPreset('compact', event)" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition">30%</button>
                                 <button onclick="setDrawerHeightPreset('medium', event)" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition">60%</button>
-                                <button onclick="setDrawerHeightPreset('large', event)" class="px-2.5 py-0.5 rounded bg-amber-500 text-black font-bold border border-amber-400 transition shadow">95% ENTERA</button>
+                                <button onclick="setDrawerHeightPreset('large', event)" class="px-2.5 py-0.5 rounded bg-amber-500 text-black font-bold border border-amber-400 transition shadow">MAX</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Horizontal Tool Categories Bar -->
+                    <!-- Horizontal Tool Categories Bar (Including Curves RGB) -->
                     <div id="toolTabsBar" class="tab-scroll-drag flex overflow-x-auto border-b border-zinc-800/80 scrollbar-none font-mono text-xs tracking-wider bg-zinc-950 active:cursor-grabbing shrink-0">
                         <button onclick="switchEditTab('profiles')" id="tabBtn-profiles" class="px-4 py-3 shrink-0 border-b-2 border-amber-400 text-white font-bold transition">PERFILES</button>
-                        <button onclick="switchEditTab('light')" id="tabBtn-light" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-zinc-400 font-semibold hover:text-white transition">LUZ</button>
-                        <button onclick="switchEditTab('color')" id="tabBtn-color" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-zinc-400 font-semibold hover:text-white transition">COLOR</button>
-                        <button onclick="switchEditTab('effects')" id="tabBtn-effects" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-zinc-400 font-semibold hover:text-white transition">EFECTOS</button>
-                        <button onclick="switchEditTab('rgbGlitch')" id="tabBtn-rgbGlitch" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-amber-400 font-semibold hover:text-amber-300 transition">GLITCH RGB</button>
-                        <button onclick="switchEditTab('prism')" id="tabBtn-prism" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-cyan-400 font-semibold hover:text-cyan-300 transition">PRISMA</button>
-                        <button onclick="switchEditTab('vintageLens')" id="tabBtn-vintageLens" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-purple-400 font-semibold hover:text-purple-300 transition">LENTES</button>
-                        <button onclick="switchEditTab('datamosh')" id="tabBtn-datamosh" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-rose-400 font-semibold hover:text-rose-300 transition">DATAMOSH</button>
+                        <button onclick="switchEditTab('ajustes')" id="tabBtn-ajustes" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-zinc-400 font-semibold hover:text-white transition flex items-center space-x-1">
+                            <i class="fa-solid fa-sliders text-xs"></i>
+                            <span>AJUSTES</span>
+                        </button>
+                        <button onclick="switchEditTab('efectos')" id="tabBtn-efectos" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-amber-400 font-semibold hover:text-amber-300 transition flex items-center space-x-1">
+                            <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                            <span>EFECTOS</span>
+                        </button>
                         <button onclick="switchEditTab('frame')" id="tabBtn-frame" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-zinc-400 font-semibold hover:text-white transition">MARCO</button>
                     </div>
 
                     <!-- Tool Drawer Slider Panels Stack -->
                     <div id="drawerPanelsContainer" class="p-4 space-y-4 flex-1 overflow-y-auto font-mono text-xs overscroll-contain">
                         
-                        <!-- Panel 1: Expanded Profiles & Leica B&W Styles -->
+                        <!-- Panel 1: Profiles -->
                         <div id="panel-profiles" class="space-y-4">
-                            <!-- Quick Reset to Normal Profile Button Bar -->
                             <div class="flex items-center justify-between p-3 bg-zinc-900/90 rounded-xl border border-zinc-800 shadow-sm">
                                 <div>
                                     <span class="text-zinc-200 font-bold text-xs block">MODALIDAD DE COLOR</span>
@@ -371,6 +604,29 @@
                             <div id="profilesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5"></div>
                         </div>
 
+                        <!-- Group Panel: AJUSTES (Luz, Color, Efectos básicos, Curvas RGB + Gotario/Recortar) -->
+                        <div id="panel-ajustes" class="hidden space-y-3.5">
+
+                            <!-- Herramientas rápidas: Gotario y Recortar, agrupadas aquí -->
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <button onclick="toggleEyedropperTool()" id="btnAjustesEyedropper" class="flex items-center justify-center space-x-1.5 py-2.5 px-2 bg-zinc-900/90 border border-zinc-800 rounded-xl text-zinc-200 hover:text-white hover:bg-zinc-800 active:scale-95 transition font-mono text-xs font-bold">
+                                    <i class="fa-solid fa-eye-dropper text-amber-400"></i>
+                                    <span>GOTARIO</span>
+                                </button>
+                                <button onclick="toggleCropTool()" id="btnAjustesCrop" class="flex items-center justify-center space-x-1.5 py-2.5 px-2 bg-zinc-900/90 border border-zinc-800 rounded-xl text-zinc-200 hover:text-white hover:bg-zinc-800 active:scale-95 transition font-mono text-xs font-bold">
+                                    <i class="fa-solid fa-crop text-amber-400"></i>
+                                    <span>RECORTAR</span>
+                                </button>
+                            </div>
+
+                            <!-- Sub-pestañas internas de Ajustes -->
+                            <div id="ajustesSubTabsBar" class="flex overflow-x-auto scrollbar-none font-mono text-[11px] tracking-wider bg-zinc-900/60 rounded-xl border border-zinc-800/80 p-1 gap-1">
+                                <button onclick="switchSubTab('ajustes','light')" id="subTabBtn-light" class="flex-1 px-3 py-2 rounded-lg bg-amber-500 text-black font-bold text-center transition whitespace-nowrap">LUZ</button>
+                                <button onclick="switchSubTab('ajustes','color')" id="subTabBtn-color" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-zinc-400 font-semibold text-center hover:text-white transition whitespace-nowrap">COLOR</button>
+                                <button onclick="switchSubTab('ajustes','effects')" id="subTabBtn-effects" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-zinc-400 font-semibold text-center hover:text-white transition whitespace-nowrap">EFECTOS</button>
+                                <button onclick="switchSubTab('ajustes','curves')" id="subTabBtn-curves" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-zinc-400 font-semibold text-center hover:text-white transition whitespace-nowrap">CURVAS RGB</button>
+                            </div>
+
                         <!-- Panel 2: Light -->
                         <div id="panel-light" class="hidden space-y-3.5">
                             <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
@@ -401,6 +657,17 @@
                                     <input type="range" id="paramBlacks" min="-100" max="100" value="0" oninput="onParamChange('blacks')" class="ios-slider">
                                 </div>
                             </div>
+                            <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center space-x-1.5">
+                                        <i class="fa-solid fa-smog text-sky-400 text-xs"></i>
+                                        <span class="text-zinc-200 font-semibold">Borrar Neblina</span>
+                                    </div>
+                                    <span id="valDehaze" class="text-amber-400 font-bold">0</span>
+                                </div>
+                                <input type="range" id="paramDehaze" min="-100" max="100" value="0" oninput="onParamChange('dehaze')" class="ios-slider">
+                                <p class="text-[9px] text-zinc-500 font-mono mt-1">+ elimina bruma / - anade neblina atmosferica</p>
+                            </div>
                         </div>
 
                         <!-- Panel 3: Color & White Balance -->
@@ -425,15 +692,55 @@
                             </div>
                         </div>
 
-                        <!-- Panel 4: Standard Effects -->
+                        <!-- Panel 4: RGB CURVES (Interactive Canvas Curve Control) -->
+                        <div id="panel-curves" class="hidden space-y-3.5">
+                            <div class="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-amber-400 font-bold text-xs">EDICIÓN DE CURVAS RGB</span>
+                                    <button onclick="resetRgbCurves()" class="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded text-[11px] transition font-mono">
+                                        <i class="fa-solid fa-rotate-left mr-1"></i>Reset Curva
+                                    </button>
+                                </div>
+
+                                <!-- Channel Selector -->
+                                <div class="grid grid-cols-4 gap-1.5 font-mono text-xs">
+                                    <button onclick="setCurveChannel('rgb')" id="btnCurveChanRgb" class="py-1.5 rounded-lg bg-amber-500 text-black font-bold text-center transition">Master</button>
+                                    <button onclick="setCurveChannel('r')" id="btnCurveChanR" class="py-1.5 rounded-lg bg-zinc-800 text-rose-400 font-bold text-center hover:bg-zinc-700 transition">Rojo</button>
+                                    <button onclick="setCurveChannel('g')" id="btnCurveChanG" class="py-1.5 rounded-lg bg-zinc-800 text-emerald-400 font-bold text-center hover:bg-zinc-700 transition">Verde</button>
+                                    <button onclick="setCurveChannel('b')" id="btnCurveChanB" class="py-1.5 rounded-lg bg-zinc-800 text-sky-400 font-bold text-center hover:bg-zinc-700 transition">Azul</button>
+                                </div>
+
+                                <!-- Curve Canvas -->
+                                <div class="flex justify-center my-2">
+                                    <canvas id="curvesCanvas" width="250" height="250" class="bg-zinc-950 border border-zinc-800 rounded-lg cursor-crosshair shadow-inner touch-none"></canvas>
+                                </div>
+                                <p class="text-[10px] text-zinc-400 text-center font-mono">Arrastra los puntos para ajustar luces, sombras y tonos.</p>
+                            </div>
+                        </div>
+
+                        <!-- Panel 5: Effects -->
                         <div id="panel-effects" class="hidden space-y-3.5">
                             <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
-                                <div class="flex justify-between text-zinc-200 font-semibold"><span>Textura</span><span id="valTexture" class="text-amber-400 font-bold">0</span></div>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center space-x-1.5">
+                                        <i class="fa-solid fa-diamond text-emerald-400 text-[10px]"></i>
+                                        <span class="text-zinc-200 font-semibold">Textura</span>
+                                    </div>
+                                    <span id="valTexture" class="text-amber-400 font-bold">0</span>
+                                </div>
                                 <input type="range" id="paramTexture" min="-100" max="100" value="0" oninput="onParamChange('texture')" class="ios-slider">
+                                <p class="text-[9px] text-zinc-500 font-mono mt-1">+ detalles finos / - suaviza microtextura</p>
                             </div>
                             <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
-                                <div class="flex justify-between text-zinc-200 font-semibold"><span>Claridad</span><span id="valClarity" class="text-amber-400 font-bold">0</span></div>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center space-x-1.5">
+                                        <i class="fa-solid fa-circle-half-stroke text-violet-400 text-[10px]"></i>
+                                        <span class="text-zinc-200 font-semibold">Claridad</span>
+                                    </div>
+                                    <span id="valClarity" class="text-amber-400 font-bold">0</span>
+                                </div>
                                 <input type="range" id="paramClarity" min="-100" max="100" value="0" oninput="onParamChange('clarity')" class="ios-slider">
+                                <p class="text-[9px] text-zinc-500 font-mono mt-1">+ contraste local y estructura / - belleza y glow</p>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
@@ -446,8 +753,23 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- /Panel 5: Effects -->
 
-                        <!-- Panel 5: RGB Glitch -->
+                        </div>
+                        <!-- /Group Panel: AJUSTES -->
+
+                        <!-- Group Panel: EFECTOS (Glitch RGB, Prisma, Lentes, Datamosh) -->
+                        <div id="panel-efectos" class="hidden space-y-3.5">
+
+                            <!-- Sub-pestañas internas de Efectos -->
+                            <div id="efectosSubTabsBar" class="flex overflow-x-auto scrollbar-none font-mono text-[11px] tracking-wider bg-zinc-900/60 rounded-xl border border-zinc-800/80 p-1 gap-1">
+                                <button onclick="switchSubTab('efectos','rgbGlitch')" id="subTabBtn-rgbGlitch" class="flex-1 px-3 py-2 rounded-lg bg-amber-500 text-black font-bold text-center transition whitespace-nowrap">GLITCH RGB</button>
+                                <button onclick="switchSubTab('efectos','prism')" id="subTabBtn-prism" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-cyan-400 font-semibold text-center hover:text-cyan-300 transition whitespace-nowrap">PRISMA</button>
+                                <button onclick="switchSubTab('efectos','vintageLens')" id="subTabBtn-vintageLens" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-purple-400 font-semibold text-center hover:text-purple-300 transition whitespace-nowrap">LENTES</button>
+                                <button onclick="switchSubTab('efectos','datamosh')" id="subTabBtn-datamosh" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-rose-400 font-semibold text-center hover:text-rose-300 transition whitespace-nowrap">DATAMOSH</button>
+                            </div>
+
+                        <!-- Panel 6: RGB Glitch -->
                         <div id="panel-rgbGlitch" class="hidden space-y-3.5">
                             <div class="p-3 bg-zinc-900/90 rounded-xl border border-amber-500/30 shadow-md">
                                 <span class="text-amber-400 font-bold text-xs block mb-2">1. DESALINEACIÓN Y CROMÁTICA RGB</span>
@@ -468,10 +790,9 @@
                             </div>
                         </div>
 
-                        <!-- Panel 6: Prism -->
+                        <!-- Panel 7: Prism -->
                         <div id="panel-prism" class="hidden space-y-3.5">
                             <span class="text-cyan-400 font-bold text-xs block">2. EFECTOS DE PRISMA DE CRISTAL ÓPTICO</span>
-                            
                             <div class="space-y-1 p-3 bg-cyan-950/40 rounded-xl border border-cyan-500/30">
                                 <div class="flex justify-between text-zinc-100 font-bold">
                                     <span>Efecto Prisma Radial Lens</span>
@@ -494,10 +815,9 @@
                             </div>
                         </div>
 
-                        <!-- Panel 7: Vintage Lens -->
+                        <!-- Panel 8: Vintage Lens -->
                         <div id="panel-vintageLens" class="hidden space-y-3.5">
                             <span class="text-purple-400 font-bold text-xs block">3. LENTES VINTAGE Y ANAMÓRFICO</span>
-                            
                             <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
                                 <div class="flex justify-between text-zinc-200 font-semibold"><span>Flare Anamórfico Sci-Fi</span><span id="valAnamorphicFlare" class="text-purple-400 font-bold">0</span></div>
                                 <input type="range" id="paramAnamorphicFlare" min="0" max="100" value="0" oninput="onParamChange('anamorphicFlare')" class="ios-slider ios-slider-purple">
@@ -508,10 +828,9 @@
                             </div>
                         </div>
 
-                        <!-- Panel 8: Datamoshing -->
+                        <!-- Panel 9: Datamoshing -->
                         <div id="panel-datamosh" class="hidden space-y-3.5">
                             <span class="text-rose-400 font-bold text-xs block">4. GLITCH DIGITAL Y DATAMOSH VHS</span>
-                            
                             <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
                                 <div class="flex justify-between text-zinc-200 font-semibold"><span>Bandas Scanlines Interferencia RGB</span><span id="valScanlines" class="text-rose-400 font-bold">0</span></div>
                                 <input type="range" id="paramScanlines" min="0" max="100" value="0" oninput="onParamChange('scanlines')" class="ios-slider ios-slider-rose">
@@ -521,13 +840,18 @@
                                 <input type="range" id="paramVhsTape" min="0" max="100" value="0" oninput="onParamChange('vhsTape')" class="ios-slider ios-slider-rose">
                             </div>
                         </div>
+                        <!-- /Panel 9: Datamoshing -->
 
-                        <!-- Panel 9: Frame & Metadata -->
+                        </div>
+                        <!-- /Group Panel: EFECTOS -->
+
+                        <!-- Panel 10: Frame & Metadata -->
                         <div id="panel-frame" class="hidden space-y-3.5">
                             <div class="flex items-center space-x-2.5 bg-zinc-900/80 p-2.5 rounded-xl border border-zinc-800">
-                                <input type="checkbox" id="checkLeicaFrame" checked onchange="onParamChange('leicaFrame')" class="accent-amber-500 w-4 h-4 rounded cursor-pointer">
-                                <label for="checkLeicaFrame" class="text-zinc-200 font-bold cursor-pointer">Activar Marco Fotográfico</label>
+                                <input type="checkbox" id="checkLeicaFrame" onchange="onParamChange('leicaFrame')" class="accent-amber-500 w-4 h-4 rounded cursor-pointer">
+                                <label for="checkLeicaFrame" class="text-zinc-200 font-bold cursor-pointer">Activar Marco Fotográfico (opcional, al finalizar)</label>
                             </div>
+                            <p class="text-[9px] text-zinc-500 font-mono -mt-1">Mientras editas, la foto se ve completa sin marco. Actívalo aquí cuando termines de ajustarla.</p>
 
                             <div class="space-y-1">
                                 <span class="text-zinc-400 text-[11px]">ESTILO DE MARCO</span>
@@ -546,6 +870,15 @@
                                         <span>Texto Opcional "Diego-X-Studio"</span>
                                     </label>
                                 </div>
+                                <div class="space-y-1 pt-1">
+                                    <div class="flex justify-between text-zinc-200 font-semibold"><span>Tamaño del Texto</span><span id="valLogoTextScale" class="text-amber-400 font-bold">130%</span></div>
+                                    <input type="range" id="paramLogoTextScale" min="50" max="250" value="130" oninput="onParamChange('logoTextScale')" class="ios-slider">
+                                </div>
+                                <div class="space-y-1 pt-1">
+                                    <div class="flex justify-between text-zinc-200 font-semibold"><span>Posición Vertical</span><span id="valLogoTextOffsetY" class="text-amber-400 font-bold">0</span></div>
+                                    <input type="range" id="paramLogoTextOffsetY" min="-40" max="40" value="0" oninput="onParamChange('logoTextOffsetY')" class="ios-slider">
+                                    <p class="text-[9px] text-zinc-500 font-mono mt-1">Sube o baja el texto dentro del marco</p>
+                                </div>
                             </div>
 
                             <div class="flex items-center space-x-2.5 bg-zinc-900/80 p-2.5 rounded-xl border border-zinc-800">
@@ -555,8 +888,18 @@
 
                             <div class="space-y-1">
                                 <span class="text-zinc-400 text-[11px]">TEXTO METADATOS PERSONALIZADO</span>
-                                <input type="text" id="frameText" value="LEICA M11 PRO • 35mm f/1.4 ISO 100" oninput="onParamChange('frameText')" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-zinc-200 text-xs font-mono focus:outline-none focus:border-amber-400">
+                                <input type="text" id="frameText" value="iPhone 13 Pro Max" oninput="onParamChange('frameText')" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-zinc-200 text-xs font-mono focus:outline-none focus:border-amber-400">
                             </div>
+                            <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
+                                <div class="flex justify-between text-zinc-200 font-semibold"><span>Tamaño del Texto Metadatos</span><span id="valMetaTextScale" class="text-amber-400 font-bold">130%</span></div>
+                                <input type="range" id="paramMetaTextScale" min="50" max="250" value="130" oninput="onParamChange('metaTextScale')" class="ios-slider">
+                            </div>
+                            <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
+                                <div class="flex justify-between text-zinc-200 font-semibold"><span>Posición Vertical Metadatos</span><span id="valMetaTextOffsetY" class="text-amber-400 font-bold">0</span></div>
+                                <input type="range" id="paramMetaTextOffsetY" min="-40" max="40" value="0" oninput="onParamChange('metaTextOffsetY')" class="ios-slider">
+                                <p class="text-[9px] text-zinc-500 font-mono mt-1">Sube o baja el texto dentro del marco</p>
+                            </div>
+                            <p class="text-[9px] text-zinc-500 font-mono -mt-1">El tamaño y la posición de estos dos textos se guardan automáticamente en este dispositivo.</p>
                         </div>
                     </div>
 
@@ -572,7 +915,7 @@
                         </div>
                         
                         <button onclick="resetEditParams()" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-lg text-xs font-mono border border-zinc-800 transition">
-                            <i class="fa-solid fa-rotate-left mr-1"></i>Reiniciar Todo
+                            <i class="fa-solid fa-rotate-left mr-1"></i>Reiniciar Parámetros
                         </button>
                     </div>
                 </div>
@@ -580,12 +923,31 @@
 
             <!-- 3. GALLERY VIEWPORT -->
             <section id="galleryView" class="absolute inset-0 hidden flex flex-col bg-zinc-950 z-20 p-4 overflow-hidden">
-                <div class="flex items-center justify-between mb-4 pb-2 border-b border-zinc-800">
+                <div id="galleryHeader" class="flex items-center justify-between mb-4 pb-2 border-b border-zinc-800">
                     <h2 class="text-xs font-bold font-mono text-zinc-200">GALERÍA DE ESTUDIO DIEGO-X</h2>
-                    <label class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-mono rounded-lg cursor-pointer border border-zinc-800 transition">
-                        <i class="fa-solid fa-plus mr-1"></i>Importar Foto
-                        <input type="file" accept="image/*" onchange="handleFileUpload(event)" class="hidden">
-                    </label>
+                    <div class="flex items-center space-x-2">
+                        <button id="gallerySelectBtn" onclick="toggleSelectionMode()" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-mono rounded-lg cursor-pointer border border-zinc-800 transition">
+                            <i class="fa-solid fa-check-double mr-1"></i><span id="selectBtnText">Seleccionar</span>
+                        </button>
+                        <label class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-mono rounded-lg cursor-pointer border border-zinc-800 transition">
+                            <i class="fa-solid fa-plus mr-1"></i>Importar Foto
+                            <input type="file" accept="image/*" onchange="handleFileUpload(event)" class="hidden">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Select Mode Header (hidden by default) -->
+                <div id="gallerySelectHeader" class="hidden items-center justify-between mb-4 pb-2 border-b border-zinc-800">
+                    <div class="flex items-center space-x-3">
+                        <button onclick="cancelSelectionMode()" class="text-zinc-400 hover:text-zinc-100 text-xs font-mono transition"><i class="fa-solid fa-arrow-left mr-1"></i>Volver</button>
+                        <span id="selectedCount" class="text-xs font-mono text-zinc-400">0 seleccionadas</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="selectAllPhotos()" class="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-mono rounded-lg cursor-pointer border border-zinc-800 transition">Todo</button>
+                        <button onclick="deleteSelectedPhotos()" id="deleteBtn" class="px-2.5 py-1.5 bg-red-600/20 hover:bg-red-600/40 text-red-400 text-xs font-mono rounded-lg cursor-pointer border border-red-600/40 transition">
+                            <i class="fa-solid fa-trash mr-1"></i>Eliminar
+                        </button>
+                    </div>
                 </div>
 
                 <div id="galleryGrid" class="flex-1 overflow-y-auto grid grid-cols-3 gap-2 align-content-start"></div>
@@ -594,8 +956,49 @@
                     <i class="fa-solid fa-images text-3xl mb-2 text-zinc-700"></i>
                     <p class="text-xs">No hay fotos guardadas en la galería.</p>
                 </div>
+
+                <!-- Delete Confirmation Bar -->
+                <div id="deleteBar" class="delete-bar">
+                    <span id="deleteBarText" class="text-xs font-mono text-zinc-300"></span>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="cancelDelete()" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-mono rounded-lg cursor-pointer border border-zinc-700 transition">Cancelar</button>
+                        <button onclick="confirmDelete()" class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-mono rounded-lg cursor-pointer transition font-bold">
+                            <i class="fa-solid fa-trash mr-1"></i>Eliminar
+                        </button>
+                    </div>
+                </div>
             </section>
         </main>
+
+        <!-- iOS Compatible Save Image Modal Popup -->
+        <div id="iosSaveModal" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-4">
+            <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 max-w-sm w-full text-center space-y-4 shadow-2xl relative">
+                <button onclick="closeIosSaveModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl border border-amber-500/40">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-zinc-100 font-mono">GUARDAR EN TU IPHONE</h3>
+                    <p class="text-xs text-zinc-400 font-mono mt-1">Mantén presionada la imagen abajo y selecciona <span class="text-amber-400 font-bold">"Guardar en Fotos"</span> o usa la acción rápida.</p>
+                </div>
+
+                <div class="max-h-[50vh] overflow-hidden rounded-xl border border-zinc-800 flex items-center justify-center bg-black">
+                    <img id="iosSaveImage" class="max-w-full max-h-[50vh] object-contain">
+                </div>
+
+                <div class="flex items-center space-x-2 pt-2">
+                    <button id="btnIosNativeShare" onclick="shareIosPhotoNative()" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold font-mono rounded-xl text-xs transition shadow-lg flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-share-nodes"></i>
+                        <span>Compartir / Guardar</span>
+                    </button>
+                    <a id="btnIosDirectDownload" download="Diego-X-Foto.jpg" class="py-2.5 px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-mono font-bold rounded-xl text-xs transition border border-zinc-700">
+                        <i class="fa-solid fa-download"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
 
         <!-- Bottom Main Navigation Tabs -->
         <nav class="h-14 bg-zinc-900 border-t border-zinc-800/80 grid grid-cols-3 shrink-0 z-30 font-mono text-xs pb-safe">
@@ -631,10 +1034,47 @@
         let focusTimeout = null;
 
         let galleryPhotos = [];
+        let gallerySelectionMode = false;
+        let selectedPhotoIndexes = new Set();
         let rawImage = new Image();
         let imageLoaded = false;
         let isRendering = false;
         let isComparingOriginal = false;
+        // Interactive drag state: while true, previews render at a reduced
+        // internal resolution so sliders / curve points feel fluid; the
+        // moment the drag ends we snap back to a full-resolution render.
+        let isSliderInteracting = false;
+        const PREVIEW_MAX_DIM = 1100;
+
+        // Undo History Stack
+        let historyStack = [];
+
+        // Eyedropper State
+        let isEyedropperActive = false;
+        let eyedropperTarget = 'white'; // 'white', 'gray', 'black'
+
+        // Freeform Crop Tool State
+        let isCropActive = false;
+        let cropRect = { x: 0.1, y: 0.1, w: 0.8, h: 0.8 }; // Normalized 0..1
+        let isDraggingCrop = false;
+        let activeCropHandle = null;
+        let cropStartPos = { x: 0, y: 0 };
+        let cropStartRect = { x: 0, y: 0, w: 0, h: 0 };
+
+        // RGB Curves State
+        let activeCurveChannel = 'rgb'; // 'rgb', 'r', 'g', 'b'
+        let curvePoints = {
+            rgb: [{x: 0, y: 0}, {x: 255, y: 255}],
+            r: [{x: 0, y: 0}, {x: 255, y: 255}],
+            g: [{x: 0, y: 0}, {x: 255, y: 255}],
+            b: [{x: 0, y: 0}, {x: 255, y: 255}]
+        };
+        let curveLut = {
+            rgb: new Uint8Array(256),
+            r: new Uint8Array(256),
+            g: new Uint8Array(256),
+            b: new Uint8Array(256)
+        };
 
         // Active Edit Parameters
         let editParams = {
@@ -652,6 +1092,7 @@
             saturation: 0,
             texture: 0,
             clarity: 0,
+            dehaze: 0,
             vignette: 0,
             grain: 0,
             
@@ -670,18 +1111,19 @@
             scanlines: 0,
             vhsTape: 0,
 
-            leicaFrame: true,
+            leicaFrame: false,
             frameStyle: 'polaroid',
             showLogoText: true,
             showExifText: true,
-            frameText: 'LEICA M11 PRO • 35mm f/1.4 ISO 100'
+            frameText: 'iPhone 13 Pro Max',
+            logoTextScale: 130,
+            metaTextScale: 130,
+            logoTextOffsetY: 0,
+            metaTextOffsetY: 0
         };
 
         const colorProfiles = [
-            // Normal / Original
             { id: 'none', name: 'Tono Normal (Original)', cat: 'color', iconBg: 'bg-zinc-600', isNormal: true },
-            
-            // Leica Monochrom / B&W Profiles
             { id: 'leica_monochrom', name: 'Leica Monochrom', cat: 'leica_bw', iconBg: 'bg-zinc-800 border border-white/20' },
             { id: 'leica_bw_hc', name: 'Leica B&W Alto Contraste', cat: 'leica_bw', iconBg: 'bg-black border border-white/40' },
             { id: 'leica_bw_smooth', name: 'Leica B&W Suave', cat: 'leica_bw', iconBg: 'bg-zinc-400' },
@@ -689,12 +1131,8 @@
             { id: 'leica_bw_yellow', name: 'Leica B&W Filtro Amarillo', cat: 'leica_bw', iconBg: 'bg-amber-950 border border-amber-500/40' },
             { id: 'leica_bw_green', name: 'Leica B&W Filtro Verde', cat: 'leica_bw', iconBg: 'bg-emerald-950 border border-emerald-500/40' },
             { id: 'leica_sepia', name: 'Leica Sepia Monochrom', cat: 'leica_bw', iconBg: 'bg-yellow-900 border border-amber-600/40' },
-
-            // Leica Color Profiles
             { id: 'leica_m', name: 'Leica Look Vivid', cat: 'color', iconBg: 'bg-red-600' },
             { id: 'leica_natural', name: 'Leica Look Natural', cat: 'color', iconBg: 'bg-amber-600' },
-
-            // Film & Analog Emulations
             { id: 'kodak_portra', name: 'Kodak Portra 400', cat: 'color', iconBg: 'bg-orange-500' },
             { id: 'kodak_ektar', name: 'Kodak Ektar 100', cat: 'color', iconBg: 'bg-red-500' },
             { id: 'fuji_velvia', name: 'Fuji Velvia 50', cat: 'color', iconBg: 'bg-emerald-600' },
@@ -708,6 +1146,548 @@
         ];
 
         let activeCategoryFilter = 'all';
+
+        window.onload = function() {
+            loadFrameTextSizePrefs();
+            initCamera();
+            setupVerticalDrawerSwipe();
+            initRgbCurvesCanvas();
+            setupCropDragHandlers();
+            renderProfilesCatalog();
+            rebuildCurveLuts();
+            generateDemoCanvas();
+            setupSliderFluidDragHandlers();
+            setupCanvasViewportResizeObserver();
+        };
+
+        // --- Persist manual text-size preferences for the "Diego-X-Studio"
+        // logo and the metadata text, so they stay as the user left them
+        // next time they open the app on this device. ---
+        const FRAME_TEXT_SIZE_STORAGE_KEY = 'diegoXStudio_frameTextSizePrefs';
+
+        function saveFrameTextSizePrefs() {
+            try {
+                localStorage.setItem(FRAME_TEXT_SIZE_STORAGE_KEY, JSON.stringify({
+                    logoTextScale: editParams.logoTextScale,
+                    metaTextScale: editParams.metaTextScale,
+                    logoTextOffsetY: editParams.logoTextOffsetY,
+                    metaTextOffsetY: editParams.metaTextOffsetY
+                }));
+            } catch (e) { /* localStorage no disponible: se ignora silenciosamente */ }
+        }
+
+        function loadFrameTextSizePrefs() {
+            try {
+                const raw = localStorage.getItem(FRAME_TEXT_SIZE_STORAGE_KEY);
+                if (!raw) return;
+                const saved = JSON.parse(raw);
+                if (typeof saved.logoTextScale === 'number') editParams.logoTextScale = saved.logoTextScale;
+                if (typeof saved.metaTextScale === 'number') editParams.metaTextScale = saved.metaTextScale;
+                if (typeof saved.logoTextOffsetY === 'number') editParams.logoTextOffsetY = saved.logoTextOffsetY;
+                if (typeof saved.metaTextOffsetY === 'number') editParams.metaTextOffsetY = saved.metaTextOffsetY;
+
+                // Reflejar el valor guardado en los sliders y sus etiquetas
+                [['paramLogoTextScale', 'valLogoTextScale', 'logoTextScale', '%'],
+                 ['paramMetaTextScale', 'valMetaTextScale', 'metaTextScale', '%'],
+                 ['paramLogoTextOffsetY', 'valLogoTextOffsetY', 'logoTextOffsetY', ''],
+                 ['paramMetaTextOffsetY', 'valMetaTextOffsetY', 'metaTextOffsetY', '']].forEach(([sliderId, labelId, key, suffix]) => {
+                    const input = document.getElementById(sliderId);
+                    const label = document.getElementById(labelId);
+                    if (input) {
+                        input.value = editParams[key];
+                        const min = parseFloat(input.min) || 0;
+                        const max = parseFloat(input.max) || 100;
+                        input.style.setProperty('--fill', `${((editParams[key] - min) / (max - min)) * 100}%`);
+                    }
+                    if (label) {
+                        label.innerText = suffix === '%' ? `${editParams[key]}%` : (editParams[key] > 0 ? `+${editParams[key]}` : `${editParams[key]}`);
+                    }
+                });
+            } catch (e) { /* preferencia guardada corrupta o no disponible: se usa el valor por defecto */ }
+        }
+
+        // Delegated listeners so every .ios-slider (present or added later)
+        // starts a low-res "fast preview" render on drag start and snaps back
+        // to a full-resolution render on release, keeping the thumb fluid.
+        function setupSliderFluidDragHandlers() {
+            const container = document.body;
+            const isSlider = (el) => el && el.classList && el.classList.contains('ios-slider');
+
+            container.addEventListener('pointerdown', (e) => { if (isSlider(e.target)) beginSliderInteraction(); }, true);
+            container.addEventListener('touchstart', (e) => { if (isSlider(e.target)) beginSliderInteraction(); }, { passive: true, capture: true });
+            container.addEventListener('mousedown', (e) => { if (isSlider(e.target)) beginSliderInteraction(); }, true);
+
+            window.addEventListener('pointerup', endSliderInteraction);
+            window.addEventListener('mouseup', endSliderInteraction);
+            window.addEventListener('touchend', endSliderInteraction);
+            window.addEventListener('touchcancel', endSliderInteraction);
+        }
+
+        // --- UNDO HISTORY LOGIC ---
+        function pushHistoryState() {
+            if (historyStack.length > 25) historyStack.shift();
+            
+            // Save crop image source & edit parameters copy
+            historyStack.push({
+                imageSrc: rawImage.src,
+                params: JSON.parse(JSON.stringify(editParams)),
+                curves: JSON.parse(JSON.stringify(curvePoints))
+            });
+
+            updateUndoButtonState();
+        }
+
+        function undoLastAction() {
+            if (historyStack.length === 0) return;
+            const prevState = historyStack.pop();
+
+            editParams = prevState.params;
+            curvePoints = prevState.curves;
+            rebuildCurveLuts();
+            drawRgbCurveGraph();
+
+            if (rawImage.src !== prevState.imageSrc) {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => {
+                    rawImage = img;
+                    syncAllUiControls();
+                    requestCanvasRender();
+                };
+                img.src = prevState.imageSrc;
+            } else {
+                syncAllUiControls();
+                requestCanvasRender();
+            }
+
+            updateUndoButtonState();
+        }
+
+        function updateUndoButtonState() {
+            const btn = document.getElementById('btnHeaderUndo');
+            if (btn) {
+                btn.disabled = historyStack.length === 0;
+            }
+        }
+
+        // --- EYEDROFFER (GOTARIO) LOGIC ---
+        function toggleEyedropperTool(forceState) {
+            isEyedropperActive = forceState !== undefined ? forceState : !isEyedropperActive;
+            const banner = document.getElementById('eyedropperBanner');
+            const btn = document.getElementById('btnHeaderEyedropper');
+
+            if (isCropActive) cancelCropTool();
+
+            if (isEyedropperActive) {
+                if (banner) banner.classList.remove('hidden');
+                if (btn) btn.classList.add('bg-amber-500', 'text-black');
+                setEyedropperTarget(eyedropperTarget);
+            } else {
+                if (banner) banner.classList.add('hidden');
+                if (btn) btn.classList.remove('bg-amber-500', 'text-black');
+            }
+        }
+
+        function setEyedropperTarget(target) {
+            eyedropperTarget = target;
+            const status = document.getElementById('eyedropperStatusText');
+            
+            ['btnEyedropperWhite', 'btnEyedropperGray', 'btnEyedropperBlack'].forEach(id => {
+                const b = document.getElementById(id);
+                if (b) b.classList.remove('ring-2', 'ring-amber-300');
+            });
+
+            if (target === 'white') {
+                if (status) status.innerText = "GOTARIO BLANCOS: Toca la zona más blanca/brillante de la foto";
+                document.getElementById('btnEyedropperWhite')?.classList.add('ring-2', 'ring-amber-300');
+            } else if (target === 'gray') {
+                if (status) status.innerText = "GOTARIO GRIS NEUTRAL: Toca un área gris para balancear temperatura";
+                document.getElementById('btnEyedropperGray')?.classList.add('ring-2', 'ring-amber-300');
+            } else if (target === 'black') {
+                if (status) status.innerText = "GOTARIO NEGROS: Toca la zona más oscura o sombra de la foto";
+                document.getElementById('btnEyedropperBlack')?.classList.add('ring-2', 'ring-amber-300');
+            }
+        }
+
+        function handleCanvasEyedropperClick(e) {
+            if (!isEyedropperActive) return;
+
+            const canvas = document.getElementById('photoCanvas');
+            if (!canvas) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+            const ctx = canvas.getContext('2d');
+            const pixel = ctx.getImageData(Math.round(clickX), Math.round(clickY), 1, 1).data;
+            const r = pixel[0], g = pixel[1], b = pixel[2];
+
+            pushHistoryState();
+
+            if (eyedropperTarget === 'white') {
+                const maxC = Math.max(r, g, b);
+                const diff = 255 - maxC;
+                editParams.whites = Math.min(100, Math.max(-100, Math.round(diff * 0.5)));
+                editParams.exposure = Math.min(100, Math.max(-100, Math.round(diff * 0.3)));
+            } else if (eyedropperTarget === 'gray') {
+                // Adjust Temp & Tint based on sample RGB channel ratios
+                const avg = (r + g + b) / 3;
+                const tempDelta = Math.round((r - b) * 0.6);
+                const tintDelta = Math.round((g - avg) * 0.6);
+                
+                editParams.temp = Math.min(100, Math.max(-100, editParams.temp - tempDelta));
+                editParams.tint = Math.min(100, Math.max(-100, editParams.tint - tintDelta));
+            } else if (eyedropperTarget === 'black') {
+                const minC = Math.min(r, g, b);
+                editParams.blacks = Math.min(100, Math.max(-100, Math.round(-minC * 0.6)));
+            }
+
+            syncAllUiControls();
+            requestCanvasRender();
+            toggleEyedropperTool(false);
+        }
+
+        // --- FREEFORM CROP ENGINE ---
+        function toggleCropTool() {
+            if (isEyedropperActive) toggleEyedropperTool(false);
+
+            isCropActive = !isCropActive;
+            const banner = document.getElementById('cropToolBanner');
+            const overlay = document.getElementById('cropOverlay');
+            const btn = document.getElementById('btnHeaderCrop');
+
+            if (isCropActive) {
+                if (banner) banner.classList.remove('hidden');
+                if (overlay) overlay.classList.remove('hidden');
+                if (btn) btn.classList.add('bg-amber-500', 'text-black');
+                cropRect = { x: 0.08, y: 0.08, w: 0.84, h: 0.84 };
+                updateCropOverlayPosition();
+            } else {
+                if (banner) banner.classList.add('hidden');
+                if (overlay) overlay.classList.add('hidden');
+                if (btn) btn.classList.remove('bg-amber-500', 'text-black');
+            }
+        }
+
+        function cancelCropTool() {
+            toggleCropTool();
+        }
+
+        function updateCropOverlayPosition() {
+            const overlay = document.getElementById('cropOverlay');
+            const canvas = document.getElementById('photoCanvas');
+            if (!overlay || !canvas) return;
+
+            const cW = canvas.clientWidth;
+            const cH = canvas.clientHeight;
+
+            overlay.style.left = `${cropRect.x * cW}px`;
+            overlay.style.top = `${cropRect.y * cH}px`;
+            overlay.style.width = `${cropRect.w * cW}px`;
+            overlay.style.height = `${cropRect.h * cH}px`;
+        }
+
+        function setupCropDragHandlers() {
+            const overlay = document.getElementById('cropOverlay');
+            if (!overlay) return;
+
+            function getClientPos(e) {
+                return {
+                    x: e.touches ? e.touches[0].clientX : e.clientX,
+                    y: e.touches ? e.touches[0].clientY : e.clientY
+                };
+            }
+
+            overlay.addEventListener('mousedown', startCropDrag);
+            overlay.addEventListener('touchstart', startCropDrag, { passive: false });
+
+            function startCropDrag(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const pos = getClientPos(e);
+                cropStartPos = pos;
+                cropStartRect = { ...cropRect };
+
+                if (e.target.classList.contains('crop-handle')) {
+                    activeCropHandle = e.target.getAttribute('data-handle');
+                } else {
+                    activeCropHandle = 'move';
+                }
+
+                isDraggingCrop = true;
+            }
+
+            window.addEventListener('mousemove', handleCropMove);
+            window.addEventListener('touchmove', handleCropMove, { passive: false });
+
+            function handleCropMove(e) {
+                if (!isDraggingCrop || !isCropActive) return;
+                e.preventDefault();
+
+                const canvas = document.getElementById('photoCanvas');
+                if (!canvas) return;
+
+                const cW = canvas.clientWidth;
+                const cH = canvas.clientHeight;
+                const pos = getClientPos(e);
+
+                const dx = (pos.x - cropStartPos.x) / cW;
+                const dy = (pos.y - cropStartPos.y) / cH;
+
+                let { x, y, w, h } = cropStartRect;
+
+                if (activeCropHandle === 'move') {
+                    x = Math.max(0, Math.min(1 - w, x + dx));
+                    y = Math.max(0, Math.min(1 - h, y + dy));
+                } else {
+                    if (activeCropHandle.includes('l')) {
+                        const newW = Math.max(0.1, w - dx);
+                        x = x + (w - newW);
+                        w = newW;
+                    }
+                    if (activeCropHandle.includes('r')) {
+                        w = Math.max(0.1, Math.min(1 - x, w + dx));
+                    }
+                    if (activeCropHandle.includes('t')) {
+                        const newH = Math.max(0.1, h - dy);
+                        y = y + (h - newH);
+                        h = newH;
+                    }
+                    if (activeCropHandle.includes('b')) {
+                        h = Math.max(0.1, Math.min(1 - y, h + dy));
+                    }
+                }
+
+                cropRect = { x, y, w, h };
+                updateCropOverlayPosition();
+            }
+
+            window.addEventListener('mouseup', endCropDrag);
+            window.addEventListener('touchend', endCropDrag);
+
+            function endCropDrag() {
+                isDraggingCrop = false;
+                activeCropHandle = null;
+            }
+
+            window.addEventListener('resize', () => {
+                if (isCropActive) updateCropOverlayPosition();
+            });
+        }
+
+        function applyCropTool() {
+            if (!rawImage || !rawImage.width) return;
+
+            pushHistoryState();
+
+            const cropX = Math.round(cropRect.x * rawImage.width);
+            const cropY = Math.round(cropRect.y * rawImage.height);
+            const cropW = Math.round(cropRect.w * rawImage.width);
+            const cropH = Math.round(cropRect.h * rawImage.height);
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = cropW;
+            tempCanvas.height = cropH;
+            const ctx = tempCanvas.getContext('2d');
+
+            ctx.drawImage(rawImage, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+            const croppedUrl = tempCanvas.toDataURL('image/jpeg', 0.95);
+            const newImg = new Image();
+            newImg.crossOrigin = "anonymous";
+            newImg.onload = () => {
+                rawImage = newImg;
+                toggleCropTool();
+                requestCanvasRender();
+            };
+            newImg.src = croppedUrl;
+        }
+
+        // --- RGB CURVES ENGINE ---
+        function initRgbCurvesCanvas() {
+            const canvas = document.getElementById('curvesCanvas');
+            if (!canvas) return;
+
+            let isDraggingPoint = false;
+            let activePointIndex = -1;
+
+            canvas.addEventListener('mousedown', onCurveStart);
+            canvas.addEventListener('touchstart', onCurveStart, { passive: false });
+
+            function getCanvasPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: Math.max(0, Math.min(255, ((clientX - rect.left) / rect.width) * 255)),
+                    y: Math.max(0, Math.min(255, 255 - (((clientY - rect.top) / rect.height) * 255)))
+                };
+            }
+
+            function onCurveStart(e) {
+                e.preventDefault();
+                const pos = getCanvasPos(e);
+                const points = curvePoints[activeCurveChannel];
+
+                // Check if user clicked an existing point
+                let foundIdx = points.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) < 20);
+
+                if (foundIdx !== -1) {
+                    activePointIndex = foundIdx;
+                } else {
+                    // Insert new control point
+                    pushHistoryState();
+                    points.push(pos);
+                    points.sort((a, b) => a.x - b.x);
+                    activePointIndex = points.findIndex(p => p.x === pos.x && p.y === pos.y);
+                }
+
+                isDraggingPoint = true;
+                isSliderInteracting = true;
+                rebuildCurveLuts();
+                drawRgbCurveGraph();
+                requestCanvasRender();
+            }
+
+            window.addEventListener('mousemove', onCurveMove);
+            window.addEventListener('touchmove', onCurveMove, { passive: false });
+
+            function onCurveMove(e) {
+                if (!isDraggingPoint || activePointIndex === -1) return;
+                e.preventDefault();
+
+                const pos = getCanvasPos(e);
+                const points = curvePoints[activeCurveChannel];
+
+                // Restrain end points
+                if (activePointIndex === 0) {
+                    points[0].y = pos.y;
+                } else if (activePointIndex === points.length - 1) {
+                    points[points.length - 1].y = pos.y;
+                } else {
+                    points[activePointIndex].x = pos.x;
+                    points[activePointIndex].y = pos.y;
+                    points.sort((a, b) => a.x - b.x);
+                    activePointIndex = points.findIndex(p => p.x === pos.x && p.y === pos.y);
+                }
+
+                rebuildCurveLuts();
+                drawRgbCurveGraph();
+                requestCanvasRender();
+            }
+
+            window.addEventListener('mouseup', () => { isDraggingPoint = false; endSliderInteraction(); });
+            window.addEventListener('touchend', () => { isDraggingPoint = false; endSliderInteraction(); });
+
+            drawRgbCurveGraph();
+        }
+
+        function setCurveChannel(channel) {
+            activeCurveChannel = channel;
+            ['btnCurveChanRgb', 'btnCurveChanR', 'btnCurveChanG', 'btnCurveChanB'].forEach(id => {
+                const b = document.getElementById(id);
+                if (b) b.className = "py-1.5 rounded-lg bg-zinc-800 text-zinc-300 font-bold text-center hover:bg-zinc-700 transition";
+            });
+
+            if (channel === 'rgb') document.getElementById('btnCurveChanRgb').className = "py-1.5 rounded-lg bg-amber-500 text-black font-bold text-center transition";
+            if (channel === 'r') document.getElementById('btnCurveChanR').className = "py-1.5 rounded-lg bg-rose-600 text-white font-bold text-center transition";
+            if (channel === 'g') document.getElementById('btnCurveChanG').className = "py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-center transition";
+            if (channel === 'b') document.getElementById('btnCurveChanB').className = "py-1.5 rounded-lg bg-sky-600 text-white font-bold text-center transition";
+
+            drawRgbCurveGraph();
+        }
+
+        function resetRgbCurves() {
+            pushHistoryState();
+            curvePoints = {
+                rgb: [{x: 0, y: 0}, {x: 255, y: 255}],
+                r: [{x: 0, y: 0}, {x: 255, y: 255}],
+                g: [{x: 0, y: 0}, {x: 255, y: 255}],
+                b: [{x: 0, y: 0}, {x: 255, y: 255}]
+            };
+            rebuildCurveLuts();
+            drawRgbCurveGraph();
+            requestCanvasRender();
+        }
+
+        function rebuildCurveLuts() {
+            ['rgb', 'r', 'g', 'b'].forEach(chan => {
+                const pts = curvePoints[chan];
+                const lut = curveLut[chan];
+
+                for (let i = 0; i < 256; i++) {
+                    // Linear interpolation between curve points
+                    let val = i;
+                    for (let p = 0; p < pts.length - 1; p++) {
+                        if (i >= pts[p].x && i <= pts[p+1].x) {
+                            const rangeX = pts[p+1].x - pts[p].x || 1;
+                            const t = (i - pts[p].x) / rangeX;
+                            val = pts[p].y + t * (pts[p+1].y - pts[p].y);
+                            break;
+                        }
+                    }
+                    lut[i] = Math.min(255, Math.max(0, Math.round(val)));
+                }
+            });
+        }
+
+        function drawRgbCurveGraph() {
+            const canvas = document.getElementById('curvesCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw Background Grid
+            ctx.strokeStyle = '#27272a';
+            ctx.lineWidth = 1;
+            for (let i = 1; i < 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo((w / 4) * i, 0); ctx.lineTo((w / 4) * i, h);
+                ctx.moveTo(0, (h / 4) * i); ctx.lineTo(w, (h / 4) * i);
+                ctx.stroke();
+            }
+
+            // Draw Diagonal Reference Line
+            ctx.strokeStyle = '#3f3f46';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(0, h); ctx.lineTo(w, 0);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw Active Channel Curve
+            const lut = curveLut[activeCurveChannel];
+            ctx.strokeStyle = activeCurveChannel === 'r' ? '#f43f5e' :
+                              activeCurveChannel === 'g' ? '#10b981' :
+                              activeCurveChannel === 'b' ? '#38bdf8' : '#f59e0b';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for (let x = 0; x < 256; x++) {
+                const cx = (x / 255) * w;
+                const cy = h - ((lut[x] / 255) * h);
+                if (x === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+            }
+            ctx.stroke();
+
+            // Draw Control Points
+            const pts = curvePoints[activeCurveChannel];
+            pts.forEach(p => {
+                const px = (p.x / 255) * w;
+                const py = h - ((p.y / 255) * h);
+                ctx.fillStyle = '#ffffff';
+                ctx.strokeStyle = ctx.strokeStyle;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(px, py, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            });
+        }
 
         async function initCamera() {
             const video = document.getElementById('cameraVideo');
@@ -890,13 +1870,18 @@
             reader.onload = function(evt) {
                 if (window.EXIF) {
                     EXIF.getData(file, function() {
-                        const make = EXIF.getTag(this, "Make") || "LEICA";
-                        const model = EXIF.getTag(this, "Model") || "M11 PRO";
-                        const iso = EXIF.getTag(this, "ISOSpeedRatings") || "100";
-                        const focal = EXIF.getTag(this, "FocalLength") || "35";
-                        const fnum = EXIF.getTag(this, "FNumber") || "1.4";
-                        
-                        editParams.frameText = `${make} ${model} • ${focal}mm f/${fnum} ISO ${iso}`.toUpperCase();
+                        const make = EXIF.getTag(this, "Make");
+                        const model = EXIF.getTag(this, "Model") || "iPhone 13 Pro Max";
+                        const iso = EXIF.getTag(this, "ISOSpeedRatings");
+                        const focal = EXIF.getTag(this, "FocalLength");
+                        const fnum = EXIF.getTag(this, "FNumber");
+
+                        // Usa el metadato real de la foto (marca/modelo/lente) si existe;
+                        // si no hay EXIF disponible, cae por defecto a iPhone 13 Pro Max.
+                        const makeModel = make && model && String(model).includes(String(make)) ? model : [make, model].filter(Boolean).join(' ');
+                        const specs = [focal ? `${focal}mm` : null, fnum ? `f/${fnum}` : null, iso ? `ISO ${iso}` : null].filter(Boolean).join(' ');
+
+                        editParams.frameText = (specs ? `${makeModel} • ${specs}` : makeModel).toUpperCase();
                         const inputExif = document.getElementById('frameText');
                         if (inputExif) inputExif.value = editParams.frameText;
                     });
@@ -911,7 +1896,6 @@
             rawImage.crossOrigin = "anonymous";
             rawImage.onload = () => {
                 imageLoaded = true;
-                
                 galleryPhotos.unshift(url);
                 updateGalleryUI();
                 
@@ -937,7 +1921,7 @@
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 36px Space Mono';
             ctx.textAlign = 'center';
-            ctx.fillText('DIEGO-X-STUDIO DEMO', 600, 460);
+            ctx.fillText('DIEGO-X-STUDIO PRO', 600, 460);
 
             loadPhotoFromUrl(c.toDataURL('image/jpeg'));
         }
@@ -980,33 +1964,30 @@
                 drawer.style.transition = 'height 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
             }
 
-            // Touch Events
             handleArea.addEventListener('touchstart', (e) => {
-                if (e.touches.length === 1) {
-                    onStart(e.touches[0].clientY);
-                }
+                if (e.touches.length === 1) onStart(e.touches[0].clientY);
             }, { passive: true });
 
             window.addEventListener('touchmove', (e) => {
-                if (isDragging && e.touches.length === 1) {
-                    onMove(e.touches[0].clientY);
-                }
+                if (isDragging && e.touches.length === 1) onMove(e.touches[0].clientY);
             }, { passive: true });
 
             window.addEventListener('touchend', onEnd);
 
-            // Mouse / Pointer Events
-            handleArea.addEventListener('mousedown', (e) => {
-                onStart(e.clientY);
-            });
-
-            window.addEventListener('mousemove', (e) => {
-                if (isDragging) {
-                    onMove(e.clientY);
-                }
-            });
-
+            handleArea.addEventListener('mousedown', (e) => onStart(e.clientY));
+            window.addEventListener('mousemove', (e) => { if (isDragging) onMove(e.clientY); });
             window.addEventListener('mouseup', onEnd);
+        }
+
+        function setDrawerHeightPreset(preset, e) {
+            if (e) e.stopPropagation();
+            const drawer = document.getElementById('editorToolsSidebar');
+            if (!drawer) return;
+
+            drawer.style.transition = 'height 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+            if (preset === 'compact') drawer.style.height = '30%';
+            if (preset === 'medium') drawer.style.height = '58%';
+            if (preset === 'large') drawer.style.height = '94%';
         }
 
         function switchMainTab(tab) {
@@ -1033,16 +2014,20 @@
             }
         }
 
+        // Sub-tabs nested inside each top-level group tab.
+        const subTabGroups = {
+            ajustes: ['light', 'color', 'effects', 'curves'],
+            efectos: ['rgbGlitch', 'prism', 'vintageLens', 'datamosh']
+        };
+
         function switchEditTab(tab) {
             currentEditTab = tab;
-            const tabs = ['profiles', 'light', 'color', 'effects', 'rgbGlitch', 'prism', 'vintageLens', 'datamosh', 'frame'];
-            
+            const tabs = ['profiles', 'ajustes', 'efectos', 'frame'];
+
             tabs.forEach(t => {
                 const btn = document.getElementById(`tabBtn-${t}`);
                 const panel = document.getElementById(`panel-${t}`);
-                if (btn) {
-                    btn.className = "px-4 py-3 shrink-0 border-b-2 border-transparent text-zinc-400 font-semibold hover:text-white transition";
-                }
+                if (btn) btn.className = "px-4 py-3 shrink-0 border-b-2 border-transparent text-zinc-400 font-semibold hover:text-white transition";
                 if (panel) panel.classList.add('hidden');
             });
 
@@ -1050,9 +2035,65 @@
             const activePanel = document.getElementById(`panel-${tab}`);
             if (activeBtn) activeBtn.className = "px-4 py-3 shrink-0 border-b-2 border-amber-400 text-white font-bold transition";
             if (activePanel) activePanel.classList.remove('hidden');
+
+            // When entering a grouped tab, make sure its first sub-tab is showing.
+            if (subTabGroups[tab]) {
+                switchSubTab(tab, subTabGroups[tab][0]);
+            }
+        }
+
+        // Switches between the inner panels nested inside "ajustes" (Luz,
+        // Color, Efectos, Curvas RGB) or "efectos" (Glitch RGB, Prisma,
+        // Lentes, Datamosh) without touching the top-level tab bar.
+        function switchSubTab(group, sub) {
+            const subs = subTabGroups[group];
+            if (!subs) return;
+
+            subs.forEach(s => {
+                const btn = document.getElementById(`subTabBtn-${s}`);
+                const panel = document.getElementById(`panel-${s}`);
+                if (btn) {
+                    const isCyan = s === 'prism';
+                    const isPurple = s === 'vintageLens';
+                    const isRose = s === 'datamosh';
+                    const idleColor = isCyan ? 'text-cyan-400 hover:text-cyan-300' : isPurple ? 'text-purple-400 hover:text-purple-300' : isRose ? 'text-rose-400 hover:text-rose-300' : 'text-zinc-400 hover:text-white';
+                    btn.className = `flex-1 px-3 py-2 rounded-lg bg-transparent ${idleColor} font-semibold text-center transition whitespace-nowrap`;
+                }
+                if (panel) panel.classList.add('hidden');
+            });
+
+            const activeBtn = document.getElementById(`subTabBtn-${sub}`);
+            const activePanel = document.getElementById(`panel-${sub}`);
+            if (activeBtn) activeBtn.className = "flex-1 px-3 py-2 rounded-lg bg-amber-500 text-black font-bold text-center transition whitespace-nowrap";
+            if (activePanel) activePanel.classList.remove('hidden');
+        }
+
+        function toggleHistogram() {
+            showHistogram = !showHistogram;
+            const box = document.getElementById('histogramBox');
+            if (box) {
+                if (showHistogram) box.classList.remove('hidden'); else box.classList.add('hidden');
+            }
+            requestCanvasRender();
+        }
+
+        function toggleDeviceMode() {
+            isPcMode = !isPcMode;
+            const container = document.getElementById('appContainer');
+            const icon = document.getElementById('deviceModeIcon');
+
+            if (isPcMode) {
+                container.classList.add('pc-mode-active');
+                if (icon) icon.className = "fa-solid fa-desktop text-xs text-amber-400";
+            } else {
+                container.classList.remove('pc-mode-active');
+                if (icon) icon.className = "fa-solid fa-mobile-screen-button text-xs text-amber-400";
+            }
+            requestCanvasRender();
         }
 
         function setRgbGlitchMode(mode) {
+            pushHistoryState();
             editParams.rgbMode = mode;
             ['rgbBtnCyber', 'rgbBtnAnaglyph', 'rgbBtnRadial'].forEach(id => {
                 const b = document.getElementById(id);
@@ -1066,20 +2107,14 @@
         }
 
         function resetProfileToNormal() {
+            pushHistoryState();
             editParams.profile = 'none';
             renderProfilesCatalog();
             requestCanvasRender();
         }
 
-        function startComparingOriginal() {
-            isComparingOriginal = true;
-            renderPhotoCanvas();
-        }
-
-        function stopComparingOriginal() {
-            isComparingOriginal = false;
-            renderPhotoCanvas();
-        }
+        function startComparingOriginal() { isComparingOriginal = true; renderPhotoCanvas(); }
+        function stopComparingOriginal() { isComparingOriginal = false; renderPhotoCanvas(); }
 
         function onParamChange(key) {
             const sliderMap = {
@@ -1096,6 +2131,7 @@
                 saturation: 'paramSaturation',
                 texture: 'paramTexture',
                 clarity: 'paramClarity',
+                dehaze: 'paramDehaze',
                 vignette: 'paramVignette',
                 grain: 'paramGrain',
                 rgbOffset: 'paramRgbOffset',
@@ -1107,14 +2143,17 @@
                 anamorphicFlare: 'paramAnamorphicFlare',
                 holgaLomo: 'paramHolgaLomo',
                 scanlines: 'paramScanlines',
-                vhsTape: 'paramVhsTape'
+                vhsTape: 'paramVhsTape',
+                logoTextScale: 'paramLogoTextScale',
+                metaTextScale: 'paramMetaTextScale',
+                logoTextOffsetY: 'paramLogoTextOffsetY',
+                metaTextOffsetY: 'paramMetaTextOffsetY'
             };
 
             if (sliderMap[key]) {
                 const input = document.getElementById(sliderMap[key]);
                 if (input) {
                     editParams[key] = parseFloat(input.value);
-                    
                     const min = parseFloat(input.min) || 0;
                     const max = parseFloat(input.max) || 100;
                     const fillPct = ((editParams[key] - min) / (max - min)) * 100;
@@ -1122,21 +2161,51 @@
 
                     const valText = document.getElementById(`val${key.charAt(0).toUpperCase() + key.slice(1)}`);
                     if (valText) {
-                        if (key === 'radialPrismEffect' || key === 'profileIntensity') {
+                        if (key === 'radialPrismEffect' || key === 'profileIntensity' || key === 'logoTextScale' || key === 'metaTextScale') {
                             valText.innerText = `${editParams[key]}%`;
+                        } else if (key === 'logoTextOffsetY' || key === 'metaTextOffsetY') {
+                            valText.innerText = editParams[key] > 0 ? `+${editParams[key]}` : `${editParams[key]}`;
                         } else {
                             valText.innerText = key === 'rgbAngle' ? `${editParams[key]}°` : editParams[key];
                         }
                     }
+
+                    if (key === 'logoTextScale' || key === 'metaTextScale' || key === 'logoTextOffsetY' || key === 'metaTextOffsetY') saveFrameTextSizePrefs();
                 }
             }
 
-            if (key === 'leicaFrame') editParams.leicaFrame = document.getElementById('checkLeicaFrame').checked;
-            if (key === 'frameStyle') editParams.frameStyle = document.getElementById('frameStyleSelect').value;
-            if (key === 'showLogoText') editParams.showLogoText = document.getElementById('checkShowLogoText').checked;
-            if (key === 'showExifText') editParams.showExifText = document.getElementById('checkShowExifText').checked;
+            if (key === 'leicaFrame') { pushHistoryState(); editParams.leicaFrame = document.getElementById('checkLeicaFrame').checked; }
+            if (key === 'frameStyle') { pushHistoryState(); editParams.frameStyle = document.getElementById('frameStyleSelect').value; }
+            if (key === 'showLogoText') { pushHistoryState(); editParams.showLogoText = document.getElementById('checkShowLogoText').checked; }
+            if (key === 'showExifText') { pushHistoryState(); editParams.showExifText = document.getElementById('checkShowExifText').checked; }
             if (key === 'frameText') editParams.frameText = document.getElementById('frameText').value;
 
+            requestCanvasRender();
+        }
+
+        function syncAllUiControls() {
+            Object.keys(editParams).forEach(key => {
+                const valText = document.getElementById(`val${key.charAt(0).toUpperCase() + key.slice(1)}`);
+                if (valText) valText.innerText = editParams[key];
+            });
+
+            renderProfilesCatalog();
+        }
+
+        function resetEditParams() {
+            pushHistoryState();
+            editParams = {
+                profile: 'none', profileIntensity: 100, exposure: 0, contrast: 0, highlights: 0, shadows: 0,
+                whites: 0, blacks: 0, temp: 0, tint: 0, vibrance: 0, saturation: 0, texture: 0, clarity: 0,
+                dehaze: 0, vignette: 0, grain: 0, rgbMode: 'cyberGlitch', rgbOffset: 0, rgbAngle: 0, radialPrismEffect: 0,
+                prismSpectrum: 0, prismSplit: 0, prismKaleido: 0, anamorphicFlare: 0, holgaLomo: 0,
+                scanlines: 0, vhsTape: 0, leicaFrame: false, frameStyle: 'polaroid', showLogoText: true,
+                showExifText: true, frameText: editParams.frameText,
+                logoTextScale: editParams.logoTextScale, metaTextScale: editParams.metaTextScale,
+                logoTextOffsetY: editParams.logoTextOffsetY, metaTextOffsetY: editParams.metaTextOffsetY
+            };
+            resetRgbCurves();
+            syncAllUiControls();
             requestCanvasRender();
         }
 
@@ -1147,6 +2216,51 @@
                 renderPhotoCanvas();
                 isRendering = false;
             });
+        }
+
+        // Called once when the user starts dragging a slider / curve point.
+        function beginSliderInteraction() {
+            if (!isSliderInteracting) {
+                isSliderInteracting = true;
+                pushHistoryState();
+            }
+        }
+
+        // Called once when the drag ends: snap back to a crisp full-res render.
+        function endSliderInteraction() {
+            if (!isSliderInteracting) return;
+            isSliderInteracting = false;
+            requestCanvasRender();
+        }
+
+        // Ensures the working photo (with or without frame) always scales
+        // down to fit completely inside the visible viewport area, no
+        // matter how the tools panel below it is resized. We set explicit
+        // CSS pixel dimensions instead of relying only on object-fit, since
+        // object-fit support on <canvas> is inconsistent across mobile
+        // browsers and can otherwise let part of the frame get clipped.
+        function fitCanvasToViewport() {
+            const canvas = document.getElementById('photoCanvas');
+            const viewport = document.getElementById('canvasViewport');
+            if (!canvas || !viewport || !canvas.width || !canvas.height) return;
+
+            const stylePad = 16; // matches the viewport's p-2 padding on both axes
+            const availW = Math.max(1, viewport.clientWidth - stylePad);
+            const availH = Math.max(1, viewport.clientHeight - stylePad);
+
+            const scale = Math.min(availW / canvas.width, availH / canvas.height, 1) ||
+                          Math.min(availW / canvas.width, availH / canvas.height);
+
+            canvas.style.width = `${Math.round(canvas.width * scale)}px`;
+            canvas.style.height = `${Math.round(canvas.height * scale)}px`;
+        }
+
+        let viewportResizeObserver = null;
+        function setupCanvasViewportResizeObserver() {
+            const viewport = document.getElementById('canvasViewport');
+            if (!viewport || typeof ResizeObserver === 'undefined') return;
+            viewportResizeObserver = new ResizeObserver(() => fitCanvasToViewport());
+            viewportResizeObserver.observe(viewport);
         }
 
         function renderPhotoCanvas() {
@@ -1191,36 +2305,53 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
+            // While actively dragging a slider or a curve point, process the
+            // image at a smaller internal resolution so the preview stays
+            // fluid; on release we re-render once at full resolution.
+            let procW = imgW, procH = imgH;
+            if (isSliderInteracting) {
+                const longSide = Math.max(imgW, imgH);
+                if (longSide > PREVIEW_MAX_DIM) {
+                    const scale = PREVIEW_MAX_DIM / longSide;
+                    procW = Math.max(1, Math.round(imgW * scale));
+                    procH = Math.max(1, Math.round(imgH * scale));
+                }
+            }
+
             const workCanvas = document.createElement('canvas');
-            workCanvas.width = imgW;
-            workCanvas.height = imgH;
+            workCanvas.width = procW;
+            workCanvas.height = procH;
             const wCtx = workCanvas.getContext('2d');
 
-            wCtx.drawImage(rawImage, 0, 0, imgW, imgH);
+            wCtx.drawImage(rawImage, 0, 0, procW, procH);
 
-            applyLightAndColorAdjustments(wCtx, imgW, imgH);
-            applyTextureClarityVignetteGrain(wCtx, imgW, imgH);
+            applyLightColorAndCurveAdjustments(wCtx, procW, procH);
+            if (editParams.dehaze !== 0) applyDehaze(wCtx, procW, procH);
+            applyClarityAndTexture(wCtx, procW, procH);
+            applyTextureClarityVignetteGrain(wCtx, procW, procH);
 
-            if (editParams.rgbOffset > 0) applyRgbGlitchEffect(wCtx, imgW, imgH);
-            if (editParams.radialPrismEffect > 0) applyRadialSpectrumBlur(wCtx, imgW, imgH);
+            if (editParams.rgbOffset > 0) applyRgbGlitchEffect(wCtx, procW, procH);
+            if (editParams.radialPrismEffect > 0) applyRadialSpectrumBlur(wCtx, procW, procH);
             if (editParams.prismSpectrum > 0 || editParams.prismSplit > 0 || editParams.prismKaleido > 0) {
-                applyGlassPrismEffects(wCtx, imgW, imgH);
+                applyGlassPrismEffects(wCtx, procW, procH);
             }
-            if (editParams.anamorphicFlare > 0 || editParams.holgaLomo > 0) applyVintageLensAberrations(wCtx, imgW, imgH);
-            if (editParams.scanlines > 0 || editParams.vhsTape > 0) applyDatamoshAndScanlines(wCtx, imgW, imgH);
+            if (editParams.anamorphicFlare > 0 || editParams.holgaLomo > 0) applyVintageLensAberrations(wCtx, procW, procH);
+            if (editParams.scanlines > 0 || editParams.vhsTape > 0) applyDatamoshAndScanlines(wCtx, procW, procH);
 
             const photoX = editParams.leicaFrame ? framePaddingSides : 0;
             const photoY = editParams.leicaFrame ? framePaddingTop : 0;
-            ctx.drawImage(workCanvas, photoX, photoY, imgW, imgH);
+            ctx.drawImage(workCanvas, 0, 0, procW, procH, photoX, photoY, imgW, imgH);
 
             if (editParams.leicaFrame) {
                 renderFrameBrandingAndMetadata(ctx, canvas.width, canvas.height, photoX, photoY, imgW, imgH, framePaddingBottom);
             }
 
-            if (showHistogram) renderHistogram(wCtx, imgW, imgH);
+            if (showHistogram) renderHistogram(wCtx, procW, procH);
+            if (isCropActive) updateCropOverlayPosition();
+            fitCanvasToViewport();
         }
 
-        function applyLightAndColorAdjustments(ctx, w, h) {
+        function applyLightColorAndCurveAdjustments(ctx, w, h) {
             const imgData = ctx.getImageData(0, 0, w, h);
             const data = imgData.data;
 
@@ -1237,6 +2368,11 @@
 
             const prof = editParams.profile;
             const pIntensity = (editParams.profileIntensity || 100) / 100;
+
+            const lutRgb = curveLut.rgb;
+            const lutR = curveLut.r;
+            const lutG = curveLut.g;
+            const lutB = curveLut.b;
 
             for (let i = 0; i < data.length; i += 4) {
                 let r = data[i];
@@ -1269,7 +2405,7 @@
                 g = gray + (sat + amtVib) * (g - gray);
                 b = gray + (sat + amtVib) * (b - gray);
 
-                // Extended Color Profiles & Leica Monochrom Transformations
+                // Apply Color Profiles
                 if (prof && prof !== 'none' && pIntensity > 0) {
                     let pr = r, pg = g, pb = b;
 
@@ -1278,88 +2414,65 @@
                             const monoL = 0.299 * r + 0.587 * g + 0.114 * b;
                             pr = pg = pb = monoL;
                             break;
-
                         case 'leica_bw_hc':
                             let monoHC = 0.299 * r + 0.587 * g + 0.114 * b;
                             monoHC = monoHC < 128 ? Math.pow(monoHC / 128, 1.4) * 128 : 255 - Math.pow((255 - monoHC) / 127, 1.4) * 127;
                             pr = pg = pb = monoHC;
                             break;
-
                         case 'leica_bw_smooth':
                             const monoS = 0.33 * r + 0.33 * g + 0.33 * b;
                             pr = pg = pb = (monoS * 0.85) + 20;
                             break;
-
                         case 'leica_bw_red':
                             const monoRed = 0.70 * r + 0.20 * g + 0.10 * b;
                             pr = pg = pb = monoRed;
                             break;
-
                         case 'leica_bw_yellow':
                             const monoY = 0.45 * r + 0.45 * g + 0.10 * b;
                             pr = pg = pb = monoY;
                             break;
-
                         case 'leica_bw_green':
                             const monoG = 0.15 * r + 0.70 * g + 0.15 * b;
                             pr = pg = pb = monoG;
                             break;
-
                         case 'leica_sepia':
                             const monoSp = 0.299 * r + 0.587 * g + 0.114 * b;
-                            pr = monoSp * 1.12 + 15;
-                            pg = monoSp * 0.95 + 8;
-                            pb = monoSp * 0.75;
+                            pr = monoSp * 1.12 + 15; pg = monoSp * 0.95 + 8; pb = monoSp * 0.75;
                             break;
-
                         case 'leica_m':
                             pr = r * 1.15 + 6; pg = g * 0.98; pb = b * 0.90;
                             break;
-
                         case 'leica_natural':
                             pr = r * 1.02 + 2; pg = g * 1.01; pb = b * 0.99;
                             break;
-
                         case 'kodak_portra':
                             pr = r * 1.08 + 10; pg = g * 1.02 + 5; pb = b * 0.92;
                             break;
-
                         case 'kodak_ektar':
                             pr = r * 1.18; pg = g * 1.05; pb = b * 1.02;
                             break;
-
                         case 'fuji_velvia':
                             pr = r * 1.12; pg = g * 1.15; pb = b * 1.08;
                             break;
-
                         case 'kodachrome':
                             pr = r * 1.15 + 8; pg = g * 0.95; pb = b * 0.88;
                             break;
-
                         case 'agfa_vista':
                             pr = r * 1.10; pg = g * 1.08; pb = b * 0.95 + 10;
                             break;
-
                         case 'bleach_bypass':
                             const bbL = 0.299 * r + 0.587 * g + 0.114 * b;
-                            pr = r * 0.5 + bbL * 0.5;
-                            pg = g * 0.5 + bbL * 0.5;
-                            pb = b * 0.5 + bbL * 0.5;
+                            pr = r * 0.5 + bbL * 0.5; pg = g * 0.5 + bbL * 0.5; pb = b * 0.5 + bbL * 0.5;
                             break;
-
                         case 'cine_teal':
                             pr = r * 1.08; pg = g * 0.95; pb = b < 128 ? b * 1.25 : b * 0.85;
                             break;
-
                         case 'vintage_70s':
                             pr = r * 1.1 + 15; pg = g * 1.0 + 8; pb = b * 0.85;
                             break;
-
                         case 'cyberpunk':
-                            pr = r > 128 ? r * 1.25 : r * 0.75;
-                            pb = b < 128 ? b * 1.35 : b * 1.1;
+                            pr = r > 128 ? r * 1.25 : r * 0.75; pb = b < 128 ? b * 1.35 : b * 1.1;
                             break;
-
                         case 'polaroid':
                             pr = r * 1.05 + 12; pg = g * 1.02 + 10; pb = b * 0.90 + 15;
                             break;
@@ -1370,9 +2483,601 @@
                     b = b * (1 - pIntensity) + pb * pIntensity;
                 }
 
-                data[i] = Math.min(255, Math.max(0, r));
-                data[i+1] = Math.min(255, Math.max(0, g));
-                data[i+2] = Math.min(255, Math.max(0, b));
+                // Clamp values before LUT lookup
+                r = Math.min(255, Math.max(0, r));
+                g = Math.min(255, Math.max(0, g));
+                b = Math.min(255, Math.max(0, b));
+
+                // Apply RGB Curve LUTs
+                r = lutR[lutRgb[Math.round(r)]];
+                g = lutG[lutRgb[Math.round(g)]];
+                b = lutB[lutRgb[Math.round(b)]];
+
+                data[i] = r;
+                data[i+1] = g;
+                data[i+2] = b;
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        // --- DEHAZE (Borrar Neblina) - Lightroom-style atmospheric dehazing ---
+        // Based on the physical model: I(x) = J(x) * t(x) + A * (1 - t(x))
+        // where I=observed, J=scene radiance (clear), t=transmission, A=atmospheric light
+        // Positive values remove haze, negative values add atmospheric haze.
+        function applyDehaze(ctx, w, h) {
+            const strength = editParams.dehaze; // -100 to +100
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const data = imgData.data;
+            const totalPixels = w * h;
+
+            // --- STEP 1: Estimate atmospheric light (A) using top 0.5% brightest pixels ---
+            // This is the 'airlight' that haze adds uniformly
+            const brightThreshold = Math.max(1, Math.floor(totalPixels * 0.005));
+            const pixelBrightness = new Float32Array(totalPixels);
+            
+            for (let i = 0; i < totalPixels; i++) {
+                const idx = i * 4;
+                pixelBrightness[i] = 0.2989 * data[idx] + 0.5870 * data[idx + 1] + 0.1140 * data[idx + 2];
+            }
+
+            // Find the threshold value for top 0.5% brightness
+            const sortedCopy = new Float32Array(pixelBrightness);
+            sortedCopy.sort();
+            const airLightThreshold = sortedCopy[Math.max(0, totalPixels - brightThreshold)];
+
+            // Average color of pixels above threshold = atmospheric light estimate
+            let aR = 0, aG = 0, aB = 0, aCount = 0;
+            for (let i = 0; i < totalPixels; i++) {
+                if (pixelBrightness[i] >= airLightThreshold) {
+                    const idx = i * 4;
+                    aR += data[idx];
+                    aG += data[idx + 1];
+                    aB += data[idx + 2];
+                    aCount++;
+                }
+            }
+            aCount = Math.max(1, aCount);
+            aR /= aCount;
+            aG /= aCount;
+            aB /= aCount;
+
+            // Atmospheric light: blend estimate with pure white (haze tends toward white)
+            const aLum = 0.2989 * aR + 0.5870 * aG + 0.1140 * aB;
+            const whiteBlend = Math.max(0, 1 - aLum / 200) * 0.5;
+            aR = aR * (1 - whiteBlend) + 245 * whiteBlend;
+            aG = aG * (1 - whiteBlend) + 245 * whiteBlend;
+            aB = aB * (1 - whiteBlend) + 245 * whiteBlend;
+
+            // --- STEP 2: Process each pixel ---
+            const absStr = Math.abs(strength);
+            const sign = strength > 0 ? 1 : -1;
+            // Map 0..100 to 0..1 with an S-curve for more natural feel
+            const t = (absStr / 100);
+            const effectPower = t < 0.5 
+                ? 2 * t * t 
+                : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i];
+                let g = data[i + 1];
+                let b = data[i + 2];
+
+                if (sign > 0) {
+                    // --- DEHAZE (positive): Remove atmospheric haze ---
+                    // Estimate per-pixel transmission: how much scene light passes through
+                    // t(x) ≈ 1 - ω * (I(x)/A) where ω is a tuning parameter
+                    const rNorm = r / (aR + 0.001);
+                    const gNorm = g / (aG + 0.001);
+                    const bNorm = b / (aB + 0.001);
+                    const minChannel = Math.min(rNorm, gNorm, bNorm);
+
+                    // Dark channel prior approximation for transmission
+                    // Lower min-channel ratio = more haze
+                    const omega = 0.85;
+                    let transmission = 1 - omega * Math.min(1, minChannel);
+                    transmission = Math.max(0.05, Math.min(0.97, transmission));
+
+                    // Dehaze strength modulates how aggressively we recover
+                    const dehazeFactor = effectPower * 1.4; // Scale for visible effect
+
+                    // Recover scene radiance: J = (I - A) / t + A
+                    // Blend between hazy and clear based on dehazeFactor
+                    const invT = 1 / (transmission + 0.01);
+                    let clearR = (r - aR) * invT + aR;
+                    let clearG = (g - aG) * invT + aG;
+                    let clearB = (b - aB) * invT + aB;
+
+                    // Smart blending: stronger effect on midtones and hazy areas
+                    const lum = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+                    // Pixels close to atmospheric light are more affected by haze
+                    const distToAir = 1 - Math.abs(lum - aLum) / (aLum + 1);
+                    // Hazy pixel indicator: high brightness + low saturation
+                    const maxC = Math.max(r, g, b);
+                    const minC = Math.min(r, g, b);
+                    const saturation = (maxC - minC) / (maxC + 0.001);
+                    const hazyFactor = Math.max(0, distToAir * (1 - saturation * 0.7));
+                    
+                    // Adaptive strength: more dehaze where there's more haze
+                    const adaptiveStrength = dehazeFactor * (0.3 + 0.7 * hazyFactor);
+
+                    r = r + (clearR - r) * adaptiveStrength;
+                    g = g + (clearG - g) * adaptiveStrength;
+                    b = b + (clearB - b) * adaptiveStrength;
+
+                    // Intelligent saturation compensation to prevent over-saturation
+                    // When dehazing, colors get more saturated naturally.
+                    // We limit the saturation boost to avoid neon artifacts.
+                    const newLum = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+                    const newMax = Math.max(r, g, b);
+                    const newMin = Math.min(r, g, b);
+                    const newSat = (newMax - newMin) / (newMax + 0.001);
+                    
+                    // If saturation increased too much (>50% boost), pull it back
+                    const maxSatBoost = 0.45 + 0.15 * (1 - adaptiveStrength);
+                    if (newSat > saturation + maxSatBoost && saturation < 0.8) {
+                        const targetSat = Math.min(saturation + maxSatBoost, 0.92);
+                        const satScale = newSat > 0.001 ? targetSat / newSat : 1;
+                        r = newLum + (r - newLum) * satScale;
+                        g = newLum + (g - newLum) * satScale;
+                        b = newLum + (b - newLum) * satScale;
+                    }
+
+                    // Protect blacks from crushing (clipped blacks prevention)
+                    // Dark pixels should not go below a minimum threshold
+                    const blackFloor = 3 + (1 - adaptiveStrength) * 8;
+                    r = Math.max(blackFloor, r);
+                    g = Math.max(blackFloor, g);
+                    b = Math.max(blackFloor, b);
+
+                } else {
+                    // --- ADD HAZE (negative): Simulate atmospheric haze ---
+                    // Blend pixels toward atmospheric light based on a depth-like heuristic
+                    const lum = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+                    
+                    // Simulate depth: darker/more saturated = closer, brighter/less saturated = farther
+                    const maxC = Math.max(r, g, b);
+                    const minC = Math.min(r, g, b);
+                    const saturation = (maxC - minC) / (maxC + 0.001);
+                    
+                    // Pseudo-depth: 0 (close) to 1 (far)
+                    const depthFactor = (1 - saturation * 0.4) * (lum / 255);
+                    
+                    // Haze amount increases with distance
+                    const hazeAmount = effectPower * 0.75 * depthFactor;
+                    
+                    // Atmospheric scattering: blend toward a slightly warm white
+                    const hazeR = 240 + lum * 0.02;
+                    const hazeG = 238 + lum * 0.02;
+                    const hazeB = 242 + lum * 0.01;
+                    
+                    r = r * (1 - hazeAmount) + hazeR * hazeAmount;
+                    g = g * (1 - hazeAmount) + hazeG * hazeAmount;
+                    b = b * (1 - hazeAmount) + hazeB * hazeAmount;
+
+                    // Slight contrast reduction for dreamy atmospheric feel
+                    const hazeContrast = 1 - effectPower * 0.15 * depthFactor;
+                    r = 128 + (r - 128) * hazeContrast;
+                    g = 128 + (g - 128) * hazeContrast;
+                    b = 128 + (b - 128) * hazeContrast;
+                }
+
+                data[i] = Math.min(255, Math.max(0, Math.round(r)));
+                data[i + 1] = Math.min(255, Math.max(0, Math.round(g)));
+                data[i + 2] = Math.min(255, Math.max(0, Math.round(b)));
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        // =====================================================================
+        // CLARITY & TEXTURE ENGINE — Professional local contrast & beauty system
+        // =====================================================================
+        // Positive Clarity: Local contrast enhancement (Unsharp Mask at mid-freq)
+        // Negative Clarity: Beauty smoothing + bloom/glow + edge-aware preservation
+        // Texture: Fine detail sharpening/smoothing at small radius
+        // =====================================================================
+
+        // --- Efficient Downsampled Multi-Pass Box Blur ---
+        // Downscales image, applies N passes of separable box blur, upscales back.
+        // Approximates Gaussian blur much faster than convolution.
+        function fastBlur(srcData, w, h, radius, passes) {
+            const maxSmallDim = 512;
+            const scale = Math.min(1, maxSmallDim / Math.max(w, h));
+            const sw = Math.max(4, Math.round(w * scale));
+            const sh = Math.max(4, Math.round(h * scale));
+            const smallPx = sw * sh;
+
+            const smallR = new Float32Array(smallPx);
+            const smallG = new Float32Array(smallPx);
+            const smallB = new Float32Array(smallPx);
+
+            for (let sy = 0; sy < sh; sy++) {
+                const srcY = (sy + 0.5) / sh * h - 0.5;
+                const y0 = Math.max(0, Math.floor(srcY));
+                const y1 = Math.min(h - 1, y0 + 1);
+                const fy = srcY - y0;
+                for (let sx = 0; sx < sw; sx++) {
+                    const srcX = (sx + 0.5) / sw * w - 0.5;
+                    const x0 = Math.max(0, Math.floor(srcX));
+                    const x1 = Math.min(w - 1, x0 + 1);
+                    const fx = srcX - x0;
+                    const si = sy * sw + sx;
+                    const i00 = (y0 * w + x0) * 4;
+                    const i10 = (y0 * w + x1) * 4;
+                    const i01 = (y1 * w + x0) * 4;
+                    const i11 = (y1 * w + x1) * 4;
+                    smallR[si] = srcData[i00]*(1-fx)*(1-fy) + srcData[i10]*fx*(1-fy) + srcData[i01]*(1-fx)*fy + srcData[i11]*fx*fy;
+                    smallG[si] = srcData[i00+1]*(1-fx)*(1-fy) + srcData[i10+1]*fx*(1-fy) + srcData[i01+1]*(1-fx)*fy + srcData[i11+1]*fx*fy;
+                    smallB[si] = srcData[i00+2]*(1-fx)*(1-fy) + srcData[i10+2]*fx*(1-fy) + srcData[i01+2]*(1-fx)*fy + srcData[i11+2]*fx*fy;
+                }
+            }
+
+            const blurR = Math.max(1, Math.round(radius * scale));
+            const tmpR = new Float32Array(smallPx);
+            const tmpG = new Float32Array(smallPx);
+            const tmpB = new Float32Array(smallPx);
+
+            for (let p = 0; p < passes; p++) {
+                // Horizontal pass with sliding window
+                for (let y = 0; y < sh; y++) {
+                    const row = y * sw;
+                    let sumR = 0, sumG = 0, sumB = 0;
+                    let wL = 0, wRt = Math.min(blurR, sw - 1);
+                    for (let x = wL; x <= wRt; x++) { sumR += smallR[row+x]; sumG += smallG[row+x]; sumB += smallB[row+x]; }
+                    for (let x = 0; x < sw; x++) {
+                        const tL = Math.max(0, x - blurR);
+                        const tR = Math.min(sw - 1, x + blurR);
+                        while (wRt < tR) { wRt++; sumR += smallR[row+wRt]; sumG += smallG[row+wRt]; sumB += smallB[row+wRt]; }
+                        while (wRt > tR) { sumR -= smallR[row+wRt]; sumG -= smallG[row+wRt]; sumB -= smallB[row+wRt]; wRt--; }
+                        while (wL > tL) { wL--; sumR += smallR[row+wL]; sumG += smallG[row+wL]; sumB += smallB[row+wL]; }
+                        while (wL < tL) { sumR -= smallR[row+wL]; sumG -= smallG[row+wL]; sumB -= smallB[row+wL]; wL++; }
+                        const cnt = wRt - wL + 1;
+                        tmpR[row+x] = sumR / cnt; tmpG[row+x] = sumG / cnt; tmpB[row+x] = sumB / cnt;
+                    }
+                }
+                smallR.set(tmpR); smallG.set(tmpG); smallB.set(tmpB);
+                // Vertical pass with sliding window
+                for (let x = 0; x < sw; x++) {
+                    let sumR = 0, sumG = 0, sumB = 0;
+                    let wT = 0, wB = Math.min(blurR, sh - 1);
+                    for (let y = wT; y <= wB; y++) { const i=y*sw+x; sumR += smallR[i]; sumG += smallG[i]; sumB += smallB[i]; }
+                    for (let y = 0; y < sh; y++) {
+                        const tT = Math.max(0, y - blurR);
+                        const tB = Math.min(sh - 1, y + blurR);
+                        while (wB < tB) { wB++; const i=wB*sw+x; sumR += smallR[i]; sumG += smallG[i]; sumB += smallB[i]; }
+                        while (wB > tB) { const i=wB*sw+x; sumR -= smallR[i]; sumG -= smallG[i]; sumB -= smallB[i]; wB--; }
+                        while (wT > tT) { wT--; const i=wT*sw+x; sumR += smallR[i]; sumG += smallG[i]; sumB += smallB[i]; }
+                        while (wT < tT) { const i=wT*sw+x; sumR -= smallR[i]; sumG -= smallG[i]; sumB -= smallB[i]; wT++; }
+                        const cnt = wB - wT + 1;
+                        const i = y * sw + x;
+                        tmpR[i] = sumR / cnt; tmpG[i] = sumG / cnt; tmpB[i] = sumB / cnt;
+                    }
+                }
+                smallR.set(tmpR); smallG.set(tmpG); smallB.set(tmpB);
+            }
+
+            const outR = new Float32Array(w * h);
+            const outG = new Float32Array(w * h);
+            const outB = new Float32Array(w * h);
+            for (let y = 0; y < h; y++) {
+                const srcY = (y + 0.5) / h * sh - 0.5;
+                const y0 = Math.max(0, Math.floor(srcY));
+                const y1 = Math.min(sh - 1, y0 + 1);
+                const fy = srcY - y0;
+                for (let x = 0; x < w; x++) {
+                    const srcX = (x + 0.5) / w * sw - 0.5;
+                    const x0 = Math.max(0, Math.floor(srcX));
+                    const x1 = Math.min(sw - 1, x0 + 1);
+                    const fx = srcX - x0;
+                    const di = y * w + x;
+                    outR[di] = smallR[y0*sw+x0]*(1-fx)*(1-fy) + smallR[y0*sw+x1]*fx*(1-fy) + smallR[y1*sw+x0]*(1-fx)*fy + smallR[y1*sw+x1]*fx*fy;
+                    outG[di] = smallG[y0*sw+x0]*(1-fx)*(1-fy) + smallG[y0*sw+x1]*fx*(1-fy) + smallG[y1*sw+x0]*(1-fx)*fy + smallG[y1*sw+x1]*fx*fy;
+                    outB[di] = smallB[y0*sw+x0]*(1-fx)*(1-fy) + smallB[y0*sw+x1]*fx*(1-fy) + smallB[y1*sw+x0]*(1-fx)*fy + smallB[y1*sw+x1]*fx*fy;
+                }
+            }
+            return { r: outR, g: outG, b: outB };
+        }
+
+        // --- Single-channel version of fastBlur (for luminance/variance maps) ---
+        function fastBlurSingle(src, w, h, radius, passes) {
+            const maxSmallDim = 512;
+            const scale = Math.min(1, maxSmallDim / Math.max(w, h));
+            const sw = Math.max(4, Math.round(w * scale));
+            const sh = Math.max(4, Math.round(h * scale));
+            const smallPx = sw * sh;
+            const small = new Float32Array(smallPx);
+            for (let sy = 0; sy < sh; sy++) {
+                const srcY = (sy + 0.5) / sh * h - 0.5;
+                const y0 = Math.max(0, Math.floor(srcY));
+                const y1 = Math.min(h - 1, y0 + 1);
+                const fy = srcY - y0;
+                for (let sx = 0; sx < sw; sx++) {
+                    const srcX = (sx + 0.5) / sw * w - 0.5;
+                    const x0 = Math.max(0, Math.floor(srcX));
+                    const x1 = Math.min(w - 1, x0 + 1);
+                    const fx = srcX - x0;
+                    small[sy * sw + sx] = src[y0*w+x0]*(1-fx)*(1-fy) + src[y0*w+x1]*fx*(1-fy) + src[y1*w+x0]*(1-fx)*fy + src[y1*w+x1]*fx*fy;
+                }
+            }
+            const blurR = Math.max(1, Math.round(radius * scale));
+            const tmp = new Float32Array(smallPx);
+            for (let p = 0; p < passes; p++) {
+                for (let y = 0; y < sh; y++) {
+                    const row = y * sw;
+                    let sum = 0;
+                    let wL = 0, wRt = Math.min(blurR, sw - 1);
+                    for (let x = wL; x <= wRt; x++) sum += small[row + x];
+                    for (let x = 0; x < sw; x++) {
+                        const tL = Math.max(0, x - blurR);
+                        const tR = Math.min(sw - 1, x + blurR);
+                        while (wRt < tR) { wRt++; sum += small[row + wRt]; }
+                        while (wRt > tR) { sum -= small[row + wRt]; wRt--; }
+                        while (wL > tL) { wL--; sum += small[row + wL]; }
+                        while (wL < tL) { sum -= small[row + wL]; wL++; }
+                        tmp[row + x] = sum / (wRt - wL + 1);
+                    }
+                }
+                small.set(tmp);
+                for (let x = 0; x < sw; x++) {
+                    let sum = 0;
+                    let wT = 0, wB = Math.min(blurR, sh - 1);
+                    for (let y = wT; y <= wB; y++) sum += small[y * sw + x];
+                    for (let y = 0; y < sh; y++) {
+                        const tT = Math.max(0, y - blurR);
+                        const tB = Math.min(sh - 1, y + blurR);
+                        while (wB < tB) { wB++; sum += small[wB * sw + x]; }
+                        while (wB > tB) { sum -= small[wB * sw + x]; wB--; }
+                        while (wT > tT) { wT--; sum += small[wT * sw + x]; }
+                        while (wT < tT) { sum -= small[wT * sw + x]; wT++; }
+                        tmp[y * sw + x] = sum / (wB - wT + 1);
+                    }
+                }
+                small.set(tmp);
+            }
+            const out = new Float32Array(w * h);
+            for (let y = 0; y < h; y++) {
+                const srcY = (y + 0.5) / h * sh - 0.5;
+                const y0 = Math.max(0, Math.floor(srcY));
+                const y1 = Math.min(sh - 1, y0 + 1);
+                const fy = srcY - y0;
+                for (let x = 0; x < w; x++) {
+                    const srcX = (x + 0.5) / w * sw - 0.5;
+                    const x0 = Math.max(0, Math.floor(srcX));
+                    const x1 = Math.min(sw - 1, x0 + 1);
+                    const fx = srcX - x0;
+                    out[y * w + x] = small[y0*sw+x0]*(1-fx)*(1-fy) + small[y0*sw+x1]*fx*(1-fy) + small[y1*sw+x0]*(1-fx)*fy + small[y1*sw+x1]*fx*fy;
+                }
+            }
+            return out;
+        }
+
+        // --- Local Variance Map (edge detector for beauty mode) ---
+        // Returns per-pixel variance in a small neighborhood. Low variance = smooth skin.
+        function computeVarianceMap(data, w, h, radius) {
+            const n = w * h;
+            const lum = new Float32Array(n);
+            for (let i = 0; i < n; i++) {
+                const idx = i * 4;
+                lum[i] = 0.2989 * data[idx] + 0.5870 * data[idx+1] + 0.1140 * data[idx+2];
+            }
+            const blur1 = fastBlurSingle(lum, w, h, radius, 2);
+            const lumSq = new Float32Array(n);
+            for (let i = 0; i < n; i++) lumSq[i] = lum[i] * lum[i];
+            const blur2 = fastBlurSingle(lumSq, w, h, radius, 2);
+            const variance = new Float32Array(n);
+            for (let i = 0; i < n; i++) {
+                const mean = blur1[i];
+                variance[i] = Math.max(0, blur2[i] - mean * mean);
+            }
+            return variance;
+        }
+
+        // --- Main Clarity + Texture Processing ---
+        function applyClarityAndTexture(ctx, w, h) {
+            const clarity = editParams.clarity;
+            const texture = editParams.texture;
+            if (clarity === 0 && texture === 0) return;
+
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const data = imgData.data;
+            const n = w * h;
+
+            // =========================================
+            // POSITIVE CLARITY: Local Contrast Enhancement
+            // Unsharp Mask at mid-frequency radius.
+            // Includes halo suppression via soft-clamping.
+            // =========================================
+            if (clarity > 0) {
+                const strength = clarity / 100; // 0..1
+                // S-curve for natural progression
+                const power = strength < 0.5
+                    ? 2 * strength * strength
+                    : 1 - Math.pow(-2 * strength + 2, 2) / 2;
+                const amount = power * 2.2; // Max ~2.2x detail boost
+
+                // Large-radius blur for mid-frequency detail extraction
+                const blurRadius = 18 + power * 12; // 18..30px
+                const blurred = fastBlur(data, w, h, blurRadius, 3);
+
+                for (let i = 0; i < n; i++) {
+                    const idx = i * 4;
+                    const bR = blurred.r[i], bG = blurred.g[i], bB = blurred.b[i];
+
+                    // Detail = original - blurred (high/mid frequency)
+                    let dR = data[idx] - bR;
+                    let dG = data[idx+1] - bG;
+                    let dB = data[idx+2] - bB;
+
+                    // --- Halo Suppression ---
+                    // Large detail values indicate edges. Clamp them proportionally
+                    // to prevent dark/light halos at high-contrast boundaries.
+                    const absDetail = Math.abs(dR) + Math.abs(dG) + Math.abs(dB);
+                    const haloThreshold = 60 + (1 - power) * 40; // 60..100
+                    // Soft clamp: reduce detail smoothly above threshold
+                    const haloFactor = absDetail > haloThreshold
+                        ? haloThreshold / absDetail
+                        : 1;
+                    // Smooth transition using smoothstep
+                    const t = Math.min(1, absDetail / (haloThreshold * 2));
+                    const smoothHalo = haloFactor + (1 - haloFactor) * (3*t*t - 2*t*t*t);
+
+                    dR *= smoothHalo;
+                    dG *= smoothHalo;
+                    dB *= smoothHalo;
+
+                    // Apply local contrast enhancement
+                    let r = data[idx] + dR * amount;
+                    let g = data[idx+1] + dG * amount;
+                    let b = data[idx+2] + dB * amount;
+
+                    // --- Saturation Guard ---
+                    // Prevent color oversaturation from contrast boost
+                    const origLum = 0.2989 * data[idx] + 0.5870 * data[idx+1] + 0.1140 * data[idx+2];
+                    const newLum = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+                    const maxC = Math.max(r, g, b);
+                    const minC = Math.min(r, g, b);
+                    const newSat = maxC > 0.001 ? (maxC - minC) / maxC : 0;
+                    const origMaxC = Math.max(data[idx], data[idx+1], data[idx+2]);
+                    const origMinC = Math.min(data[idx], data[idx+1], data[idx+2]);
+                    const origSat = origMaxC > 0.001 ? (origMaxC - origMinC) / origMaxC : 0;
+                    if (newSat > origSat * 1.35 && origSat > 0.05) {
+                        const satLimit = origSat * 1.25;
+                        const scale = newSat > 0.001 ? satLimit / newSat : 1;
+                        r = newLum + (r - newLum) * scale;
+                        g = newLum + (g - newLum) * scale;
+                        b = newLum + (b - newLum) * scale;
+                    }
+
+                    data[idx]   = Math.min(255, Math.max(0, Math.round(r)));
+                    data[idx+1] = Math.min(255, Math.max(0, Math.round(g)));
+                    data[idx+2] = Math.min(255, Math.max(0, Math.round(b)));
+                }
+            }
+
+            // =========================================
+            // NEGATIVE CLARITY: Beauty Smoothing + Glow/Bloom
+            // Edge-aware bilateral-like smoothing + highlight bloom.
+            // =========================================
+            else if (clarity < 0) {
+                const strength = Math.abs(clarity) / 100; // 0..1
+                const power = strength < 0.5
+                    ? 2 * strength * strength
+                    : 1 - Math.pow(-2 * strength + 2, 2) / 2;
+
+                // --- Step 1: Compute edge/texture map for preservation ---
+                // Low variance = smooth area (skin) -> more blur
+                // High variance = edge/detail (eyes, lips, hair) -> less blur
+                const varianceMap = computeVarianceMap(data, w, h, 5);
+                // Normalize variance to 0..1
+                let maxVar = 0;
+                for (let i = 0; i < n; i++) maxVar = Math.max(maxVar, varianceMap[i]);
+                maxVar = Math.max(1, maxVar);
+                const edgeStrength = new Float32Array(n);
+                for (let i = 0; i < n; i++) {
+                    // Map variance to edge strength 0..1
+                    const norm = varianceMap[i] / maxVar;
+                    // Apply sigmoid for smooth transition
+                    edgeStrength[i] = 1 / (1 + Math.exp(-12 * (norm - 0.35)));
+                }
+
+                // --- Step 2: Beauty blur (medium-large radius) ---
+                const beautyRadius = 12 + power * 18; // 12..30px
+                const blurred = fastBlur(data, w, h, beautyRadius, 3);
+
+                // --- Step 3: Secondary very-large blur for glow/bloom ---
+                const glowRadius = 40 + power * 40; // 40..80px
+                const glowBlur = fastBlur(data, w, h, glowRadius, 4);
+
+                // --- Step 4: Combine ---
+                const smoothAmount = power * 0.75; // Max 75% blend toward blur
+                const glowAmount = power * 0.3;    // Max 30% glow overlay
+
+                for (let i = 0; i < n; i++) {
+                    const idx = i * 4;
+                    const edge = edgeStrength[i]; // 0=smooth(skin), 1=sharp(edge)
+
+                    // Adaptive smoothing: less on edges, more on smooth areas
+                    const adaptiveSmooth = smoothAmount * (1 - edge * 0.85);
+                    // Minimum smoothing even on edges (very subtle)
+                    const effectiveSmooth = Math.max(0, adaptiveSmooth);
+
+                    // Blend original toward beauty blur
+                    let r = data[idx] * (1 - effectiveSmooth) + blurred.r[i] * effectiveSmooth;
+                    let g = data[idx+1] * (1 - effectiveSmooth) + blurred.g[i] * effectiveSmooth;
+                    let b = data[idx+2] * (1 - effectiveSmooth) + blurred.b[i] * effectiveSmooth;
+
+                    // --- Glow / Bloom Effect ---
+                    // Extract highlights from the large blur, add as luminous overlay
+                    // Only bright areas contribute to glow (above threshold)
+                    const lum = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+                    const glowThreshold = 120;
+                    // Soft mask: glow intensity increases for brighter pixels
+                    const glowMask = Math.max(0, (lum - glowThreshold) / (255 - glowThreshold));
+                    const glowIntensity = glowMask * glowMask * glowAmount; // Quadratic for subtlety
+
+                    // Screen blend: result = 1 - (1 - a)(1 - b) — brightens without clipping
+                    const gR = glowBlur.r[i] / 255;
+                    const gG = glowBlur.g[i] / 255;
+                    const gB = glowBlur.b[i] / 255;
+                    r = r + (255 * (1 - (1 - r/255) * (1 - gR)) - r) * glowIntensity;
+                    g = g + (255 * (1 - (1 - g/255) * (1 - gG)) - g) * glowIntensity;
+                    b = b + (255 * (1 - (1 - b/255) * (1 - gB)) - b) * glowIntensity;
+
+                    // --- Warm highlight tint for porcelain glow ---
+                    // Subtle warm shift on highlights to mimic classic beauty lighting
+                    if (lum > 140) {
+                        const warmShift = ((lum - 140) / 115) * power * 3;
+                        r += warmShift;
+                        g += warmShift * 0.4;
+                        // No blue shift — keeps the warm porcelain feel
+                    }
+
+                    data[idx]   = Math.min(255, Math.max(0, Math.round(r)));
+                    data[idx+1] = Math.min(255, Math.max(0, Math.round(g)));
+                    data[idx+2] = Math.min(255, Math.max(0, Math.round(b)));
+                }
+            }
+
+            // =========================================
+            // TEXTURE: Fine detail at small radius
+            // Positive: sharpen fine detail (pores, fabric, hair)
+            // Negative: smooth fine detail
+            // =========================================
+            if (texture !== 0) {
+                const strength = texture / 100;
+                const power = strength < 0.5
+                    ? 2 * strength * strength
+                    : 1 - Math.pow(-2 * strength + 2, 2) / 2;
+
+                // Small radius for fine detail
+                const texRadius = 2 + Math.abs(power) * 2; // 2..4px
+                const blurred = fastBlur(data, w, h, texRadius, 2);
+                const amount = power * 1.5;
+
+                for (let i = 0; i < n; i++) {
+                    const idx = i * 4;
+                    const dR = data[idx] - blurred.r[i];
+                    const dG = data[idx+1] - blurred.g[i];
+                    const dB = data[idx+2] - blurred.b[i];
+
+                    let r, g, b;
+                    if (texture > 0) {
+                        // Enhance fine detail
+                        r = data[idx] + dR * amount;
+                        g = data[idx+1] + dG * amount;
+                        b = data[idx+2] + dB * amount;
+                    } else {
+                        // Smooth fine detail
+                        r = data[idx] - dR * amount * 0.6;
+                        g = data[idx+1] - dG * amount * 0.6;
+                        b = data[idx+2] - dB * amount * 0.6;
+                    }
+
+                    data[idx]   = Math.min(255, Math.max(0, Math.round(r)));
+                    data[idx+1] = Math.min(255, Math.max(0, Math.round(g)));
+                    data[idx+2] = Math.min(255, Math.max(0, Math.round(b)));
+                }
             }
 
             ctx.putImageData(imgData, 0, 0);
@@ -1381,7 +3086,6 @@
         function applyTextureClarityVignetteGrain(ctx, w, h) {
             if (editParams.vignette !== 0 || editParams.grain > 0) {
                 ctx.save();
-                
                 if (editParams.vignette !== 0) {
                     const vVal = editParams.vignette;
                     const radGrad = ctx.createRadialGradient(w/2, h/2, Math.min(w, h) * 0.3, w/2, h/2, Math.max(w, h) * 0.7);
@@ -1478,10 +3182,8 @@
                 for (let x = 0; x < w; x++) {
                     const idx = (y * w + x) * 4;
 
-                    let rx = x + dx;
-                    let ry = y + dy;
-                    let bx = x - dx;
-                    let by = y - dy;
+                    let rx = x + dx; let ry = y + dy;
+                    let bx = x - dx; let by = y - dy;
 
                     if (mode === 'cyberGlitch' && (y % 12 < 3)) {
                         rx += Math.round(offset * 0.2);
@@ -1531,8 +3233,7 @@
             const src = srcData.data;
             const dest = destData.data;
 
-            const cx = w / 2;
-            const cy = h / 2;
+            const cx = w / 2; const cy = h / 2;
             const maxDist = Math.hypot(cx, cy);
 
             const numSamples = 7;
@@ -1542,24 +3243,18 @@
                 for (let x = 0; x < w; x++) {
                     const idx = (y * w + x) * 4;
 
-                    const dx = x - cx;
-                    const dy = y - cy;
+                    const dx = x - cx; const dy = y - cy;
                     const dist = Math.hypot(dx, dy);
                     const normDist = dist / maxDist;
 
                     const effectFactor = Math.pow(normDist, 1.7) * intensity;
 
                     if (effectFactor < 0.01) {
-                        dest[idx]     = src[idx];
-                        dest[idx + 1] = src[idx + 1];
-                        dest[idx + 2] = src[idx + 2];
-                        dest[idx + 3] = src[idx + 3];
+                        dest[idx] = src[idx]; dest[idx + 1] = src[idx + 1]; dest[idx + 2] = src[idx + 2]; dest[idx + 3] = src[idx + 3];
                         continue;
                     }
 
-                    const unitX = dx / (dist || 1);
-                    const unitY = dy / (dist || 1);
-
+                    const unitX = dx / (dist || 1); const unitY = dy / (dist || 1);
                     let rSum = 0, gSum = 0, bSum = 0;
 
                     for (let s = 0; s < numSamples; s++) {
@@ -1578,12 +3273,10 @@
                         const by = Math.min(h - 1, Math.max(0, Math.round(y + unitY * (offset - 5 * effectFactor))));
                         const bIdx = (by * w + bx) * 4;
 
-                        rSum += src[rIdx];
-                        gSum += src[gIdx + 1];
-                        bSum += src[bIdx + 2];
+                        rSum += src[rIdx]; gSum += src[gIdx + 1]; bSum += src[bIdx + 2];
                     }
 
-                    dest[idx]     = Math.min(255, rSum / numSamples);
+                    dest[idx] = Math.min(255, rSum / numSamples);
                     dest[idx + 1] = Math.min(255, gSum / numSamples);
                     dest[idx + 2] = Math.min(255, bSum / numSamples);
                     dest[idx + 3] = src[idx + 3];
@@ -1613,7 +3306,6 @@
 
             if (editParams.prismSplit > 0) {
                 const splitAlpha = (editParams.prismSplit / 100) * 0.35;
-                
                 const leftGrad = ctx.createLinearGradient(0, 0, w * 0.5, 0);
                 leftGrad.addColorStop(0, `rgba(236, 72, 153, ${splitAlpha})`);
                 leftGrad.addColorStop(1, `rgba(236, 72, 153, 0)`);
@@ -1631,7 +3323,6 @@
             if (editParams.prismKaleido > 0) {
                 const kAlpha = (editParams.prismKaleido / 100) * 0.4;
                 ctx.globalCompositeOperation = 'overlay';
-                
                 const radGrad = ctx.createRadialGradient(w * 0.5, h * 0.5, 20, w * 0.5, h * 0.5, w * 0.4);
                 radGrad.addColorStop(0, `rgba(255, 255, 255, ${kAlpha})`);
                 radGrad.addColorStop(0.5, `rgba(168, 85, 247, ${kAlpha * 0.6})`);
@@ -1681,255 +3372,102 @@
 
         function applyDatamoshAndScanlines(ctx, w, h) {
             ctx.save();
-
             if (editParams.scanlines > 0) {
                 const alpha = (editParams.scanlines / 100) * 0.4;
                 ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
                 for (let y = 0; y < h; y += 4) {
-                    ctx.fillRect(0, y, w, 1.5);
+                    ctx.fillRect(0, y, w, 2);
                 }
             }
 
             if (editParams.vhsTape > 0) {
-                const vhsAlpha = (editParams.vhsTape / 100) * 0.5;
-                
-                const trackY = h * 0.88;
-                ctx.fillStyle = `rgba(255, 255, 255, ${vhsAlpha * 0.6})`;
-                ctx.fillRect(0, trackY, w, 8);
-
-                ctx.fillStyle = `rgba(239, 68, 68, ${vhsAlpha * 0.4})`;
-                ctx.fillRect(0, trackY - 3, w, 3);
+                const intensity = editParams.vhsTape / 100;
+                ctx.fillStyle = `rgba(255, 255, 255, ${intensity * 0.12})`;
+                for (let i = 0; i < 15; i++) {
+                    const ry = Math.random() * h;
+                    const rh = Math.random() * 4 + 1;
+                    ctx.fillRect(0, ry, w, rh);
+                }
             }
-
             ctx.restore();
         }
 
-        function renderFrameBrandingAndMetadata(ctx, canvasW, canvasH, photoX, photoY, imgW, imgH, framePaddingBottom) {
+        function renderFrameBrandingAndMetadata(ctx, cW, cH, pX, pY, imgW, imgH, pBottom) {
             ctx.save();
+            const isDark = editParams.frameStyle === 'dark';
+            ctx.fillStyle = isDark ? '#ffffff' : '#000000';
 
-            const baseFontSize = Math.max(12, Math.round(imgW * 0.022));
-            ctx.font = `600 ${baseFontSize}px 'Space Mono', monospace`;
-            ctx.textBaseline = "middle";
-
-            const isDarkFrame = editParams.frameStyle === 'dark';
-            const primaryTextColor = isDarkFrame ? '#f4f4f5' : '#18181b';
-            const secondaryTextColor = isDarkFrame ? '#a1a1aa' : '#52525b';
-
-            const leftMargin = photoX;
-            const textCenterY = photoY + imgH + Math.round(framePaddingBottom * 0.45);
-
-            let currentX = leftMargin;
+            // Alineados a la izquierda, con un margen igual al lateral del marco,
+            // y con un tamaño más discreto que antes.
+            const leftX = pX > 0 ? pX : Math.round(imgW * 0.04);
 
             if (editParams.showLogoText) {
-                const logoSize = Math.round(baseFontSize * 1.5);
-
-                ctx.fillStyle = '#f59e0b';
-                ctx.beginPath();
-                ctx.arc(currentX + logoSize/2, textCenterY, logoSize/2, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.fillStyle = '#000000';
-                ctx.font = `bold ${Math.round(baseFontSize * 0.9)}px sans-serif`;
-                ctx.textAlign = "center";
-                ctx.fillText("X", currentX + logoSize/2, textCenterY + 1);
-
-                currentX += logoSize + Math.round(baseFontSize * 0.6);
-
-                ctx.fillStyle = primaryTextColor;
-                ctx.font = `700 ${baseFontSize}px 'Space Mono', monospace`;
-                ctx.textAlign = "left";
-                ctx.fillText("Diego-X-Studio", currentX, textCenterY);
-
-                const brandWidth = ctx.measureText("Diego-X-Studio").width;
-                currentX += brandWidth + Math.round(baseFontSize * 1.2);
-
-                if (editParams.showExifText && editParams.frameText) {
-                    ctx.fillStyle = '#f59e0b';
-                    ctx.beginPath();
-                    ctx.arc(currentX, textCenterY, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                    currentX += Math.round(baseFontSize * 0.8);
-                }
+                const logoScale = (editParams.logoTextScale || 130) / 100;
+                const logoSize = Math.round(imgH * 0.034 * logoScale);
+                ctx.font = `bold ${logoSize}px Space Mono`;
+                ctx.textAlign = 'left';
+                const logoYFactor = Math.min(0.95, Math.max(0.05, 0.45 + (editParams.logoTextOffsetY || 0) / 100));
+                const textY = pY + imgH + Math.round(pBottom * logoYFactor);
+                ctx.fillText('DIEGO-X-STUDIO', leftX, textY);
             }
 
             if (editParams.showExifText && editParams.frameText) {
-                ctx.fillStyle = secondaryTextColor;
-                ctx.font = `500 ${baseFontSize}px 'Space Mono', monospace`;
-                ctx.textAlign = "left";
-                ctx.fillText(editParams.frameText, currentX, textCenterY);
+                const metaScale = (editParams.metaTextScale || 130) / 100;
+                const metaSize = Math.round(imgH * 0.024 * metaScale);
+                ctx.font = `${metaSize}px Space Mono`;
+                ctx.textAlign = 'left';
+                ctx.fillStyle = isDark ? '#a1a1aa' : '#52525b';
+                const metaYFactor = Math.min(0.95, Math.max(0.05, 0.75 + (editParams.metaTextOffsetY || 0) / 100));
+                const metaY = pY + imgH + Math.round(pBottom * metaYFactor);
+                ctx.fillText(editParams.frameText, leftX, metaY);
             }
 
             ctx.restore();
         }
 
-        function exportEditedPhoto() {
-            const canvas = document.getElementById('photoCanvas');
-            if (!canvas) return;
-
-            const format = document.getElementById('exportFormatSelect').value || 'jpg';
-            const mimeType = format === 'png' ? 'image/png' : (format === 'webp' ? 'image/webp' : 'image/jpeg');
-            
-            const link = document.createElement('a');
-            link.download = `Diego-X-Studio_${Date.now()}.${format}`;
-            link.href = canvas.toDataURL(mimeType, 0.98);
-            link.click();
-        }
-
-        function resetEditParams() {
-            editParams = {
-                profile: 'none',
-                profileIntensity: 100,
-                exposure: 0,
-                contrast: 0,
-                highlights: 0,
-                shadows: 0,
-                whites: 0,
-                blacks: 0,
-                temp: 0,
-                tint: 0,
-                vibrance: 0,
-                saturation: 0,
-                texture: 0,
-                clarity: 0,
-                vignette: 0,
-                grain: 0,
-                rgbMode: 'cyberGlitch',
-                rgbOffset: 0,
-                rgbAngle: 0,
-                radialPrismEffect: 0,
-                prismSpectrum: 0,
-                prismSplit: 0,
-                prismKaleido: 0,
-                anamorphicFlare: 0,
-                holgaLomo: 0,
-                scanlines: 0,
-                vhsTape: 0,
-                leicaFrame: true,
-                frameStyle: 'polaroid',
-                showLogoText: true,
-                showExifText: true,
-                frameText: editParams.frameText || 'LEICA M11 PRO • 35mm f/1.4 ISO 100'
-            };
-
-            const inputs = document.querySelectorAll('.ios-slider');
-            inputs.forEach(i => {
-                i.value = 0;
-                i.style.setProperty('--fill', '0%');
+        function filterProfileCategory(cat) {
+            activeCategoryFilter = cat;
+            ['catBtn-all', 'catBtn-leica_bw', 'catBtn-color', 'catBtn-cine'].forEach(id => {
+                const b = document.getElementById(id);
+                if (b) b.className = "px-2.5 py-1 rounded bg-zinc-800 text-zinc-300 hover:text-white font-semibold";
             });
-
+            const activeBtn = document.getElementById(`catBtn-${cat}`);
+            if (activeBtn) activeBtn.className = "px-2.5 py-1 rounded bg-amber-500 text-black font-bold";
             renderProfilesCatalog();
-            requestCanvasRender();
-        }
-
-        function updateGalleryUI() {
-            const grid = document.getElementById('galleryGrid');
-            const emptyMsg = document.getElementById('emptyGalleryMsg');
-            const lastThumb = document.getElementById('lastThumbnail');
-            const galleryIcon = document.getElementById('galleryIcon');
-
-            if (!grid) return;
-            grid.innerHTML = '';
-
-            if (galleryPhotos.length === 0) {
-                if (emptyMsg) emptyMsg.classList.remove('hidden');
-                return;
-            }
-
-            if (emptyMsg) emptyMsg.classList.add('hidden');
-            if (lastThumb && galleryPhotos[0]) {
-                lastThumb.src = galleryPhotos[0];
-                lastThumb.classList.remove('hidden');
-                if (galleryIcon) galleryIcon.classList.add('hidden');
-            }
-
-            galleryPhotos.forEach((url) => {
-                const item = document.createElement('div');
-                item.className = "aspect-square bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 cursor-pointer active:scale-95 transition shadow-md relative";
-                item.onclick = () => loadPhotoFromUrl(url);
-                item.innerHTML = `<img src="${url}" class="w-full h-full object-cover">`;
-                grid.appendChild(item);
-            });
         }
 
         function renderProfilesCatalog() {
             const grid = document.getElementById('profilesGrid');
-            const nameDisplay = document.getElementById('currentProfileNameDisplay');
             if (!grid) return;
             grid.innerHTML = '';
 
-            const filtered = colorProfiles.filter(p => {
-                if (activeCategoryFilter === 'all') return true;
-                if (activeCategoryFilter === 'leica_bw') return p.cat === 'leica_bw' || p.id === 'none';
-                if (activeCategoryFilter === 'color') return p.cat === 'color' || p.id === 'none';
-                if (activeCategoryFilter === 'cine') return p.cat === 'cine' || p.id === 'none';
-                return true;
-            });
+            const list = colorProfiles.filter(p => activeCategoryFilter === 'all' || p.cat === activeCategoryFilter);
 
-            const currentProfObj = colorProfiles.find(p => p.id === editParams.profile);
-            if (nameDisplay) {
-                nameDisplay.innerText = currentProfObj ? currentProfObj.name : 'Tono Normal (Original)';
-            }
-
-            filtered.forEach(p => {
+            list.forEach(p => {
+                const card = document.createElement('div');
                 const isActive = editParams.profile === p.id;
-                const card = document.createElement('button');
-                card.onclick = () => {
-                    editParams.profile = p.id;
-                    renderProfilesCatalog();
-                    requestCanvasRender();
-                };
-                card.className = `flex flex-col items-center justify-center p-2.5 rounded-xl bg-zinc-900 border ${isActive ? 'profile-card-active' : 'border-zinc-800/90'} hover:border-amber-400 active:scale-95 transition text-center relative overflow-hidden`;
-                
+                card.className = `p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 cursor-pointer flex items-center space-x-2.5 transition active:scale-95 ${isActive ? 'profile-card-active' : 'hover:border-zinc-700'}`;
+                card.onclick = () => selectColorProfile(p.id, p.name);
+
                 card.innerHTML = `
-                    <div class="w-8 h-8 rounded-full ${p.iconBg} mb-1.5 shadow-md flex items-center justify-center">
-                        ${p.isNormal ? '<i class="fa-solid fa-camera-rotate text-xs text-white"></i>' : ''}
+                    <div class="w-8 h-8 rounded-lg ${p.iconBg} shrink-0 flex items-center justify-center font-bold text-xs shadow-inner">
+                        ${p.isNormal ? '<i class="fa-solid fa-ban text-xs text-white"></i>' : ''}
                     </div>
-                    <span class="text-[10px] font-mono font-bold ${isActive ? 'text-amber-400' : 'text-zinc-300'} truncate w-full">${p.name}</span>
+                    <div class="flex flex-col overflow-hidden">
+                        <span class="text-xs font-bold text-zinc-100 truncate font-mono">${p.name}</span>
+                        <span class="text-[9px] text-zinc-400 font-mono capitalize">${p.cat.replace('_', ' ')}</span>
+                    </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        function filterProfileCategory(cat) {
-            activeCategoryFilter = cat;
-            ['all', 'leica_bw', 'color', 'cine'].forEach(c => {
-                const b = document.getElementById(`catBtn-${c}`);
-                if (b) {
-                    if (c === cat) {
-                        b.className = "px-2.5 py-1 rounded bg-amber-500 text-black font-bold";
-                    } else {
-                        b.className = "px-2.5 py-1 rounded bg-zinc-800 text-zinc-300 hover:text-white font-semibold";
-                    }
-                }
-            });
+        function selectColorProfile(id, name) {
+            pushHistoryState();
+            editParams.profile = id;
+            const display = document.getElementById('currentProfileNameDisplay');
+            if (display) display.innerText = name;
             renderProfilesCatalog();
-        }
-
-        function toggleHistogram() {
-            showHistogram = !showHistogram;
-            const box = document.getElementById('histogramBox');
-            if (box) {
-                if (showHistogram) box.classList.remove('hidden');
-                else box.classList.add('hidden');
-            }
-            if (imageLoaded) requestCanvasRender();
-        }
-
-        function toggleDeviceMode() {
-            isPcMode = !isPcMode;
-            const container = document.getElementById('appContainer');
-            const icon = document.getElementById('deviceModeIcon');
-            const text = document.getElementById('deviceModeText');
-
-            if (isPcMode) {
-                container.classList.add('pc-mode-active');
-                if (icon) icon.className = "fa-solid fa-desktop text-[12px] text-amber-400";
-                if (text) text.innerText = "ESCRITORIO";
-            } else {
-                container.classList.remove('pc-mode-active');
-                if (icon) icon.className = "fa-solid fa-mobile-screen-button text-[12px] text-amber-400";
-                if (text) text.innerText = "MÓVIL";
-            }
             requestCanvasRender();
         }
 
@@ -1937,28 +3475,240 @@
             switchMainTab('gallery');
         }
 
-        function setDrawerHeightPreset(preset, e) {
-            if (e) e.stopPropagation();
-            const drawer = document.getElementById('editorToolsSidebar');
-            if (!drawer) return;
+        function updateGalleryUI() {
+            const grid = document.getElementById('galleryGrid');
+            const msg = document.getElementById('emptyGalleryMsg');
+            const thumb = document.getElementById('lastThumbnail');
+            const icon = document.getElementById('galleryIcon');
 
-            drawer.style.transition = 'height 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            if (galleryPhotos.length > 0) {
+                if (msg) msg.classList.add('hidden');
+                if (thumb) {
+                    thumb.src = galleryPhotos[0];
+                    thumb.classList.remove('hidden');
+                }
+                if (icon) icon.classList.add('hidden');
+
+                galleryPhotos.forEach((url, i) => {
+                    const item = document.createElement('div');
+                    const isSelected = selectedPhotoIndexes.has(i);
+                    item.className = 'aspect-square rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 relative group cursor-pointer shadow-md' + (isSelected ? ' gallery-item-selected' : '');
+                    
+                    let innerHtml = '<img src="' + url + '" class="w-full h-full object-cover">';
+                    
+                    // Checkbox for selection mode
+                    if (gallerySelectionMode) {
+                        innerHtml += '<div class="gallery-checkbox ' + (isSelected ? 'checked' : '') + '" onclick="event.stopPropagation(); togglePhotoSelection(' + i + ')"><i class="fa-solid fa-check"></i></div>';
+                        innerHtml += '<div class="absolute inset-0 bg-black/0 hover:bg-black/20 transition pointer-events-none"></div>';
+                    } else {
+                        innerHtml += '<div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center space-x-2">';
+                        innerHtml += '<button onclick="event.stopPropagation(); loadPhotoFromUrl(\'' + url + '\')" class="w-8 h-8 rounded-full bg-amber-500 text-black flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-pen"></i></button>';
+                        innerHtml += '<button onclick="event.stopPropagation(); quickDeleteSingle(' + i + ')" class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-trash"></i></button>';
+                        innerHtml += '</div>';
+                    }
+                    
+                    item.innerHTML = innerHtml;
+                    
+                    if (gallerySelectionMode) {
+                        item.addEventListener('click', function() { togglePhotoSelection(i); });
+                    }
+                    
+                    grid.appendChild(item);
+                });
+            } else {
+                if (msg) msg.classList.remove('hidden');
+                if (thumb) thumb.classList.add('hidden');
+                if (icon) icon.classList.remove('hidden');
+            }
             
-            if (preset === 'compact') {
-                drawer.style.height = '30%';
-            } else if (preset === 'medium') {
-                drawer.style.height = '60%';
-            } else if (preset === 'large') {
-                drawer.style.height = '95%';
+            updateSelectionUI();
+        }
+
+        // --- GALLERY SELECTION & DELETE LOGIC ---
+        function toggleSelectionMode() {
+            gallerySelectionMode = !gallerySelectionMode;
+            selectedPhotoIndexes.clear();
+            const header = document.getElementById('galleryHeader');
+            const selHeader = document.getElementById('gallerySelectHeader');
+            const selectBtnText = document.getElementById('selectBtnText');
+            const selectBtn = document.getElementById('gallerySelectBtn');
+            if (gallerySelectionMode) {
+                if (header) header.classList.add('hidden');
+                if (selHeader) { selHeader.classList.remove('hidden'); selHeader.classList.add('flex'); }
+                if (selectBtnText) selectBtnText.textContent = 'Cancelar';
+                if (selectBtn) selectBtn.classList.add('border-amber-500', 'text-amber-400');
+            } else {
+                if (header) header.classList.remove('hidden');
+                if (selHeader) { selHeader.classList.add('hidden'); selHeader.classList.remove('flex'); }
+                if (selectBtnText) selectBtnText.textContent = 'Seleccionar';
+                if (selectBtn) selectBtn.classList.remove('border-amber-500', 'text-amber-400');
+            }
+            cancelDelete();
+            updateGalleryUI();
+        }
+
+        function cancelSelectionMode() {
+            gallerySelectionMode = false;
+            selectedPhotoIndexes.clear();
+            const header = document.getElementById('galleryHeader');
+            const selHeader = document.getElementById('gallerySelectHeader');
+            const selectBtnText = document.getElementById('selectBtnText');
+            const selectBtn = document.getElementById('gallerySelectBtn');
+            if (header) header.classList.remove('hidden');
+            if (selHeader) { selHeader.classList.add('hidden'); selHeader.classList.remove('flex'); }
+            if (selectBtnText) selectBtnText.textContent = 'Seleccionar';
+            if (selectBtn) selectBtn.classList.remove('border-amber-500', 'text-amber-400');
+            cancelDelete();
+            updateGalleryUI();
+        }
+
+        function togglePhotoSelection(index) {
+            if (selectedPhotoIndexes.has(index)) {
+                selectedPhotoIndexes.delete(index);
+            } else {
+                selectedPhotoIndexes.add(index);
+            }
+            cancelDelete();
+            updateGalleryUI();
+        }
+
+        function selectAllPhotos() {
+            if (selectedPhotoIndexes.size === galleryPhotos.length) {
+                selectedPhotoIndexes.clear();
+            } else {
+                for (let i = 0; i < galleryPhotos.length; i++) {
+                    selectedPhotoIndexes.add(i);
+                }
+            }
+            cancelDelete();
+            updateGalleryUI();
+        }
+
+        function updateSelectionUI() {
+            const countEl = document.getElementById('selectedCount');
+            const deleteBtn = document.getElementById('deleteBtn');
+            if (countEl) {
+                const n = selectedPhotoIndexes.size;
+                countEl.textContent = n + (n === 1 ? ' seleccionada' : ' seleccionadas');
+                countEl.className = n > 0 ? 'text-xs font-mono text-amber-400 font-bold' : 'text-xs font-mono text-zinc-400';
+            }
+            if (deleteBtn) {
+                if (selectedPhotoIndexes.size > 0) {
+                    deleteBtn.classList.remove('opacity-40', 'pointer-events-none');
+                } else {
+                    deleteBtn.classList.add('opacity-40', 'pointer-events-none');
+                }
             }
         }
 
-        window.onload = function() {
-            initCamera();
-            renderProfilesCatalog();
-            setupVerticalDrawerSwipe();
-            generateDemoCanvas();
-        };
+        function deleteSelectedPhotos() {
+            if (selectedPhotoIndexes.size === 0) return;
+            const n = selectedPhotoIndexes.size;
+            const deleteBar = document.getElementById('deleteBar');
+            const deleteBarText = document.getElementById('deleteBarText');
+            if (deleteBarText) {
+                deleteBarText.textContent = 'Eliminar ' + n + (n === 1 ? ' foto' : ' fotos') + '? Esta accion no se puede deshacer.';
+            }
+            if (deleteBar) deleteBar.classList.add('active');
+        }
+
+        function quickDeleteSingle(index) {
+            selectedPhotoIndexes.clear();
+            selectedPhotoIndexes.add(index);
+            deleteSelectedPhotos();
+        }
+
+        function cancelDelete() {
+            const deleteBar = document.getElementById('deleteBar');
+            if (deleteBar) deleteBar.classList.remove('active');
+        }
+
+        function confirmDelete() {
+            if (selectedPhotoIndexes.size === 0) return;
+            // Remove selected photos (sort descending to preserve indexes)
+            const indexes = Array.from(selectedPhotoIndexes).sort((a, b) => b - a);
+            indexes.forEach(idx => {
+                galleryPhotos.splice(idx, 1);
+            });
+            selectedPhotoIndexes.clear();
+            cancelDelete();
+            if (galleryPhotos.length === 0) {
+                cancelSelectionMode();
+            }
+            updateGalleryUI();
+        }
+
+        // --- IPHONE & DESKTOP PHOTO EXPORT LOGIC ---
+        let currentExportBlob = null;
+
+        function exportEditedPhoto() {
+            const canvas = document.getElementById('photoCanvas');
+            if (!canvas || !imageLoaded) return;
+
+            const format = document.getElementById('exportFormatSelect')?.value || 'jpg';
+            const mimeType = format === 'png' ? 'image/png' : format === 'webp' ? 'image/webp' : 'image/jpeg';
+            const extension = format === 'png' ? 'png' : format === 'webp' ? 'webp' : 'jpg';
+
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                currentExportBlob = blob;
+                const blobUrl = URL.createObjectURL(blob);
+                const filename = `DiegoX_${Date.now()}.${extension}`;
+
+                // Detect iOS Safari / Mobile iPhone environment
+                const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+                if (isIos) {
+                    // Show iOS optimized modal popup for long-press & Web Share API
+                    const iosModal = document.getElementById('iosSaveModal');
+                    const iosImg = document.getElementById('iosSaveImage');
+                    const iosDownloadBtn = document.getElementById('btnIosDirectDownload');
+
+                    if (iosImg) iosImg.src = blobUrl;
+                    if (iosDownloadBtn) {
+                        iosDownloadBtn.href = blobUrl;
+                        iosDownloadBtn.download = filename;
+                    }
+                    if (iosModal) iosModal.classList.remove('hidden');
+                } else {
+                    // Standard Browser Direct Download
+                    const link = document.createElement('a');
+                    link.download = filename;
+                    link.href = blobUrl;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            }, mimeType, 0.95);
+        }
+
+        async function shareIosPhotoNative() {
+            if (!currentExportBlob) return;
+
+            const file = new File([currentExportBlob], `DiegoX_${Date.now()}.jpg`, { type: 'image/jpeg' });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Foto Diego-X-Studio',
+                        text: 'Fotografía procesada con Diego-X-Studio Pro'
+                    });
+                } catch (err) {
+                    console.log('Share error or canceled:', err);
+                }
+            } else {
+                alert('Manten presionada la imagen para Guardar en Fotos en Safari.');
+            }
+        }
+
+        function closeIosSaveModal() {
+            const iosModal = document.getElementById('iosSaveModal');
+            if (iosModal) iosModal.classList.add('hidden');
+        }
     </script>
 </body>
 </html>
