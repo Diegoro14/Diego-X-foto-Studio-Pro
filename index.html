@@ -141,14 +141,19 @@
             transform: translateZ(0);
         }
 
-        /* === GLASS PANEL: ~38% bottom, photo ~62% top, frosted, no black bars === */
+        /* === GLASS PANEL: floats OVER photo, 38% min, 50% max === */
         .editor-tools-sidebar {
-            flex: 0 0 38%;
+            position: absolute !important;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 38%;
+            flex: none !important;
             max-height: none !important;
             min-height: 0 !important;
-            background: rgba(9, 9, 11, 0.45) !important;
-            backdrop-filter: blur(24px) saturate(1.3);
-            -webkit-backdrop-filter: blur(24px) saturate(1.3);
+            background: rgba(9, 9, 11, 0.08) !important;
+            backdrop-filter: blur(12px) saturate(1.2);
+            -webkit-backdrop-filter: blur(12px) saturate(1.2);
             border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
             box-shadow: none;
             overflow: hidden;
@@ -368,7 +373,7 @@
             </div>
 
             <!-- Top Header Action Line: Crop, Undo, Eyedropper, Histogram, Device Mode, Save -->
-            <div class="flex items-center space-x-1.5 overflow-x-auto scrollbar-none py-1">
+            <div class="flex items-center space-x-2.5 overflow-x-auto scrollbar-none py-1">
                 <!-- Free Crop Tool Button -->
                 <button onclick="toggleCropTool()" id="btnHeaderCrop" title="Cortar Imagen de Forma Libre" class="px-2.5 h-8 rounded-lg bg-zinc-800 border border-zinc-700/80 flex items-center space-x-1 text-zinc-200 hover:text-white hover:bg-zinc-700 active:scale-95 transition text-xs font-mono">
                     <i class="fa-solid fa-crop text-amber-400"></i>
@@ -525,8 +530,8 @@
                     </div>
                 </div>
 
-                <!-- Edge-to-edge Canvas & Crop Container (always full height — panel floats on top) -->
-                <div id="canvasViewport" class="editor-preview-container flex-1 min-h-0 bg-black relative flex items-start justify-center pt-2 px-2 pb-0 overflow-hidden transition-all duration-75">
+                <!-- Canvas Container — always 62% of screen, panel floats below/over -->
+                <div id="canvasViewport" class="editor-preview-container w-full bg-black relative flex items-start justify-center pt-2 px-2 pb-0 overflow-hidden" style="height:62%">
                     
                     <div class="relative max-w-full max-h-full flex items-start justify-center" id="canvasWrapper">
                         <canvas id="photoCanvas" class="max-w-full max-h-full object-contain shadow-2xl transition-all duration-75" onclick="handleCanvasEyedropperClick(event)"></canvas>
@@ -558,7 +563,7 @@
                     </div>
 
                     <!-- Compare Original Photo Quick Hold Button -->
-                    <button id="btnHoldCompare" onmousedown="startComparingOriginal()" onmouseup="stopComparingOriginal()" onmouseleave="stopComparingOriginal()" ontouchstart="startComparingOriginal()" ontouchend="stopComparingOriginal()" class="absolute bottom-3 left-3 bg-black/75 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-[10px] font-mono font-bold text-amber-400 flex items-center space-x-1.5 shadow-xl hover:bg-black active:scale-95 transition z-30">
+                    <button id="btnHoldCompare" onmousedown="startComparingOriginal()" onmouseup="stopComparingOriginal()" onmouseleave="stopComparingOriginal()" ontouchstart="startComparingOriginal()" ontouchend="stopComparingOriginal()" class="absolute top-1 left-3 bg-black/75 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-[10px] font-mono font-bold text-amber-400 flex items-center space-x-1.5 shadow-xl hover:bg-black active:scale-95 transition z-30">
                         <i class="fa-solid fa-eye text-xs"></i>
                         <span>MANTENER: ORIGINAL</span>
                     </button>
@@ -569,24 +574,26 @@
                     </div>
                 </div>
 
-                <!-- Editor Controls — 50/50 Glass Panel -->
+                <!-- Editor Controls — Floating Glass Panel OVER photo -->
                 <div id="editorToolsSidebar" class="editor-tools-sidebar flex flex-col z-20 transition-all duration-75 ease-out">
                     
-                    <!-- Minimal divider (no drag handle needed in 50/50 mode) -->
-                    <div class="shrink-0 h-px bg-white/5 mx-4 my-1"></div>
+                    <!-- Drag handle to resize panel (38%-50%) -->
+                    <div id="drawerHandleArea" class="drawer-handle-area shrink-0 flex items-center justify-center py-2 cursor-ns-resize active:cursor-ns-resizing">
+                        <div class="drawer-handle"></div>
+                    </div>
 
                     <!-- Horizontal Tool Categories Bar (Including Curves RGB) -->
                     <div id="toolTabsBar" class="tab-scroll-drag flex overflow-x-auto scrollbar-none font-mono text-xs tracking-wider active:cursor-grabbing shrink-0">
                         <button onclick="switchEditTab('profiles')" id="tabBtn-profiles" class="px-4 py-3 shrink-0 border-b-2 border-amber-400 text-white font-bold transition">PERFILES</button>
-                        <button onclick="switchEditTab('ajustes')" id="tabBtn-ajustes" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-zinc-400 font-semibold hover:text-white transition flex items-center space-x-1">
+                        <button onclick="switchEditTab('ajustes')" id="tabBtn-ajustes" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-amber-500 font-semibold hover:text-white active:text-white transition flex items-center space-x-1">
                             <i class="fa-solid fa-sliders text-xs"></i>
                             <span>AJUSTES</span>
                         </button>
-                        <button onclick="switchEditTab('efectos')" id="tabBtn-efectos" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-amber-400 font-semibold hover:text-amber-300 transition flex items-center space-x-1">
+                        <button onclick="switchEditTab('efectos')" id="tabBtn-efectos" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-amber-500 font-semibold hover:text-white active:text-white transition flex items-center space-x-1">
                             <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
                             <span>EFECTOS</span>
                         </button>
-                        <button onclick="switchEditTab('frame')" id="tabBtn-frame" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-zinc-400 font-semibold hover:text-white transition">MARCO</button>
+                        <button onclick="switchEditTab('frame')" id="tabBtn-frame" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-amber-500 font-semibold hover:text-white active:text-white transition">MARCO</button>
                     </div>
 
                     <!-- Tool Drawer Slider Panels Stack -->
@@ -647,6 +654,7 @@
                                 <button onclick="switchSubTab('ajustes','color')" id="subTabBtn-color" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-zinc-400 font-semibold text-center hover:text-white transition whitespace-nowrap">COLOR</button>
                                 <button onclick="switchSubTab('ajustes','effects')" id="subTabBtn-effects" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-zinc-400 font-semibold text-center hover:text-white transition whitespace-nowrap">EFECTOS</button>
                                 <button onclick="switchSubTab('ajustes','curves')" id="subTabBtn-curves" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-zinc-400 font-semibold text-center hover:text-white transition whitespace-nowrap">CURVAS RGB</button>
+                                <button onclick="switchSubTab('ajustes','levels')" id="subTabBtn-levels" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-zinc-400 font-semibold text-center hover:text-white transition whitespace-nowrap">NIVELES</button>
                             </div>
 
                         <!-- Panel 2: Light -->
@@ -659,25 +667,13 @@
                                 <div class="flex justify-between text-zinc-200 font-semibold"><span>Contraste</span><span id="valContrast" class="text-amber-400 font-bold">0</span></div>
                                 <input type="range" id="paramContrast" min="-100" max="100" value="0" oninput="onParamChange('contrast')" class="ios-slider">
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
-                                    <div class="flex justify-between text-zinc-200 font-semibold"><span>Iluminación</span><span id="valHighlights" class="text-amber-400 font-bold">0</span></div>
-                                    <input type="range" id="paramHighlights" min="-100" max="100" value="0" oninput="onParamChange('highlights')" class="ios-slider">
-                                </div>
-                                <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
-                                    <div class="flex justify-between text-zinc-200 font-semibold"><span>Sombras</span><span id="valShadows" class="text-amber-400 font-bold">0</span></div>
-                                    <input type="range" id="paramShadows" min="-100" max="100" value="0" oninput="onParamChange('shadows')" class="ios-slider">
-                                </div>
+                            <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
+                                <div class="flex justify-between text-zinc-200 font-semibold"><span>Iluminación</span><span id="valHighlights" class="text-amber-400 font-bold">0</span></div>
+                                <input type="range" id="paramHighlights" min="-100" max="100" value="0" oninput="onParamChange('highlights')" class="ios-slider">
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
-                                    <div class="flex justify-between text-zinc-200 font-semibold"><span>Blancos</span><span id="valWhites" class="text-amber-400 font-bold">0</span></div>
-                                    <input type="range" id="paramWhites" min="-100" max="100" value="0" oninput="onParamChange('whites')" class="ios-slider">
-                                </div>
-                                <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
-                                    <div class="flex justify-between text-zinc-200 font-semibold"><span>Negros</span><span id="valBlacks" class="text-amber-400 font-bold">0</span></div>
-                                    <input type="range" id="paramBlacks" min="-100" max="100" value="0" oninput="onParamChange('blacks')" class="ios-slider">
-                                </div>
+                            <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
+                                <div class="flex justify-between text-zinc-200 font-semibold"><span>Sombras</span><span id="valShadows" class="text-amber-400 font-bold">0</span></div>
+                                <input type="range" id="paramShadows" min="-100" max="100" value="0" oninput="onParamChange('shadows')" class="ios-slider">
                             </div>
                             <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
                                 <div class="flex justify-between items-center">
@@ -794,6 +790,59 @@
                                 </div>
                                 <p class="text-[10px] text-zinc-400 text-center font-mono">Arrastra los puntos para ajustar luces, sombras y tonos.</p>
                             </div>
+                        </div>
+
+                        <!-- Panel: Niveles (Levels) -->
+                        <div id="panel-levels" class="hidden space-y-3.5">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-zinc-300 font-semibold text-xs">Canal:</span>
+                                <select id="levelsChannel" onchange="onLevelsChannelChange()" class="bg-zinc-900/80 border border-zinc-700/80 text-zinc-200 text-xs font-mono rounded-lg px-2 py-1.5 focus:outline-none focus:border-amber-500">
+                                    <option value="rgb">RGB</option>
+                                    <option value="r">Rojo</option>
+                                    <option value="g">Verde</option>
+                                    <option value="b">Azul</option>
+                                </select>
+                                <button onclick="autoLevels()" class="ml-auto px-3 py-1.5 bg-zinc-800 border border-zinc-700/80 rounded-lg text-amber-400 text-xs font-mono font-bold hover:bg-zinc-700 active:scale-95 transition">AUTO</button>
+                            </div>
+                            <div class="relative bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-2">
+                                <canvas id="levelsHistogramCanvas" class="w-full h-20 rounded-lg" style="image-rendering:pixelated"></canvas>
+                                <div class="flex justify-between text-[9px] text-zinc-400 font-mono mt-1 px-1">
+                                    <span>Sombras: <span id="valInBlack" class="text-amber-400">0</span></span>
+                                    <span>Gamma: <span id="valInGamma" class="text-amber-400">1.00</span></span>
+                                    <span>Luces: <span id="valInWhite" class="text-amber-400">255</span></span>
+                                </div>
+                            </div>
+                            <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-[10px] text-zinc-400 font-mono w-8 shrink-0">P.Neg</span>
+                                    <input type="range" id="paramInBlack" min="0" max="254" value="0" oninput="onLevelsChange()" class="ios-slider flex-1">
+                                    <span id="valInBlack2" class="text-amber-400 font-bold text-xs font-mono w-8 text-right">0</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-[10px] text-zinc-400 font-mono w-8 shrink-0">Gamma</span>
+                                    <input type="range" id="paramInGamma" min="10" max="999" value="100" oninput="onLevelsChange()" class="ios-slider flex-1">
+                                    <span id="valInGamma2" class="text-amber-400 font-bold text-xs font-mono w-8 text-right">1.00</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-[10px] text-zinc-400 font-mono w-8 shrink-0">P.Bla</span>
+                                    <input type="range" id="paramInWhite" min="1" max="255" value="255" oninput="onLevelsChange()" class="ios-slider flex-1">
+                                    <span id="valInWhite2" class="text-amber-400 font-bold text-xs font-mono w-8 text-right">255</span>
+                                </div>
+                            </div>
+                            <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
+                                <div class="text-zinc-300 font-semibold text-xs mb-2">Niveles de Salida</div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-[10px] text-zinc-400 font-mono w-8 shrink-0">Negro</span>
+                                    <input type="range" id="paramOutBlack" min="0" max="254" value="0" oninput="onLevelsChange()" class="ios-slider flex-1">
+                                    <span id="valOutBlack" class="text-amber-400 font-bold text-xs font-mono w-8 text-right">0</span>
+                                </div>
+                                <div class="flex items-center space-x-2 mt-1">
+                                    <span class="text-[10px] text-zinc-400 font-mono w-8 shrink-0">Blanco</span>
+                                    <input type="range" id="paramOutWhite" min="1" max="255" value="255" oninput="onLevelsChange()" class="ios-slider flex-1">
+                                    <span id="valOutWhite" class="text-amber-400 font-bold text-xs font-mono w-8 text-right">255</span>
+                                </div>
+                            </div>
+                            <button onclick="resetLevels()" class="w-full py-2 bg-zinc-800/80 border border-zinc-700/80 rounded-xl text-zinc-300 text-xs font-mono font-bold hover:bg-zinc-700 active:scale-95 transition">RESET NIVELES</button>
                         </div>
 
                         <!-- Panel 5: Effects -->
@@ -1200,6 +1249,7 @@
             grain: 0,
             unsharpMask: 0,
             blur: 0,
+            levels: { inBlack:0, inGamma:1, inWhite:255, outBlack:0, outWhite:255, channels:{} },
             selectiveColor: {
                 channel: 'reds',
                 method: 'relative',
@@ -2052,6 +2102,179 @@
             loadPhotoFromUrl(c.toDataURL('image/jpeg'));
         }
 
+        // ===== LEVELS (Niveles) =====
+        function onLevelsChannelChange() { syncLevelsSliders(); }
+
+        function updateLevelsHistogram() {
+            var canvas = document.getElementById('levelsHistogramCanvas');
+            if (!canvas || !rawImage || !rawImage.width) return;
+            var container = canvas.parentElement;
+            canvas.width = container.clientWidth - 16;
+            canvas.height = 80;
+            var ctx = canvas.getContext('2d');
+            var w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            var sw = Math.min(rawImage.width, 512);
+            var sh = Math.min(rawImage.height, 512);
+            var sc = document.createElement('canvas');
+            sc.width = sw; sc.height = sh;
+            var sctx = sc.getContext('2d');
+            sctx.drawImage(rawImage, 0, 0, sw, sh);
+            var sd = sctx.getImageData(0, 0, sw, sh).data;
+            var histR = new Uint32Array(256);
+            var histG = new Uint32Array(256);
+            var histB = new Uint32Array(256);
+            var histL = new Uint32Array(256);
+            for (var i = 0; i < sd.length; i += 4) {
+                histR[sd[i]]++;
+                histG[sd[i+1]]++;
+                histB[sd[i+2]]++;
+                var l = Math.round(0.299*sd[i] + 0.587*sd[i+1] + 0.114*sd[i+2]);
+                histL[Math.min(255, l)]++;
+            }
+            var ch = document.getElementById('levelsChannel').value;
+            var hist = ch === 'r' ? histR : ch === 'g' ? histG : ch === 'b' ? histB : histL;
+            var maxVal = 1;
+            for (var j = 0; j < 256; j++) { if (hist[j] > maxVal) maxVal = hist[j]; }
+            var colors = { r: '#ff4444', g: '#44ff44', b: '#4488ff', rgb: '#ffffff' };
+            ctx.fillStyle = colors[ch] || '#ffffff';
+            ctx.globalAlpha = 0.7;
+            var barW = w / 256;
+            for (var k = 0; k < 256; k++) {
+                var barH = (hist[k] / maxVal) * h;
+                ctx.fillRect(k * barW, h - barH, Math.max(barW, 1), barH);
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function onLevelsChange() {
+            var ch = document.getElementById('levelsChannel').value;
+            var levels = editParams.levels;
+            var inBlack = parseInt(document.getElementById('paramInBlack').value);
+            var inGamma = parseInt(document.getElementById('paramInGamma').value) / 100;
+            var inWhite = parseInt(document.getElementById('paramInWhite').value);
+            var outBlack = parseInt(document.getElementById('paramOutBlack').value);
+            var outWhite = parseInt(document.getElementById('paramOutWhite').value);
+            if (ch === 'rgb') {
+                levels.inBlack = inBlack; levels.inGamma = inGamma; levels.inWhite = inWhite;
+                levels.outBlack = outBlack; levels.outWhite = outWhite;
+            } else {
+                if (!levels.channels) levels.channels = {};
+                levels.channels[ch] = { inBlack: inBlack, inGamma: inGamma, inWhite: inWhite, outBlack: outBlack, outWhite: outWhite };
+            }
+            var vIB = document.getElementById('valInBlack'); var vIG = document.getElementById('valInGamma');
+            var vIW = document.getElementById('valInWhite');
+            var vIB2 = document.getElementById('valInBlack2'); var vIG2 = document.getElementById('valInGamma2');
+            var vIW2 = document.getElementById('valInWhite2');
+            var vOB = document.getElementById('valOutBlack'); var vOW = document.getElementById('valOutWhite');
+            if (vIB) vIB.textContent = inBlack;
+            if (vIG) vIG.textContent = inGamma.toFixed(2);
+            if (vIW) vIW.textContent = inWhite;
+            if (vIB2) vIB2.textContent = inBlack;
+            if (vIG2) vIG2.textContent = inGamma.toFixed(2);
+            if (vIW2) vIW2.textContent = inWhite;
+            if (vOB) vOB.textContent = outBlack;
+            if (vOW) vOW.textContent = outWhite;
+            document.getElementById('paramInBlack').style.setProperty('--fill', (inBlack / 254 * 100) + '%');
+            document.getElementById('paramInGamma').style.setProperty('--fill', ((inGamma - 0.1) / 9.89 * 100) + '%');
+            document.getElementById('paramInWhite').style.setProperty('--fill', ((inWhite - 1) / 254 * 100) + '%');
+            document.getElementById('paramOutBlack').style.setProperty('--fill', (outBlack / 254 * 100) + '%');
+            document.getElementById('paramOutWhite').style.setProperty('--fill', ((outWhite - 1) / 254 * 100) + '%');
+            requestCanvasRender();
+        }
+
+        function syncLevelsSliders() {
+            var ch = document.getElementById('levelsChannel').value;
+            var levels = editParams.levels;
+            var p;
+            if (ch === 'rgb') { p = levels; }
+            else { p = (levels.channels && levels.channels[ch]) || { inBlack:0, inGamma:1, inWhite:255, outBlack:0, outWhite:255 }; }
+            document.getElementById('paramInBlack').value = p.inBlack;
+            document.getElementById('paramInGamma').value = Math.round(p.inGamma * 100);
+            document.getElementById('paramInWhite').value = p.inWhite;
+            document.getElementById('paramOutBlack').value = p.outBlack;
+            document.getElementById('paramOutWhite').value = p.outWhite;
+            var els = ['valInBlack','valInGamma','valInWhite','valInBlack2','valInGamma2','valInWhite2','valOutBlack','valOutWhite'];
+            var vals = [p.inBlack, p.inGamma.toFixed(2), p.inWhite, p.inBlack, p.inGamma.toFixed(2), p.inWhite, p.outBlack, p.outWhite];
+            for (var i = 0; i < els.length; i++) {
+                var el = document.getElementById(els[i]);
+                if (el) el.textContent = vals[i];
+            }
+            document.getElementById('paramInBlack').style.setProperty('--fill', (p.inBlack / 254 * 100) + '%');
+            document.getElementById('paramInGamma').style.setProperty('--fill', ((p.inGamma - 0.1) / 9.89 * 100) + '%');
+            document.getElementById('paramInWhite').style.setProperty('--fill', ((p.inWhite - 1) / 254 * 100) + '%');
+            document.getElementById('paramOutBlack').style.setProperty('--fill', (p.outBlack / 254 * 100) + '%');
+            document.getElementById('paramOutWhite').style.setProperty('--fill', ((p.outWhite - 1) / 254 * 100) + '%');
+            updateLevelsHistogram();
+        }
+
+        function resetLevels() {
+            editParams.levels = { inBlack:0, inGamma:1, inWhite:255, outBlack:0, outWhite:255, channels:{} };
+            syncLevelsSliders();
+            requestCanvasRender();
+        }
+
+        function autoLevels() {
+            if (!rawImage) return;
+            var c = document.createElement('canvas');
+            var sw = Math.min(rawImage.width, 512), sh = Math.min(rawImage.height, 512);
+            c.width = sw; c.height = sh;
+            var cx = c.getContext('2d');
+            cx.drawImage(rawImage, 0, 0, sw, sh);
+            var d = cx.getImageData(0, 0, sw, sh).data;
+            var total = sw * sh;
+            var lumArr = new Float32Array(total);
+            for (var i = 0; i < total; i++) { lumArr[i] = 0.299*d[i*4] + 0.587*d[i*4+1] + 0.114*d[i*4+2]; }
+            lumArr.sort();
+            var lo = Math.round(lumArr[Math.floor(total * 0.005)]);
+            var hi = Math.round(lumArr[Math.ceil(total * 0.995) - 1]);
+            editParams.levels.inBlack = Math.max(0, lo - 5);
+            editParams.levels.inWhite = Math.min(255, hi + 5);
+            editParams.levels.inGamma = 1.0;
+            editParams.levels.outBlack = 0;
+            editParams.levels.outWhite = 255;
+            syncLevelsSliders();
+            requestCanvasRender();
+        }
+
+        function applyLevels(ctx, w, h) {
+            var levels = editParams.levels;
+            var hasGlobal = levels.inBlack !== 0 || levels.inGamma !== 1 || levels.inWhite !== 255 || levels.outBlack !== 0 || levels.outWhite !== 255;
+            var channels = levels.channels || {};
+            var hasChannel = false;
+            var ck = Object.keys(channels);
+            for (var ci = 0; ci < ck.length; ci++) {
+                var cp = channels[ck[ci]];
+                if (cp && (cp.inBlack !== 0 || cp.inGamma !== 1 || cp.inWhite !== 255 || cp.outBlack !== 0 || cp.outWhite !== 255)) { hasChannel = true; break; }
+            }
+            if (!hasGlobal && !hasChannel) return;
+            var imgData = ctx.getImageData(0, 0, w, h);
+            var data = imgData.data;
+            function buildLUT(p) {
+                var lut = new Uint8Array(256);
+                var range = Math.max(1, p.inWhite - p.inBlack);
+                var gamma = Math.max(0.01, p.inGamma);
+                var outRange = p.outWhite - p.outBlack;
+                for (var i = 0; i < 256; i++) {
+                    var v = (i - p.inBlack) / range;
+                    if (v < 0) v = 0; if (v > 1) v = 1;
+                    v = Math.pow(v, 1 / gamma);
+                    lut[i] = Math.max(0, Math.min(255, Math.round(v * outRange + p.outBlack))) | 0;
+                }
+                return lut;
+            }
+            var gLut = buildLUT(levels);
+            var rLut = channels.r ? buildLUT(channels.r) : gLut;
+            var grLut = channels.g ? buildLUT(channels.g) : gLut;
+            var bLut = channels.b ? buildLUT(channels.b) : gLut;
+            for (var j = 0; j < data.length; j += 4) {
+                data[j] = rLut[data[j]];
+                data[j+1] = grLut[data[j+1]];
+                data[j+2] = bLut[data[j+2]];
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+
         function setupVerticalDrawerSwipe() {
             const handleArea = document.getElementById('drawerHandleArea');
             const drawer = document.getElementById('editorToolsSidebar');
@@ -2079,16 +2302,15 @@
                 const newHeightPx = startHeight + deltaY;
                 let pct = (newHeightPx / containerHeight) * 100;
 
-                pct = Math.max(15, Math.min(85, pct));
-                drawer.style.flex = `0 0 ${pct}%`;
-                drawer.style.height = 'auto';
+                pct = Math.max(38, Math.min(55, pct));
+                drawer.style.height = pct + '%';
             }
 
             function onEnd() {
                 if (!isDragging) return;
                 isDragging = false;
                 handleArea.classList.remove('drawer-dragging');
-                drawer.style.transition = 'flex 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
+                drawer.style.transition = 'height 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
             }
 
             handleArea.addEventListener('touchstart', (e) => {
@@ -2111,10 +2333,10 @@
             const drawer = document.getElementById('editorToolsSidebar');
             if (!drawer) return;
 
-            drawer.style.transition = 'flex 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
-            if (preset === 'compact') { drawer.style.flex = '0 0 20%'; drawer.style.height = 'auto'; }
-            if (preset === 'medium')  { drawer.style.flex = '0 0 38%'; drawer.style.height = 'auto'; }
-            if (preset === 'large')   { drawer.style.flex = '0 0 75%'; drawer.style.height = 'auto'; }
+            drawer.style.transition = 'height 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+            if (preset === 'compact') drawer.style.height = '38%';
+            if (preset === 'medium')  drawer.style.height = '44%';
+            if (preset === 'large')   drawer.style.height = '55%';
         }
 
         function switchMainTab(tab) {
@@ -2143,7 +2365,7 @@
 
         // Sub-tabs nested inside each top-level group tab.
         const subTabGroups = {
-            ajustes: ['light', 'color', 'effects', 'curves'],
+            ajustes: ['light', 'color', 'effects', 'curves', 'levels'],
             efectos: ['rgbGlitch', 'prism', 'vintageLens', 'datamosh']
         };
 
@@ -2154,7 +2376,7 @@
             tabs.forEach(t => {
                 const btn = document.getElementById(`tabBtn-${t}`);
                 const panel = document.getElementById(`panel-${t}`);
-                if (btn) btn.className = "px-4 py-3 shrink-0 border-b-2 border-transparent text-zinc-400 font-semibold hover:text-white transition";
+                if (btn) btn.className = "px-4 py-3 shrink-0 border-b-2 border-transparent text-amber-500 font-semibold hover:text-white active:text-white transition";
                 if (panel) panel.classList.add('hidden');
             });
 
@@ -2193,6 +2415,7 @@
             const activePanel = document.getElementById(`panel-${sub}`);
             if (activeBtn) activeBtn.className = "flex-1 px-3 py-2 rounded-lg bg-amber-500 text-black font-bold text-center transition whitespace-nowrap";
             if (activePanel) activePanel.classList.remove('hidden');
+            if (sub === 'levels') syncLevelsSliders();
         }
 
         function toggleHistogram() {
@@ -2636,6 +2859,7 @@
                 profile: 'none', profileIntensity: 100, exposure: 0, contrast: 0, highlights: 0, shadows: 0,
                 whites: 0, blacks: 0, temp: 0, tint: 0, vibrance: 0, saturation: 0, texture: 0, clarity: 0,
                 dehaze: 0, vignette: 0, grain: 0, unsharpMask: 0, blur: 0,
+                levels: { inBlack:0, inGamma:1, inWhite:255, outBlack:0, outWhite:255, channels:{} },
                 selectiveColor: {
                     channel: 'reds', method: 'relative',
                     reds: { cyan: 0, magenta: 0, yellow: 0, black: 0 },
@@ -2780,6 +3004,7 @@
             wCtx.drawImage(rawImage, 0, 0, procW, procH);
 
             applyLightColorAndCurveAdjustments(wCtx, procW, procH);
+            applyLevels(wCtx, procW, procH);
             if (hasSelectiveColorChanges()) applySelectiveColor(wCtx, procW, procH);
             if (editParams.dehaze !== 0) applyDehaze(wCtx, procW, procH);
             applyClarityAndTexture(wCtx, procW, procH);
