@@ -141,9 +141,9 @@
             transform: translateZ(0);
         }
 
-        /* === GLASS PANEL: 50/50 split, frosted, no black bars === */
+        /* === GLASS PANEL: ~38% bottom, photo ~62% top, frosted, no black bars === */
         .editor-tools-sidebar {
-            flex: 1 1 50%;
+            flex: 0 0 38%;
             max-height: none !important;
             min-height: 0 !important;
             background: rgba(9, 9, 11, 0.45) !important;
@@ -590,7 +590,7 @@
                     </div>
 
                     <!-- Tool Drawer Slider Panels Stack -->
-                    <div id="drawerPanelsContainer" class="p-4 space-y-4 flex-1 overflow-y-auto font-mono text-xs overscroll-contain scrollbar-none -webkit-overflow-scrolling: touch scroll-smooth">
+                    <div id="drawerPanelsContainer" class="p-4 space-y-4 flex-1 overflow-y-auto font-mono text-xs overscroll-y: auto scrollbar-none -webkit-overflow-scrolling: touch">
                         
                         <!-- Panel 1: Profiles -->
                         <div id="panel-profiles" class="space-y-4">
@@ -2077,17 +2077,18 @@
                 const containerHeight = appContainer.getBoundingClientRect().height;
                 const deltaY = startY - clientY;
                 const newHeightPx = startHeight + deltaY;
-                let newHeightPct = (newHeightPx / containerHeight) * 100;
+                let pct = (newHeightPx / containerHeight) * 100;
 
-                newHeightPct = Math.max(15, Math.min(96, newHeightPct));
-                drawer.style.height = `${newHeightPct}%`;
+                pct = Math.max(15, Math.min(85, pct));
+                drawer.style.flex = `0 0 ${pct}%`;
+                drawer.style.height = 'auto';
             }
 
             function onEnd() {
                 if (!isDragging) return;
                 isDragging = false;
                 handleArea.classList.remove('drawer-dragging');
-                drawer.style.transition = 'height 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
+                drawer.style.transition = 'flex 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
             }
 
             handleArea.addEventListener('touchstart', (e) => {
@@ -2110,10 +2111,10 @@
             const drawer = document.getElementById('editorToolsSidebar');
             if (!drawer) return;
 
-            drawer.style.transition = 'height 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
-            if (preset === 'compact') drawer.style.height = '30%';
-            if (preset === 'medium') drawer.style.height = '58%';
-            if (preset === 'large') drawer.style.height = '94%';
+            drawer.style.transition = 'flex 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+            if (preset === 'compact') { drawer.style.flex = '0 0 20%'; drawer.style.height = 'auto'; }
+            if (preset === 'medium')  { drawer.style.flex = '0 0 38%'; drawer.style.height = 'auto'; }
+            if (preset === 'large')   { drawer.style.flex = '0 0 75%'; drawer.style.height = 'auto'; }
         }
 
         function switchMainTab(tab) {
