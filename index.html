@@ -65,8 +65,12 @@
             width: 480px !important;
             height: 100% !important;
             max-height: none !important;
+            flex: none !important;
             border-left: 1px solid rgba(255, 255, 255, 0.1);
             border-top: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: rgba(9, 9, 11, 0.98) !important;
         }
 
         /* Hardware Accelerated Sliders */
@@ -135,6 +139,37 @@
         #photoCanvas {
             will-change: transform;
             transform: translateZ(0);
+        }
+
+        /* === GLASS PANEL: 50/50 split, frosted, no black bars === */
+        .editor-tools-sidebar {
+            flex: 1 1 50%;
+            max-height: none !important;
+            min-height: 0 !important;
+            background: rgba(9, 9, 11, 0.45) !important;
+            backdrop-filter: blur(24px) saturate(1.3);
+            -webkit-backdrop-filter: blur(24px) saturate(1.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+            box-shadow: none;
+            overflow: hidden;
+        }
+        .editor-tools-sidebar .drawer-handle-area {
+            background: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .editor-tools-sidebar #toolTabsBar {
+            background: transparent;
+        }
+        /* Remove ALL dark card backgrounds and borders from slider containers */
+        .editor-tools-sidebar .space-y-3\.5 > div,
+        .editor-tools-sidebar .space-y-3\.5 > .bg-zinc-900\/90,
+        .editor-tools-sidebar .space-y-3\.5 > div > div,
+        .editor-tools-sidebar .space-y-3 > div,
+        .editor-tools-sidebar .space-y-3 > div > div {
+            background: transparent !important;
+            border: none !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
         }
 
         /* Touch Handle Indicator */
@@ -490,10 +525,10 @@
                     </div>
                 </div>
 
-                <!-- Edge-to-edge Canvas & Crop Container -->
-                <div id="canvasViewport" class="editor-preview-container flex-1 min-h-[60px] bg-black relative flex items-center justify-center p-2 overflow-hidden transition-all duration-75 shrink-1">
+                <!-- Edge-to-edge Canvas & Crop Container (always full height — panel floats on top) -->
+                <div id="canvasViewport" class="editor-preview-container flex-1 min-h-0 bg-black relative flex items-start justify-center pt-2 px-2 pb-0 overflow-hidden transition-all duration-75">
                     
-                    <div class="relative max-w-full max-h-full flex items-center justify-center" id="canvasWrapper">
+                    <div class="relative max-w-full max-h-full flex items-start justify-center" id="canvasWrapper">
                         <canvas id="photoCanvas" class="max-w-full max-h-full object-contain shadow-2xl transition-all duration-75" onclick="handleCanvasEyedropperClick(event)"></canvas>
 
                         <!-- Freeform Interactive Crop Box Overlay -->
@@ -534,27 +569,14 @@
                     </div>
                 </div>
 
-                <!-- Editor Controls Vertical Drawer -->
-                <div id="editorToolsSidebar" class="editor-tools-sidebar bg-zinc-950/98 backdrop-blur-xl border-t border-zinc-800 flex flex-col shrink-0 z-20 transition-all duration-75 ease-out h-[55%] min-h-[120px] max-h-[96%] shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
+                <!-- Editor Controls — 50/50 Glass Panel -->
+                <div id="editorToolsSidebar" class="editor-tools-sidebar flex flex-col z-20 transition-all duration-75 ease-out">
                     
-                    <!-- Vertical Drag / Swipe Sheet Handle Area -->
-                    <div id="drawerHandleArea" class="drawer-handle-area w-full flex flex-col items-center justify-center pt-2 pb-1.5 cursor-ns-resize touch-none select-none bg-zinc-900/90 border-b border-zinc-800/60 hover:bg-zinc-800/60 transition shrink-0">
-                        <div class="drawer-handle mb-1"></div>
-                        <div class="flex items-center justify-between w-full px-4 text-[10px] font-mono text-zinc-400">
-                            <span class="flex items-center space-x-1.5 text-zinc-200 font-bold">
-                                <i class="fa-solid fa-arrows-up-down text-amber-400"></i>
-                                <span>PANEL DE HERRAMIENTAS</span>
-                            </span>
-                            <div class="flex items-center space-x-1">
-                                <button onclick="setDrawerHeightPreset('compact', event)" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition">30%</button>
-                                <button onclick="setDrawerHeightPreset('medium', event)" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition">60%</button>
-                                <button onclick="setDrawerHeightPreset('large', event)" class="px-2.5 py-0.5 rounded bg-amber-500 text-black font-bold border border-amber-400 transition shadow">MAX</button>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Minimal divider (no drag handle needed in 50/50 mode) -->
+                    <div class="shrink-0 h-px bg-white/5 mx-4 my-1"></div>
 
                     <!-- Horizontal Tool Categories Bar (Including Curves RGB) -->
-                    <div id="toolTabsBar" class="tab-scroll-drag flex overflow-x-auto border-b border-zinc-800/80 scrollbar-none font-mono text-xs tracking-wider bg-zinc-950 active:cursor-grabbing shrink-0">
+                    <div id="toolTabsBar" class="tab-scroll-drag flex overflow-x-auto scrollbar-none font-mono text-xs tracking-wider active:cursor-grabbing shrink-0">
                         <button onclick="switchEditTab('profiles')" id="tabBtn-profiles" class="px-4 py-3 shrink-0 border-b-2 border-amber-400 text-white font-bold transition">PERFILES</button>
                         <button onclick="switchEditTab('ajustes')" id="tabBtn-ajustes" class="px-4 py-3 shrink-0 border-b-2 border-transparent text-zinc-400 font-semibold hover:text-white transition flex items-center space-x-1">
                             <i class="fa-solid fa-sliders text-xs"></i>
@@ -568,11 +590,11 @@
                     </div>
 
                     <!-- Tool Drawer Slider Panels Stack -->
-                    <div id="drawerPanelsContainer" class="p-4 space-y-4 flex-1 overflow-y-auto font-mono text-xs overscroll-contain">
+                    <div id="drawerPanelsContainer" class="p-4 space-y-4 flex-1 overflow-y-auto font-mono text-xs overscroll-contain scrollbar-none -webkit-overflow-scrolling: touch scroll-smooth">
                         
                         <!-- Panel 1: Profiles -->
                         <div id="panel-profiles" class="space-y-4">
-                            <div class="flex items-center justify-between p-3 bg-zinc-900/90 rounded-xl border border-zinc-800 shadow-sm">
+                            <div class="flex items-center justify-between p-3">
                                 <div>
                                     <span class="text-zinc-200 font-bold text-xs block">MODALIDAD DE COLOR</span>
                                     <span id="currentProfileNameDisplay" class="text-[10px] text-amber-400 font-mono font-semibold">Tono Normal (Sin perfil activo)</span>
@@ -583,7 +605,7 @@
                                 </button>
                             </div>
 
-                            <div class="space-y-1.5 p-3 bg-zinc-900/90 rounded-xl border border-zinc-800 shadow-sm">
+                            <div class="space-y-1.5 p-3">
                                 <div class="flex justify-between items-center text-xs font-mono">
                                     <span class="text-zinc-200 font-bold">INTENSIDAD DEL PERFIL</span>
                                     <span id="valProfileIntensity" class="text-amber-400 font-bold">100%</span>
@@ -609,18 +631,18 @@
 
                             <!-- Herramientas rápidas: Gotario y Recortar, agrupadas aquí -->
                             <div class="grid grid-cols-2 gap-2.5">
-                                <button onclick="toggleEyedropperTool()" id="btnAjustesEyedropper" class="flex items-center justify-center space-x-1.5 py-2.5 px-2 bg-zinc-900/90 border border-zinc-800 rounded-xl text-zinc-200 hover:text-white hover:bg-zinc-800 active:scale-95 transition font-mono text-xs font-bold">
+                                <button onclick="toggleEyedropperTool()" id="btnAjustesEyedropper" class="flex items-center justify-center space-x-1.5 py-2.5 px-2 bg-white/5 border border-white/10 rounded-xl text-zinc-200 hover:text-white hover:bg-white/10 active:scale-95 transition font-mono text-xs font-bold">
                                     <i class="fa-solid fa-eye-dropper text-amber-400"></i>
                                     <span>GOTARIO</span>
                                 </button>
-                                <button onclick="toggleCropTool()" id="btnAjustesCrop" class="flex items-center justify-center space-x-1.5 py-2.5 px-2 bg-zinc-900/90 border border-zinc-800 rounded-xl text-zinc-200 hover:text-white hover:bg-zinc-800 active:scale-95 transition font-mono text-xs font-bold">
+                                <button onclick="toggleCropTool()" id="btnAjustesCrop" class="flex items-center justify-center space-x-1.5 py-2.5 px-2 bg-white/5 border border-white/10 rounded-xl text-zinc-200 hover:text-white hover:bg-white/10 active:scale-95 transition font-mono text-xs font-bold">
                                     <i class="fa-solid fa-crop text-amber-400"></i>
                                     <span>RECORTAR</span>
                                 </button>
                             </div>
 
                             <!-- Sub-pestañas internas de Ajustes -->
-                            <div id="ajustesSubTabsBar" class="flex overflow-x-auto scrollbar-none font-mono text-[11px] tracking-wider bg-zinc-900/60 rounded-xl border border-zinc-800/80 p-1 gap-1">
+                            <div id="ajustesSubTabsBar" class="flex overflow-x-auto scrollbar-none font-mono text-[11px] tracking-wider p-1 gap-1">
                                 <button onclick="switchSubTab('ajustes','light')" id="subTabBtn-light" class="flex-1 px-3 py-2 rounded-lg bg-amber-500 text-black font-bold text-center transition whitespace-nowrap">LUZ</button>
                                 <button onclick="switchSubTab('ajustes','color')" id="subTabBtn-color" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-zinc-400 font-semibold text-center hover:text-white transition whitespace-nowrap">COLOR</button>
                                 <button onclick="switchSubTab('ajustes','effects')" id="subTabBtn-effects" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-zinc-400 font-semibold text-center hover:text-white transition whitespace-nowrap">EFECTOS</button>
@@ -690,11 +712,67 @@
                                     <input type="range" id="paramSaturation" min="-100" max="100" value="0" oninput="onParamChange('saturation')" class="ios-slider">
                                 </div>
                             </div>
+
+                            <!-- Selective Color Correction (Photoshop-style) -->
+                            <div class="p-3 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-amber-400 font-bold text-xs">CORRECCIÓN SELECTIVA DE COLOR</span>
+                                    <button onclick="resetSelectiveColor()" class="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded text-[11px] transition font-mono">
+                                        <i class="fa-solid fa-rotate-left mr-1"></i>Reset
+                                    </button>
+                                </div>
+                                <!-- Channel Selector -->
+                                <div class="space-y-1">
+                                    <span class="text-zinc-400 text-[10px] font-mono">Colores:</span>
+                                    <select id="selectiveColorChannel" onchange="onSelectiveColorChannelChange()" class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-zinc-200 text-xs focus:outline-none focus:border-amber-400">
+                                        <option value="reds" selected>🔴 Rojos</option>
+                                        <option value="yellows">🟡 Amarillos</option>
+                                        <option value="greens">🟢 Verdes</option>
+                                        <option value="cyans">🔵 Cianes</option>
+                                        <option value="blues">🔷 Azules</option>
+                                        <option value="magentas">🔸 Magentas</option>
+                                        <option value="whites">⚪ Blancos</option>
+                                        <option value="neutrals">⚫ Neutros</option>
+                                        <option value="blacks">⚫ Negros</option>
+                                    </select>
+                                </div>
+                                <!-- CMYK Sliders -->
+                                <div id="selectiveColorSliders" class="space-y-2">
+                                    <div class="space-y-0.5">
+                                        <div class="flex justify-between text-zinc-200 font-semibold text-xs"><span>Cian</span><span id="valScCyan" class="text-cyan-400 font-bold">0</span></div>
+                                        <input type="range" id="paramScCyan" min="-100" max="100" value="0" oninput="onSelectiveColorChange('cyan')" class="ios-slider">
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <div class="flex justify-between text-zinc-200 font-semibold text-xs"><span>Magenta</span><span id="valScMagenta" class="text-fuchsia-400 font-bold">0</span></div>
+                                        <input type="range" id="paramScMagenta" min="-100" max="100" value="0" oninput="onSelectiveColorChange('magenta')" class="ios-slider">
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <div class="flex justify-between text-zinc-200 font-semibold text-xs"><span>Amarillo</span><span id="valScYellow" class="text-yellow-400 font-bold">0</span></div>
+                                        <input type="range" id="paramScYellow" min="-100" max="100" value="0" oninput="onSelectiveColorChange('yellow')" class="ios-slider">
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <div class="flex justify-between text-zinc-200 font-semibold text-xs"><span>Negro</span><span id="valScBlack" class="text-zinc-300 font-bold">0</span></div>
+                                        <input type="range" id="paramScBlack" min="-100" max="100" value="0" oninput="onSelectiveColorChange('black')" class="ios-slider">
+                                    </div>
+                                </div>
+                                <!-- Method: Relative / Absolute -->
+                                <div class="flex items-center space-x-4 pt-1">
+                                    <span class="text-zinc-400 text-[10px] font-mono">Método:</span>
+                                    <label class="flex items-center space-x-1.5 cursor-pointer">
+                                        <input type="radio" name="scMethod" value="relative" id="scMethodRelative" checked class="accent-amber-500 w-3.5 h-3.5" onchange="editParams.selectiveColor.method='relative'">
+                                        <span class="text-zinc-200 text-xs">Relativo</span>
+                                    </label>
+                                    <label class="flex items-center space-x-1.5 cursor-pointer">
+                                        <input type="radio" name="scMethod" value="absolute" id="scMethodAbsolute" class="accent-amber-500 w-3.5 h-3.5" onchange="editParams.selectiveColor.method='absolute'">
+                                        <span class="text-zinc-200 text-xs">Absoluto</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Panel 4: RGB CURVES (Interactive Canvas Curve Control) -->
                         <div id="panel-curves" class="hidden space-y-3.5">
-                            <div class="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800 space-y-3">
+                            <div class="p-3 space-y-3">
                                 <div class="flex items-center justify-between">
                                     <span class="text-amber-400 font-bold text-xs">EDICIÓN DE CURVAS RGB</span>
                                     <button onclick="resetRgbCurves()" class="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded text-[11px] transition font-mono">
@@ -712,7 +790,7 @@
 
                                 <!-- Curve Canvas -->
                                 <div class="flex justify-center my-2">
-                                    <canvas id="curvesCanvas" width="250" height="250" class="bg-zinc-950 border border-zinc-800 rounded-lg cursor-crosshair shadow-inner touch-none"></canvas>
+                                    <canvas id="curvesCanvas" width="250" height="250" class="bg-black/30 border border-white/10 rounded-lg cursor-crosshair touch-none"></canvas>
                                 </div>
                                 <p class="text-[10px] text-zinc-400 text-center font-mono">Arrastra los puntos para ajustar luces, sombras y tonos.</p>
                             </div>
@@ -752,6 +830,30 @@
                                     <input type="range" id="paramGrain" min="0" max="100" value="0" oninput="onParamChange('grain')" class="ios-slider">
                                 </div>
                             </div>
+                            <!-- Unsharp Mask (Enfoque) -->
+                            <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center space-x-1.5">
+                                        <i class="fa-solid fa-diamond text-sky-400 text-[10px]"></i>
+                                        <span class="text-zinc-200 font-semibold">Unsharp Mask (Enfoque)</span>
+                                    </div>
+                                    <span id="valUnsharpMask" class="text-amber-400 font-bold">0</span>
+                                </div>
+                                <input type="range" id="paramUnsharpMask" min="0" max="200" value="0" oninput="onParamChange('unsharpMask')" class="ios-slider">
+                                <p class="text-[9px] text-zinc-500 font-mono mt-1">enfoque por máscara de desenfoque gaussiano</p>
+                            </div>
+                            <!-- Blur (Desenfoque) -->
+                            <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center space-x-1.5">
+                                        <i class="fa-solid fa-droplet text-indigo-400 text-[10px]"></i>
+                                        <span class="text-zinc-200 font-semibold">Desenfoque (Blur)</span>
+                                    </div>
+                                    <span id="valBlur" class="text-amber-400 font-bold">0</span>
+                                </div>
+                                <input type="range" id="paramBlur" min="0" max="100" value="0" oninput="onParamChange('blur')" class="ios-slider">
+                                <p class="text-[9px] text-zinc-500 font-mono mt-1">desenfoque gaussiano suave de toda la imagen</p>
+                            </div>
                         </div>
                         <!-- /Panel 5: Effects -->
 
@@ -762,7 +864,7 @@
                         <div id="panel-efectos" class="hidden space-y-3.5">
 
                             <!-- Sub-pestañas internas de Efectos -->
-                            <div id="efectosSubTabsBar" class="flex overflow-x-auto scrollbar-none font-mono text-[11px] tracking-wider bg-zinc-900/60 rounded-xl border border-zinc-800/80 p-1 gap-1">
+                            <div id="efectosSubTabsBar" class="flex overflow-x-auto scrollbar-none font-mono text-[11px] tracking-wider p-1 gap-1">
                                 <button onclick="switchSubTab('efectos','rgbGlitch')" id="subTabBtn-rgbGlitch" class="flex-1 px-3 py-2 rounded-lg bg-amber-500 text-black font-bold text-center transition whitespace-nowrap">GLITCH RGB</button>
                                 <button onclick="switchSubTab('efectos','prism')" id="subTabBtn-prism" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-cyan-400 font-semibold text-center hover:text-cyan-300 transition whitespace-nowrap">PRISMA</button>
                                 <button onclick="switchSubTab('efectos','vintageLens')" id="subTabBtn-vintageLens" class="flex-1 px-3 py-2 rounded-lg bg-transparent text-purple-400 font-semibold text-center hover:text-purple-300 transition whitespace-nowrap">LENTES</button>
@@ -771,7 +873,7 @@
 
                         <!-- Panel 6: RGB Glitch -->
                         <div id="panel-rgbGlitch" class="hidden space-y-3.5">
-                            <div class="p-3 bg-zinc-900/90 rounded-xl border border-amber-500/30 shadow-md">
+                            <div class="p-3">
                                 <span class="text-amber-400 font-bold text-xs block mb-2">1. DESALINEACIÓN Y CROMÁTICA RGB</span>
                                 <div class="grid grid-cols-3 gap-2 text-xs">
                                     <button onclick="setRgbGlitchMode('cyberGlitch')" id="rgbBtnCyber" class="py-2 px-2 bg-amber-500 text-black font-bold rounded-lg text-center transition">Glitch CRT</button>
@@ -855,7 +957,7 @@
 
                             <div class="space-y-1">
                                 <span class="text-zinc-400 text-[11px]">ESTILO DE MARCO</span>
-                                <select id="frameStyleSelect" onchange="onParamChange('frameStyle')" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-zinc-200 focus:outline-none focus:border-amber-400">
+                                <select id="frameStyleSelect" onchange="onParamChange('frameStyle')" class="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-zinc-200 focus:outline-none focus:border-amber-400">
                                     <option value="polaroid">Polaroid (Blanco Tradicional Abajo)</option>
                                     <option value="classic">Clásico Blanco / Negro</option>
                                     <option value="minimal">Minimalista Fino</option>
@@ -863,7 +965,7 @@
                                 </select>
                             </div>
 
-                            <div class="p-3 bg-zinc-900/90 rounded-xl border border-zinc-800 space-y-2">
+                            <div class="p-3 space-y-2">
                                 <div class="flex items-center justify-between">
                                     <label for="checkShowLogoText" class="text-zinc-200 font-bold text-xs flex items-center space-x-2 cursor-pointer">
                                         <input type="checkbox" id="checkShowLogoText" checked onchange="onParamChange('showLogoText')" class="accent-amber-500 w-4 h-4 rounded">
@@ -888,7 +990,7 @@
 
                             <div class="space-y-1">
                                 <span class="text-zinc-400 text-[11px]">TEXTO METADATOS PERSONALIZADO</span>
-                                <input type="text" id="frameText" value="iPhone 13 Pro Max" oninput="onParamChange('frameText')" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-zinc-200 text-xs font-mono focus:outline-none focus:border-amber-400">
+                                <input type="text" id="frameText" value="iPhone 13 Pro Max" oninput="onParamChange('frameText')" class="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-zinc-200 text-xs font-mono focus:outline-none focus:border-amber-400">
                             </div>
                             <div class="space-y-1 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
                                 <div class="flex justify-between text-zinc-200 font-semibold"><span>Tamaño del Texto Metadatos</span><span id="valMetaTextScale" class="text-amber-400 font-bold">130%</span></div>
@@ -1044,7 +1146,8 @@
         // internal resolution so sliders / curve points feel fluid; the
         // moment the drag ends we snap back to a full-resolution render.
         let isSliderInteracting = false;
-        const PREVIEW_MAX_DIM = 1100;
+        const PREVIEW_MAX_DIM = 720;
+        let _renderRAF = null;
 
         // Undo History Stack
         let historyStack = [];
@@ -1095,6 +1198,21 @@
             dehaze: 0,
             vignette: 0,
             grain: 0,
+            unsharpMask: 0,
+            blur: 0,
+            selectiveColor: {
+                channel: 'reds',
+                method: 'relative',
+                reds:     { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                yellows:  { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                greens:   { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                cyans:    { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                blues:    { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                magentas: { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                whites:   { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                neutrals: { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                blacks:   { cyan: 0, magenta: 0, yellow: 0, black: 0 }
+            },
             
             rgbMode: 'cyberGlitch',
             rgbOffset: 0,
@@ -1221,6 +1339,14 @@
             window.addEventListener('mouseup', endSliderInteraction);
             window.addEventListener('touchend', endSliderInteraction);
             window.addEventListener('touchcancel', endSliderInteraction);
+
+            // Also listen for selective color slider changes
+            const scContainer = document.getElementById('selectiveColorSliders');
+            if (scContainer) {
+                scContainer.addEventListener('pointerdown', (e) => { if (isSlider(e.target)) beginSliderInteraction(); }, true);
+                scContainer.addEventListener('touchstart', (e) => { if (isSlider(e.target)) beginSliderInteraction(); }, { passive: true, capture: true });
+                scContainer.addEventListener('mousedown', (e) => { if (isSlider(e.target)) beginSliderInteraction(); }, true);
+            }
         }
 
         // --- UNDO HISTORY LOGIC ---
@@ -2134,6 +2260,8 @@
                 dehaze: 'paramDehaze',
                 vignette: 'paramVignette',
                 grain: 'paramGrain',
+                unsharpMask: 'paramUnsharpMask',
+                blur: 'paramBlur',
                 rgbOffset: 'paramRgbOffset',
                 rgbAngle: 'paramRgbAngle',
                 radialPrismEffect: 'paramRadialPrismEffect',
@@ -2185,19 +2313,341 @@
 
         function syncAllUiControls() {
             Object.keys(editParams).forEach(key => {
+                if (key === 'selectiveColor') return;
                 const valText = document.getElementById(`val${key.charAt(0).toUpperCase() + key.slice(1)}`);
-                if (valText) valText.innerText = editParams[key];
+                if (valText) {
+                    if (key === 'unsharpMask') valText.innerText = editParams[key];
+                    else if (key === 'blur') valText.innerText = editParams[key];
+                    else valText.innerText = editParams[key];
+                }
             });
 
+            // Sync selective color sliders to current channel
+            syncSelectiveColorSliders();
             renderProfilesCatalog();
         }
+
+        // --- SELECTIVE COLOR CORRECTION UI ---
+        function onSelectiveColorChannelChange() {
+            const sel = document.getElementById('selectiveColorChannel');
+            editParams.selectiveColor.channel = sel.value;
+            syncSelectiveColorSliders();
+        }
+
+        function syncSelectiveColorSliders() {
+            const ch = editParams.selectiveColor.channel;
+            const data = editParams.selectiveColor[ch];
+            if (!data) return;
+            ['cyan', 'magenta', 'yellow', 'black'].forEach(c => {
+                const slider = document.getElementById(`paramSc${c.charAt(0).toUpperCase() + c.slice(1)}`);
+                const val = document.getElementById(`valSc${c.charAt(0).toUpperCase() + c.slice(1)}`);
+                if (slider) {
+                    slider.value = data[c];
+                    const min = parseFloat(slider.min) || 0;
+                    const max = parseFloat(slider.max) || 100;
+                    const fillPct = ((data[c] - min) / (max - min)) * 100;
+                    slider.style.setProperty('--fill', `${fillPct}%`);
+                }
+                if (val) val.innerText = data[c];
+            });
+            // Sync channel selector
+            const sel = document.getElementById('selectiveColorChannel');
+            if (sel) sel.value = ch;
+            // Sync method radio
+            const method = editParams.selectiveColor.method;
+            const relRadio = document.getElementById('scMethodRelative');
+            const absRadio = document.getElementById('scMethodAbsolute');
+            if (relRadio) relRadio.checked = (method === 'relative');
+            if (absRadio) absRadio.checked = (method === 'absolute');
+        }
+
+        function onSelectiveColorChange(component) {
+            const slider = document.getElementById(`paramSc${component.charAt(0).toUpperCase() + component.slice(1)}`);
+            if (!slider) return;
+            const val = parseFloat(slider.value);
+            const ch = editParams.selectiveColor.channel;
+            editParams.selectiveColor[ch][component] = val;
+            // Update value display and fill
+            const valEl = document.getElementById(`valSc${component.charAt(0).toUpperCase() + component.slice(1)}`);
+            if (valEl) valEl.innerText = val;
+            const min = parseFloat(slider.min) || 0;
+            const max = parseFloat(slider.max) || 100;
+            const fillPct = ((val - min) / (max - min)) * 100;
+            slider.style.setProperty('--fill', `${fillPct}%`);
+            // Trigger interaction mode for low-res preview
+            if (!isSliderInteracting) beginSliderInteraction();
+            requestCanvasRender();
+        }
+
+        function resetSelectiveColor() {
+            pushHistoryState();
+            const channels = ['reds','yellows','greens','cyans','blues','magentas','whites','neutrals','blacks'];
+            channels.forEach(ch => {
+                editParams.selectiveColor[ch] = { cyan: 0, magenta: 0, yellow: 0, black: 0 };
+            });
+            editParams.selectiveColor.method = 'relative';
+            syncSelectiveColorSliders();
+            requestCanvasRender();
+        }
+
+        // --- SELECTIVE COLOR PROCESSING (Photoshop-style) ---
+        // RGB to CMYK conversion (simplified, Photoshop-accurate enough for this use case)
+        function rgbToCmyk(r, g, b) {
+            if (r === 0 && g === 0 && b === 0) return { c: 0, m: 0, y: 0, k: 1 };
+            const c1 = 1 - r / 255;
+            const m1 = 1 - g / 255;
+            const y1 = 1 - b / 255;
+            const k = Math.min(c1, m1, y1);
+            const invK = 1 / (1 - k + 1e-10);
+            return {
+                c: (c1 - k) * invK,
+                m: (m1 - k) * invK,
+                y: (y1 - k) * invK,
+                k: k
+            };
+        }
+
+        function cmykToRgb(c, m, y, k) {
+            return {
+                r: Math.round(255 * (1 - c) * (1 - k)),
+                g: Math.round(255 * (1 - m) * (1 - k)),
+                b: Math.round(255 * (1 - y) * (1 - k))
+            };
+        }
+
+        // Check if a pixel belongs to a given color range based on hue and saturation
+        function getSelectiveColorWeight(r, g, b, channelName) {
+            const maxC = Math.max(r, g, b);
+            const minC = Math.min(r, g, b);
+            const lum = (r + g + b) / 3;
+            const sat = maxC > 0 ? (maxC - minC) / maxC : 0;
+
+            // Calculate hue in degrees (0-360)
+            let h = 0;
+            if (maxC !== minC) {
+                const d = maxC - minC;
+                if (maxC === r) h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+                else if (maxC === g) h = ((b - r) / d + 2) * 60;
+                else h = ((r - g) / d + 4) * 60;
+            }
+
+            // Define hue ranges and saturation/luminance thresholds for each color
+            // Returns a weight 0..1 indicating how much this pixel belongs to the channel
+            switch (channelName) {
+                case 'reds': {
+                    if (sat < 0.08) return 0;
+                    // Red hue: ~345-360 and 0-15
+                    const dist = h <= 180 ? Math.min(h, Math.abs(h - 360)) : Math.min(h - 360, 360 - h);
+                    const hDist = Math.min(Math.abs(h), Math.abs(h - 360), 360 - Math.abs(h));
+                    // Red wraps around 0/360
+                    const d1 = Math.min(h, 360 - h);
+                    if (d1 > 45) return 0;
+                    const hWeight = 1 - d1 / 45;
+                    return hWeight * Math.min(sat / 0.15, 1);
+                }
+                case 'yellows': {
+                    if (sat < 0.08) return 0;
+                    const hDist = Math.abs(h - 60);
+                    if (hDist > 30) return 0;
+                    return (1 - hDist / 30) * Math.min(sat / 0.15, 1);
+                }
+                case 'greens': {
+                    if (sat < 0.08) return 0;
+                    const hDist = Math.abs(h - 120);
+                    if (hDist > 35) return 0;
+                    return (1 - hDist / 35) * Math.min(sat / 0.15, 1);
+                }
+                case 'cyans': {
+                    if (sat < 0.08) return 0;
+                    const hDist = Math.abs(h - 180);
+                    if (hDist > 30) return 0;
+                    return (1 - hDist / 30) * Math.min(sat / 0.15, 1);
+                }
+                case 'blues': {
+                    if (sat < 0.08) return 0;
+                    const hDist = Math.abs(h - 240);
+                    if (hDist > 35) return 0;
+                    return (1 - hDist / 35) * Math.min(sat / 0.15, 1);
+                }
+                case 'magentas': {
+                    if (sat < 0.08) return 0;
+                    const hDist = Math.abs(h - 300);
+                    if (hDist > 30) return 0;
+                    return (1 - hDist / 30) * Math.min(sat / 0.15, 1);
+                }
+                case 'whites': {
+                    // High luminance, any hue
+                    if (lum < 200) return 0;
+                    const lumWeight = (lum - 200) / 55;
+                    return lumWeight * (1 - sat * 0.8);
+                }
+                case 'neutrals': {
+                    // Low saturation, mid luminance
+                    if (sat > 0.25) return 0;
+                    const satWeight = 1 - sat / 0.25;
+                    // Weight peaks in midtones
+                    const lumWeight = 1 - Math.abs(lum - 128) / 128;
+                    return satWeight * (0.5 + 0.5 * lumWeight);
+                }
+                case 'blacks': {
+                    // Low luminance
+                    if (lum > 55) return 0;
+                    const lumWeight = 1 - lum / 55;
+                    return lumWeight * (1 - sat * 0.5);
+                }
+                default: return 0;
+            }
+        }
+
+        function hasSelectiveColorChanges() {
+            const sc = editParams.selectiveColor;
+            const channels = ['reds','yellows','greens','cyans','blues','magentas','whites','neutrals','blacks'];
+            for (const ch of channels) {
+                const d = sc[ch];
+                if (d && (d.cyan !== 0 || d.magenta !== 0 || d.yellow !== 0 || d.black !== 0)) return true;
+            }
+            return false;
+        }
+
+        function applySelectiveColor(ctx, w, h) {
+            if (!hasSelectiveColorChanges()) return;
+
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const data = imgData.data;
+            const sc = editParams.selectiveColor;
+            const isAbsolute = sc.method === 'absolute';
+            const allChannels = ['reds','yellows','greens','cyans','blues','magentas','whites','neutrals','blacks'];
+
+            // Pre-compute which channels actually have changes (skip zero channels)
+            const activeChannels = [];
+            for (const ch of allChannels) {
+                const adj = sc[ch];
+                if (adj && (adj.cyan !== 0 || adj.magenta !== 0 || adj.yellow !== 0 || adj.black !== 0)) {
+                    activeChannels.push({
+                        name: ch,
+                        dc: adj.cyan / 100,
+                        dm: adj.magenta / 100,
+                        dy: adj.yellow / 100,
+                        dk: adj.black / 100
+                    });
+                }
+            }
+            if (activeChannels.length === 0) { ctx.putImageData(imgData, 0, 0); return; }
+
+            const len = data.length;
+            for (let i = 0; i < len; i += 4) {
+                let r = data[i], g = data[i+1], b = data[i+2];
+
+                // Convert to CMYK
+                let c1 = 1 - r / 255, m1 = 1 - g / 255, y1 = 1 - b / 255;
+                let kk = Math.min(c1, m1, y1);
+                let invK = kk >= 1 ? 0 : 1 / (1 - kk);
+                let cc = (c1 - kk) * invK, mm = (m1 - kk) * invK, yy = (y1 - kk) * invK;
+
+                // Process only active channels
+                for (let a = 0; a < activeChannels.length; a++) {
+                    const ac = activeChannels[a];
+                    const weight = getSelectiveColorWeight(r, g, b, ac.name);
+                    if (weight < 0.001) continue;
+
+                    if (isAbsolute) {
+                        cc = cc * (1 - weight) + ac.dc * weight;
+                        mm = mm * (1 - weight) + ac.dm * weight;
+                        yy = yy * (1 - weight) + ac.dy * weight;
+                        kk = kk * (1 - weight) + ac.dk * weight;
+                    } else {
+                        cc += ac.dc * cc * weight;
+                        mm += ac.dm * mm * weight;
+                        yy += ac.dy * yy * weight;
+                        kk += ac.dk * kk * weight;
+                    }
+                }
+
+                // Clamp
+                cc = cc < 0 ? 0 : cc > 1 ? 1 : cc;
+                mm = mm < 0 ? 0 : mm > 1 ? 1 : mm;
+                yy = yy < 0 ? 0 : yy > 1 ? 1 : yy;
+                kk = kk < 0 ? 0 : kk > 1 ? 1 : kk;
+
+                // Convert back to RGB inline (avoid function call overhead)
+                data[i]   = (255 * (1 - cc) * (1 - kk) + 0.5) | 0;
+                data[i+1] = (255 * (1 - mm) * (1 - kk) + 0.5) | 0;
+                data[i+2] = (255 * (1 - yy) * (1 - kk) + 0.5) | 0;
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        // --- UNSHARP MASK (Enfoque) ---
+        function applyUnsharpMask(ctx, w, h) {
+            const amount = editParams.unsharpMask;
+            if (amount <= 0) return;
+
+            const strength = amount / 100; // 0..2
+            const radius = 1.5 + strength * 1.0; // 1.5..2.5 px radius
+            const gain = strength * 1.5; // 0..3
+
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const data = imgData.data;
+            const n = w * h;
+
+            const blurred = fastBlur(data, w, h, radius, 2);
+
+            for (let i = 0; i < n; i++) {
+                const idx = i * 4;
+                const dR = data[idx] - blurred.r[i];
+                const dG = data[idx+1] - blurred.g[i];
+                const dB = data[idx+2] - blurred.b[i];
+
+                data[idx]   = Math.min(255, Math.max(0, Math.round(data[idx] + dR * gain)));
+                data[idx+1] = Math.min(255, Math.max(0, Math.round(data[idx+1] + dG * gain)));
+                data[idx+2] = Math.min(255, Math.max(0, Math.round(data[idx+2] + dB * gain)));
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        // --- GAUSSIAN BLUR (Desenfoque) ---
+        function applyGaussianBlur(ctx, w, h) {
+            const amount = editParams.blur;
+            if (amount <= 0) return;
+
+            const radius = 1 + (amount / 100) * 15; // 1..16 px
+            const passes = amount > 50 ? 3 : 2;
+
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const blurred = fastBlur(imgData.data, w, h, radius, passes);
+
+            for (let i = 0; i < w * h; i++) {
+                const idx = i * 4;
+                imgData.data[idx]   = blurred.r[i];
+                imgData.data[idx+1] = blurred.g[i];
+                imgData.data[idx+2] = blurred.b[i];
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+        }
+
 
         function resetEditParams() {
             pushHistoryState();
             editParams = {
                 profile: 'none', profileIntensity: 100, exposure: 0, contrast: 0, highlights: 0, shadows: 0,
                 whites: 0, blacks: 0, temp: 0, tint: 0, vibrance: 0, saturation: 0, texture: 0, clarity: 0,
-                dehaze: 0, vignette: 0, grain: 0, rgbMode: 'cyberGlitch', rgbOffset: 0, rgbAngle: 0, radialPrismEffect: 0,
+                dehaze: 0, vignette: 0, grain: 0, unsharpMask: 0, blur: 0,
+                selectiveColor: {
+                    channel: 'reds', method: 'relative',
+                    reds: { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                    yellows: { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                    greens: { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                    cyans: { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                    blues: { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                    magentas: { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                    whites: { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                    neutrals: { cyan: 0, magenta: 0, yellow: 0, black: 0 },
+                    blacks: { cyan: 0, magenta: 0, yellow: 0, black: 0 }
+                },
+                rgbMode: 'cyberGlitch', rgbOffset: 0, rgbAngle: 0, radialPrismEffect: 0,
                 prismSpectrum: 0, prismSplit: 0, prismKaleido: 0, anamorphicFlare: 0, holgaLomo: 0,
                 scanlines: 0, vhsTape: 0, leicaFrame: false, frameStyle: 'polaroid', showLogoText: true,
                 showExifText: true, frameText: editParams.frameText,
@@ -2211,8 +2661,11 @@
 
         function requestCanvasRender() {
             if (!imageLoaded || isRendering) return;
+            // Throttle during slider interaction: max ~30fps while dragging
+            if (isSliderInteracting && _renderRAF) return;
             isRendering = true;
-            requestAnimationFrame(() => {
+            _renderRAF = requestAnimationFrame(() => {
+                _renderRAF = null;
                 renderPhotoCanvas();
                 isRendering = false;
             });
@@ -2244,9 +2697,9 @@
             const viewport = document.getElementById('canvasViewport');
             if (!canvas || !viewport || !canvas.width || !canvas.height) return;
 
-            const stylePad = 16; // matches the viewport's p-2 padding on both axes
-            const availW = Math.max(1, viewport.clientWidth - stylePad);
-            const availH = Math.max(1, viewport.clientHeight - stylePad);
+            const padTop = 8, padSide = 4;
+            const availW = Math.max(1, viewport.clientWidth - padSide * 2);
+            const availH = Math.max(1, viewport.clientHeight - padTop);
 
             const scale = Math.min(availW / canvas.width, availH / canvas.height, 1) ||
                           Math.min(availW / canvas.width, availH / canvas.height);
@@ -2326,8 +2779,11 @@
             wCtx.drawImage(rawImage, 0, 0, procW, procH);
 
             applyLightColorAndCurveAdjustments(wCtx, procW, procH);
+            if (hasSelectiveColorChanges()) applySelectiveColor(wCtx, procW, procH);
             if (editParams.dehaze !== 0) applyDehaze(wCtx, procW, procH);
             applyClarityAndTexture(wCtx, procW, procH);
+            if (editParams.unsharpMask > 0) applyUnsharpMask(wCtx, procW, procH);
+            if (editParams.blur > 0) applyGaussianBlur(wCtx, procW, procH);
             applyTextureClarityVignetteGrain(wCtx, procW, procH);
 
             if (editParams.rgbOffset > 0) applyRgbGlitchEffect(wCtx, procW, procH);
