@@ -2380,67 +2380,6 @@
             ctx.putImageData(destData, 0, 0);
         }
 
-        function applyRadialSpectrumBlur(ctx, w, h) {
-            const intensity = editParams.radialPrismEffect / 100;
-            if (intensity <= 0) return;
-
-            const srcData = ctx.getImageData(0, 0, w, h);
-            const destData = ctx.createImageData(w, h);
-            const src = srcData.data;
-            const dest = destData.data;
-
-            const cx = w / 2; const cy = h / 2;
-            const maxDist = Math.hypot(cx, cy);
-
-            const numSamples = 7;
-            const maxShift = (Math.max(w, h) * 0.035) * intensity; 
-
-            for (let y = 0; y < h; y++) {
-                for (let x = 0; x < w; x++) {
-                    const idx = (y * w + x) * 4;
-
-                    const dx = x - cx; const dy = y - cy;
-                    const dist = Math.hypot(dx, dy);
-                    const normDist = dist / maxDist;
-
-                    const effectFactor = Math.pow(normDist, 1.7) * intensity;
-
-                    if (effectFactor < 0.01) {
-                        dest[idx] = src[idx]; dest[idx + 1] = src[idx + 1]; dest[idx + 2] = src[idx + 2]; dest[idx + 3] = src[idx + 3];
-                        continue;
-                    }
-
-                    const unitX = dx / (dist || 1); const unitY = dy / (dist || 1);
-                    let rSum = 0, gSum = 0, bSum = 0;
-
-                    for (let s = 0; s < numSamples; s++) {
-                        const t = (s / (numSamples - 1)) - 0.5;
-                        const offset = t * maxShift * effectFactor;
-
-                        const rx = Math.min(w - 1, Math.max(0, Math.round(x + unitX * (offset + 5 * effectFactor))));
-                        const ry = Math.min(h - 1, Math.max(0, Math.round(y + unitY * (offset + 5 * effectFactor))));
-                        const rIdx = (ry * w + rx) * 4;
-
-                        const gx = Math.min(w - 1, Math.max(0, Math.round(x + unitX * offset)));
-                        const gy = Math.min(h - 1, Math.max(0, Math.round(y + unitY * offset)));
-                        const gIdx = (gy * w + gx) * 4;
-
-                        const bx = Math.min(w - 1, Math.max(0, Math.round(x + unitX * (offset - 5 * effectFactor))));
-                        const by = Math.min(h - 1, Math.max(0, Math.round(y + unitY * (offset - 5 * effectFactor))));
-                        const bIdx = (by * w + bx) * 4;
-
-                        rSum += src[rIdx]; gSum += src[gIdx + 1]; bSum += src[bIdx + 2];
-                    }
-
-                    dest[idx] = Math.min(255, rSum / numSamples);
-                    dest[idx + 1] = Math.min(255, gSum / numSamples);
-                    dest[idx + 2] = Math.min(255, bSum / numSamples);
-                    dest[idx + 3] = src[idx + 3];
-                }
-            }
-
-            ctx.putImageData(destData, 0, 0);
-        }
 
         function applyGlassPrismEffects(ctx, w, h) {
             ctx.save();
@@ -2768,7 +2707,7 @@
             const hsl = {}; HSL_COLORS.forEach(c => hsl[c.k] = { h: 0, s: 0, l: 0 });
             const grade = {}; GRADE_REGIONS.forEach(r => grade[r] = { h: 0, s: 0 });
             return Object.assign({
-                profile: 'none', profileIntensity: 100,
+                profile: 'none', profileIntensity: 100, presetId: null, presetAmt: 100,
                 exposure: 0, contrast: 0, highlights: 0, shadows: 0, whites: 0, blacks: 0,
                 temp: 0, tint: 0, vibrance: 0, saturation: 0,
                 texture: 0, clarity: 0, dehaze: 0, vignette: 0, grain: 0, unsharpMask: 0, blur: 0,
@@ -3128,9 +3067,12 @@
                 return;
             }
             const low = isSliderInteracting && !showHistogram;
+            if (low) rebuildDragSource();
             const src = low ? dragSrc : previewSrc, sw = src.width, sh = src.height;
             _pxScale = Math.max(sw, sh) / Math.max(rawImage.width, rawImage.height);
+            const t0 = performance.now();
             renderEditToCanvas(canvas, src, sw, sh, low ? dragWork : workCanvas, low ? dragCtx : workCtx, true);
+            if (low) tuneDragResolution(performance.now() - t0);
             if (isCropActive) updateCropOverlayPosition();
             fitCanvasToViewport();
         }
@@ -3155,9 +3097,13 @@
             return out;
         }
 
+        let _fitKey = '';
         function fitCanvasToViewport() {
             const canvas = $('photoCanvas'), vp = $('canvasViewport');
             if (!canvas || !vp || !canvas.width || !canvas.height) return;
+            const key = canvas.width + 'x' + canvas.height + '|' + vp.clientWidth + 'x' + vp.clientHeight + '|' + vp.style.padding;
+            if (key === _fitKey) return;
+            _fitKey = key;
             const cs = getComputedStyle(vp);
             const availW = Math.max(1, vp.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
             const availH = Math.max(1, vp.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom));
@@ -3304,6 +3250,13 @@
 
         // ---------- Parámetros desde la interfaz ----------
         function onParamChange(key) {
+            if (key === 'profileIntensity' && editParams.presetId) {
+                commitDragHistory('profileIntensity');
+                const v = parseFloat($('paramProfileIntensity').value);
+                $('valProfileIntensity').textContent = v + '%';
+                setPresetAmount(v / 100);
+                return;
+            }
             if (SLIDER_KEYS.has(key)) {
                 const input = $('param' + cap(key));
                 if (!input) return;
@@ -3319,6 +3272,7 @@
 
         function syncAllUiControls() {
             SLIDER_KEYS.forEach(k => { const el = $('param' + cap(k)); if (el) { el.value = editParams[k]; setValLabel(k); } });
+            if (editParams.presetId) { const pi = $('paramProfileIntensity'); if (pi) pi.value = editParams.presetAmt; const pv = $('valProfileIntensity'); if (pv) pv.textContent = editParams.presetAmt + '%'; }
             syncSelectiveColorSliders();
             syncHslSliders();
             updateGradeKnob();
@@ -3598,6 +3552,192 @@
         }
 
 
+        // ---------- Prisma radial optimizado (se calcula a media resolución) ----------
+        const POW17 = new Float32Array(1024);
+        for (let i = 0; i < 1024; i++) POW17[i] = Math.pow(i / 1023, 1.7);
+        let _rpTmp = null, _rpUp = null;
+        function applyRadialSpectrumBlur(ctx, w, h) {
+            const intensity = editParams.radialPrismEffect / 100;
+            if (intensity <= 0) return;
+            const sw = Math.max(16, (w * 0.5) | 0), sh = Math.max(16, (h * 0.5) | 0);
+            if (!_rpTmp || _rpTmp.width !== sw || _rpTmp.height !== sh) {
+                _rpTmp = document.createElement('canvas'); _rpTmp.width = sw; _rpTmp.height = sh;
+                _rpUp = document.createElement('canvas'); _rpUp.width = w; _rpUp.height = h;
+            }
+            if (_rpUp.width !== w || _rpUp.height !== h) { _rpUp.width = w; _rpUp.height = h; }
+            const tctx = _rpTmp.getContext('2d', { willReadFrequently: true });
+            tctx.imageSmoothingEnabled = true;
+            tctx.drawImage(ctx.canvas, 0, 0, w, h, 0, 0, sw, sh);
+            const sImg = tctx.getImageData(0, 0, sw, sh), src = sImg.data;
+            const dImg = tctx.createImageData(sw, sh), dest = dImg.data;
+            const cx = sw / 2, cy = sh / 2, invMax = 1 / Math.sqrt(cx * cx + cy * cy);
+            const maxShift = Math.max(sw, sh) * 0.035 * intensity, chroma = 2.5, NS = 7, inv = 1 / NS;
+            const W1 = sw - 1, H1 = sh - 1;
+            for (let y = 0; y < sh; y++) {
+                const dy = y - cy;
+                for (let x = 0; x < sw; x++) {
+                    const idx = (y * sw + x) * 4, dx = x - cx;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const ef = POW17[Math.min(1023, (dist * invMax * 1023) | 0)] * intensity;
+                    if (ef < 0.01) { dest[idx] = src[idx]; dest[idx + 1] = src[idx + 1]; dest[idx + 2] = src[idx + 2]; dest[idx + 3] = 255; continue; }
+                    const ux = dx / dist, uy = dy / dist, c = chroma * ef;
+                    let rS = 0, gS = 0, bS = 0;
+                    for (let s = 0; s < NS; s++) {
+                        const off = (s / (NS - 1) - 0.5) * maxShift * ef;
+                        let rx = (x + ux * (off + c) + 0.5) | 0, ry = (y + uy * (off + c) + 0.5) | 0;
+                        let gx = (x + ux * off + 0.5) | 0, gy = (y + uy * off + 0.5) | 0;
+                        let bx = (x + ux * (off - c) + 0.5) | 0, by = (y + uy * (off - c) + 0.5) | 0;
+                        rx = rx < 0 ? 0 : rx > W1 ? W1 : rx; ry = ry < 0 ? 0 : ry > H1 ? H1 : ry;
+                        gx = gx < 0 ? 0 : gx > W1 ? W1 : gx; gy = gy < 0 ? 0 : gy > H1 ? H1 : gy;
+                        bx = bx < 0 ? 0 : bx > W1 ? W1 : bx; by = by < 0 ? 0 : by > H1 ? H1 : by;
+                        rS += src[(ry * sw + rx) * 4]; gS += src[(gy * sw + gx) * 4 + 1]; bS += src[(by * sw + bx) * 4 + 2];
+                    }
+                    dest[idx] = rS * inv; dest[idx + 1] = gS * inv; dest[idx + 2] = bS * inv; dest[idx + 3] = 255;
+                }
+            }
+            tctx.putImageData(dImg, 0, 0);
+            // Escala el resultado y lo mezcla con un degradado radial (centro nítido, bordes con efecto)
+            const uctx = _rpUp.getContext('2d');
+            uctx.globalCompositeOperation = 'source-over';
+            uctx.clearRect(0, 0, w, h);
+            uctx.imageSmoothingEnabled = true; uctx.imageSmoothingQuality = 'high';
+            uctx.drawImage(_rpTmp, 0, 0, sw, sh, 0, 0, w, h);
+            const R = Math.sqrt((w / 2) * (w / 2) + (h / 2) * (h / 2));
+            const g = uctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, R);
+            for (let i = 0; i <= 10; i++) { const t = i / 10; g.addColorStop(t, `rgba(0,0,0,${Math.min(1, Math.pow(t, 1.7) * intensity * 5)})`); }
+            uctx.globalCompositeOperation = 'destination-in';
+            uctx.fillStyle = g; uctx.fillRect(0, 0, w, h);
+            uctx.globalCompositeOperation = 'source-over';
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.drawImage(_rpUp, 0, 0);
+        }
+
+        // ---------- Resolución de arrastre adaptativa ----------
+        let dragLong = 640;
+        function rebuildDragSource() {
+            if (!previewSrc) return;
+            const ds = Math.min(1, dragLong / Math.max(previewSrc.width, previewSrc.height));
+            const dw = Math.max(1, Math.round(previewSrc.width * ds)), dh = Math.max(1, Math.round(previewSrc.height * ds));
+            if (dragSrc && dragSrc.width === dw && dragSrc.height === dh) return;
+            dragSrc = document.createElement('canvas'); dragSrc.width = dw; dragSrc.height = dh;
+            const dc = dragSrc.getContext('2d'); dc.imageSmoothingQuality = 'high'; dc.drawImage(previewSrc, 0, 0, dw, dh);
+            dragWork = document.createElement('canvas'); dragWork.width = dw; dragWork.height = dh;
+            dragCtx = dragWork.getContext('2d', { willReadFrequently: true });
+        }
+        function tuneDragResolution(ms) {
+            const prev = dragLong;
+            if (ms > 45) dragLong = Math.max(340, dragLong * 0.85);
+            else if (ms < 18) dragLong = Math.min(720, dragLong * 1.08);
+            if (Math.abs(dragLong - prev) / prev > 0.001) { /* se aplica en el próximo cuadro */ }
+        }
+
+        // ---------- Preajustes integrados ----------
+        const BUILTIN_CATS = [['all', 'Todos'], ['mine', 'Mis preajustes'], ['portrait', 'Retrato'], ['landscape', 'Paisaje'], ['film', 'Película'], ['cine', 'Cine'], ['vintage', 'Vintage'], ['moody', 'Moody'], ['bw', 'B&N'], ['urban', 'Urbano'], ['legacy', 'Clásicos']];
+        // c: curvas (valores Y en X = 0, 64, 128, 192, 255) · g: graduación [tono, cantidad] · h: HSL [matiz, saturación, luminosidad]
+        function P(cat, name, p, c, g, h) { return { cat, name, p: p || {}, c: c || {}, g: g || {}, h: h || {} }; }
+        const BUILTIN_PRESETS = [
+            P('portrait', 'Piel Natural', { exposure: 3, contrast: -6, temp: 5, tint: 2, vibrance: 10, highlights: -14, shadows: 12, clarity: -8 }, { rgb: [8, 68, 130, 194, 250] }, {}, { orange: [0, -8, 6], red: [0, -6, 3] }),
+            P('portrait', 'Portra Cálido', { exposure: 4, contrast: -8, temp: 12, tint: 4, saturation: -6, vibrance: 12, highlights: -16, shadows: 16, blacks: 8 }, { rgb: [20, 70, 130, 190, 246] }, { shadows: [30, 12], highs: [45, 14] }, { orange: [2, -6, 8] }),
+            P('portrait', 'Glow Suave', { exposure: 5, contrast: -12, clarity: -30, highlights: -10, shadows: 14, vibrance: 8, temp: 4 }, { rgb: [14, 72, 134, 194, 250] }),
+            P('portrait', 'Dorado', { exposure: 2, contrast: 6, temp: 20, tint: 6, saturation: 8, highlights: -10, shadows: 8 }, {}, { highs: [40, 22], mids: [35, 10] }, { yellow: [-10, 10, 0], orange: [0, 10, 4] }),
+            P('portrait', 'Rosa Pastel', { exposure: 6, contrast: -14, temp: -2, tint: 10, saturation: -12, vibrance: 14, highlights: -8, shadows: 18, blacks: 10 }, { rgb: [26, 76, 132, 190, 244] }, { global: [340, 10], shadows: [330, 14] }, { red: [-4, 4, 6], magenta: [0, 6, 6] }),
+            P('portrait', 'Estudio Limpio', { exposure: 4, contrast: 8, vibrance: 8, highlights: -18, shadows: 10, whites: 10, clarity: 8 }, { rgb: [0, 60, 130, 200, 255] }),
+            P('portrait', 'Piel Mate', { contrast: -10, saturation: -10, highlights: -12, shadows: 14, blacks: 12, temp: 4 }, { rgb: [30, 76, 130, 184, 236] }),
+            P('portrait', 'Alto Brillo', { exposure: 10, contrast: -6, highlights: -24, shadows: 22, whites: 16, vibrance: 12 }, { rgb: [10, 80, 142, 202, 255] }),
+
+            P('landscape', 'Verde Vivo', { contrast: 14, vibrance: 22, saturation: 8, clarity: 16, highlights: -14, shadows: 10, dehaze: 8 }, {}, {}, { green: [-6, 22, -4], yellow: [-8, 12, 0] }),
+            P('landscape', 'Cielo Profundo', { contrast: 16, saturation: 10, clarity: 14, highlights: -18, dehaze: 14 }, { rgb: [0, 54, 128, 202, 255] }, {}, { blue: [4, 28, -14], cyan: [0, 16, -8] }),
+            P('landscape', 'Costa Azul', { contrast: 10, temp: -8, vibrance: 16, saturation: 8, highlights: -12, shadows: 8, dehaze: 10 }, {}, {}, { cyan: [-4, 24, 0], blue: [0, 18, -6] }),
+            P('landscape', 'Otoño Cálido', { contrast: 12, temp: 14, tint: 3, vibrance: 18, highlights: -10, shadows: 6, clarity: 10 }, {}, { highs: [40, 14] }, { orange: [0, 20, 2], yellow: [0, 16, 0], green: [-14, -4, 0] }),
+            P('landscape', 'Montaña Nítida', { contrast: 18, clarity: 30, texture: 20, dehaze: 18, highlights: -20, shadows: 14, vibrance: 8, temp: -3 }),
+            P('landscape', 'Amanecer', { exposure: 2, contrast: 8, temp: 14, tint: 8, vibrance: 18, highlights: -14, shadows: 12 }, {}, { highs: [30, 24], shadows: [270, 14] }),
+            P('landscape', 'Bosque Húmedo', { contrast: 10, temp: -4, tint: -4, vibrance: 14, clarity: 14, highlights: -14, shadows: 10, saturation: -4, vignette: 12 }, {}, { shadows: [150, 10] }, { green: [-10, 12, -10] }),
+            P('landscape', 'Desierto', { contrast: 14, temp: 18, saturation: 6, vibrance: 12, highlights: -8, shadows: 6, clarity: 12, dehaze: 10 }, {}, {}, { orange: [0, 14, 4], yellow: [-6, 10, 2] }),
+
+            P('film', 'Kodak Gold', { exposure: 3, contrast: 8, temp: 16, tint: 4, saturation: 6, vibrance: 10, highlights: -10, shadows: 8, blacks: 6, grain: 14 }, { rgb: [14, 66, 130, 194, 246] }, { shadows: [40, 10], highs: [48, 14] }, { yellow: [-6, 8, 2] }),
+            P('film', 'Fuji Superia', { contrast: 10, temp: -3, tint: -6, vibrance: 14, saturation: 6, highlights: -8, shadows: 8, grain: 14 }, {}, { shadows: [170, 12] }, { green: [-6, 14, 0], blue: [0, 10, 0] }),
+            P('film', 'Cinestill 800T', { contrast: 8, temp: -12, tint: 6, saturation: 4, highlights: -10, shadows: 10, blacks: 6, grain: 18 }, { r: [0, 62, 130, 198, 255], b: [10, 68, 128, 186, 244] }, { shadows: [200, 22], highs: [10, 20] }, { red: [0, 12, 0] }),
+            P('film', 'Ektar Punch', { contrast: 16, saturation: 16, vibrance: 12, temp: 4, clarity: 8, highlights: -8, grain: 6 }, { rgb: [0, 52, 128, 204, 255] }),
+            P('film', 'Portra 160', { contrast: -4, temp: 6, saturation: -6, vibrance: 10, highlights: -12, shadows: 14, blacks: 6, grain: 10 }, { rgb: [16, 70, 130, 192, 248] }, { highs: [40, 10], shadows: [190, 8] }),
+            P('film', 'Agfa Vista 200', { contrast: 10, temp: 8, tint: 6, saturation: 10, vibrance: 10, grain: 16 }, { rgb: [10, 60, 128, 196, 250] }, {}, { red: [0, 12, 0], green: [8, 8, 0] }),
+            P('film', 'Provia 100', { contrast: 10, saturation: 10, vibrance: 10, temp: -2, clarity: 8, highlights: -8 }, {}, {}, { blue: [0, 12, -4] }),
+            P('film', 'Lomo Cruzado', { contrast: 18, saturation: 12, vibrance: 6, vignette: 34, grain: 12 }, { r: [0, 56, 130, 204, 255], g: [0, 66, 128, 190, 246], b: [28, 76, 120, 170, 226] }, { highs: [60, 12], shadows: [260, 14] }),
+            P('film', 'Polaroid 600', { exposure: 4, contrast: -8, temp: 8, tint: 5, saturation: -10, highlights: -6, blacks: 12, vignette: 14, grain: 10 }, { rgb: [28, 78, 130, 188, 240] }, { shadows: [170, 16] }),
+            P('film', 'Velvia Intenso', { contrast: 20, saturation: 24, vibrance: 10, clarity: 10, highlights: -12 }, {}, {}, { red: [0, 16, -2], green: [-4, 14, -4], blue: [0, 14, -6] }),
+
+            P('cine', 'Teal & Orange', { contrast: 14, saturation: 2, vibrance: 10, highlights: -10, shadows: 6 }, { rgb: [0, 56, 128, 200, 255] }, { shadows: [190, 24], highs: [30, 26] }, { orange: [0, 10, 2], blue: [10, 0, -8] }),
+            P('cine', 'Blade Neón', { exposure: -3, contrast: 16, temp: -14, tint: 10, saturation: 6, highlights: -6, shadows: -4, blacks: -6, vignette: 26, grain: 10 }, {}, { shadows: [210, 26], highs: [320, 22], mids: [290, 10] }),
+            P('cine', 'Matrix Verde', { contrast: 14, temp: -6, tint: -18, saturation: -8, highlights: -6, shadows: -6, vignette: 20 }, { rgb: [4, 56, 126, 196, 250] }, { global: [130, 14], shadows: [140, 22] }),
+            P('cine', 'Noir Azul', { exposure: -4, contrast: 20, temp: -16, saturation: -34, highlights: -8, shadows: -6, vignette: 30, grain: 12 }, {}, { global: [215, 16], shadows: [220, 26] }),
+            P('cine', 'Dune Ámbar', { contrast: 12, temp: 20, tint: 6, saturation: -6, highlights: -8, shadows: 6, clarity: 10, dehaze: 8, vignette: 16 }, {}, { global: [35, 18], shadows: [30, 18] }),
+            P('cine', 'Pastel Wes', { exposure: 5, contrast: -10, temp: 6, tint: 8, saturation: -4, vibrance: 20, highlights: -12, shadows: 16, blacks: 10 }, { rgb: [22, 76, 132, 190, 246] }, {}, { red: [0, -4, 6], yellow: [0, 8, 6], blue: [-6, -4, 8] }),
+            P('cine', 'Sci-Fi Frío', { contrast: 12, temp: -18, tint: -2, saturation: -10, vibrance: 8, highlights: -10, clarity: 12 }, {}, { shadows: [200, 20], global: [195, 10] }),
+            P('cine', 'Thriller Oscuro', { exposure: -8, contrast: 20, temp: -4, saturation: -20, highlights: -14, shadows: -8, blacks: -8, clarity: 12, vignette: 40, grain: 10 }, {}, { shadows: [170, 16] }),
+
+            P('vintage', 'Sepia Antiguo', { saturation: -100, contrast: 6, grain: 20, vignette: 30 }, { rgb: [22, 70, 128, 188, 240] }, { global: [38, 36], highs: [48, 16], shadows: [28, 20] }),
+            P('vintage', 'Años 70', { contrast: -4, temp: 14, tint: 6, saturation: -4, highlights: -8, blacks: 10, grain: 20, vignette: 18 }, { rgb: [24, 72, 130, 190, 244] }, { shadows: [20, 16], highs: [50, 18] }),
+            P('vintage', 'Foto de Abuela', { exposure: 2, contrast: -12, temp: 12, tint: 8, saturation: -26, blacks: 16, highlights: -10, grain: 24, vignette: 24 }, { rgb: [34, 82, 132, 184, 232] }, { global: [40, 14] }),
+            P('vintage', 'Fade 90s', { contrast: -8, temp: 6, tint: -4, saturation: -14, highlights: -6, blacks: 14, grain: 14 }, { rgb: [40, 84, 134, 184, 236] }, { shadows: [190, 14], highs: [45, 12] }),
+            P('vintage', 'Desechable', { contrast: 16, temp: 8, tint: -2, saturation: 6, highlights: 12, shadows: -4, grain: 26, vignette: 28 }, { rgb: [0, 52, 128, 208, 255] }),
+            P('vintage', 'VHS Cálido', { contrast: -6, temp: 10, tint: 6, saturation: 6, blacks: 10, grain: 22, vignette: 16 }, {}, { shadows: [260, 18], highs: [20, 16] }),
+
+            P('moody', 'Moody Verde', { exposure: -6, contrast: 14, temp: -6, tint: -8, saturation: -14, highlights: -14, shadows: -4, blacks: -4, vignette: 26 }, {}, { shadows: [165, 16] }, { green: [-12, -6, -10], yellow: [-14, -8, -6] }),
+            P('moody', 'Moody Marrón', { exposure: -5, contrast: 16, temp: 10, tint: 4, saturation: -18, highlights: -12, blacks: -4, vignette: 28 }, {}, { global: [30, 14], shadows: [25, 18] }),
+            P('moody', 'Oscuro Elegante', { exposure: -8, contrast: 24, saturation: -8, highlights: -16, blacks: -10, whites: 6, clarity: 14, vignette: 32 }),
+            P('moody', 'Niebla Fría', { exposure: 3, contrast: -14, temp: -10, saturation: -18, blacks: 14, highlights: -8, clarity: -10, dehaze: -20 }, { rgb: [34, 80, 132, 188, 240] }, { global: [210, 12] }),
+            P('moody', 'Lluvia', { exposure: -3, contrast: 10, temp: -12, tint: -4, saturation: -16, highlights: -12, clarity: 12, vignette: 18 }, {}, { shadows: [200, 16] }),
+            P('moody', 'Tormenta', { exposure: -6, contrast: 22, temp: -10, saturation: -8, highlights: -18, clarity: 26, dehaze: 20, shadows: -4, vignette: 30 }, {}, {}, { blue: [0, 10, -14] }),
+
+            P('bw', 'B&N Alto Contraste', { saturation: -100, contrast: 30, clarity: 20, highlights: -6 }, { rgb: [0, 46, 128, 208, 255] }),
+            P('bw', 'B&N Gris Suave', { saturation: -100, contrast: -8, highlights: -10, shadows: 10 }, { rgb: [10, 68, 130, 192, 246] }),
+            P('bw', 'Tri-X Grano', { saturation: -100, contrast: 18, clarity: 10, grain: 46, vignette: 16 }, { rgb: [0, 52, 128, 204, 255] }),
+            P('bw', 'Noir Profundo', { saturation: -100, exposure: -6, contrast: 26, blacks: -12, clarity: 14, vignette: 36, grain: 14 }),
+            P('bw', 'Plata Mate', { saturation: -100, contrast: -4, blacks: 14, highlights: -8, grain: 10 }, { rgb: [34, 78, 130, 188, 238] }),
+            P('bw', 'B&N Luminoso', { saturation: -100, exposure: 8, contrast: -6, highlights: -16, whites: 12, shadows: 16 }),
+            P('bw', 'Duotono Azul', { saturation: -100, contrast: 14 }, {}, { shadows: [215, 32], highs: [195, 16], global: [210, 10] }),
+            P('bw', 'Tono Sepia', { saturation: -100, contrast: 8, grain: 14 }, {}, { global: [35, 30], highs: [45, 14] }),
+
+            P('urban', 'Calle Gritty', { contrast: 22, saturation: -14, clarity: 28, texture: 22, highlights: -14, shadows: -2, temp: -2, grain: 20, vignette: 20 }),
+            P('urban', 'Neón de Noche', { exposure: -3, contrast: 16, vibrance: 22, saturation: 10, temp: -8, tint: 10, highlights: -6, vignette: 22 }, {}, { shadows: [250, 22], highs: [320, 18] }, { magenta: [0, 16, 2], blue: [0, 14, -2] }),
+            P('urban', 'Cyber Rosa', { contrast: 14, temp: -6, tint: 14, saturation: 8, vibrance: 12, vignette: 18 }, {}, { shadows: [260, 24], highs: [330, 26] }),
+            P('urban', 'Asfalto', { contrast: 20, saturation: -24, clarity: 22, highlights: -10, blacks: -4, temp: -3, grain: 16 }, {}, { shadows: [210, 10] }),
+            P('urban', 'Hora Azul', { exposure: -2, contrast: 12, temp: -18, tint: 4, vibrance: 14, highlights: -10 }, {}, { shadows: [225, 22], highs: [200, 10] }, { blue: [0, 14, -4] }),
+            P('urban', 'Metro', { exposure: -2, contrast: 14, temp: -8, tint: -10, saturation: -10, clarity: 14, grain: 16, vignette: 24 }, {}, { global: [170, 14], shadows: [180, 18] })
+        ];
+        BUILTIN_PRESETS.forEach((pr, i) => { pr.id = 'b' + i; });
+        const PRESET_X = [0, 64, 128, 192, 255];
+
+        // Escribe en `params` / `curves` los valores del preajuste escalados por amt (0..1)
+        function applyPresetKeys(params, curves, pr, amt) {
+            Object.keys(pr.p).forEach(k => { params[k] = Math.round(pr.p[k] * amt); });
+            Object.keys(pr.h).forEach(c => { const v = pr.h[c]; params.hsl[c] = { h: Math.round(v[0] * amt), s: Math.round(v[1] * amt), l: Math.round(v[2] * amt) }; });
+            Object.keys(pr.g).forEach(r => { const v = pr.g[r]; params.grade[r] = { h: v[0], s: Math.round(v[1] * amt) }; });
+            Object.keys(pr.c).forEach(ch => { curves[ch] = pr.c[ch].map((y, i) => ({ x: PRESET_X[i], y: Math.round(PRESET_X[i] + (y - PRESET_X[i]) * amt) })); });
+        }
+        const FRAME_KEYS = ['leicaFrame', 'frameStyle', 'showLogoText', 'showExifText', 'frameText', 'logoTextScale', 'metaTextScale', 'logoTextOffsetY', 'metaTextOffsetY', 'insetWidth', 'insetColor', 'insetRatio'];
+        function builtinState(pr, amt) {
+            const params = defaultParams(), curves = defaultCurves();
+            applyPresetKeys(params, curves, pr, amt);
+            params.presetId = pr.id; params.presetAmt = Math.round(amt * 100);
+            return { params, curves };
+        }
+        function selectBuiltinPreset(pr) {
+            pushHistoryState('Preajuste: ' + pr.name);
+            const st = builtinState(pr, 1);
+            FRAME_KEYS.forEach(k => { st.params[k] = editParams[k]; });
+            editParams = st.params; curvePoints = st.curves;
+            rebuildCurveLuts(); syncAllUiControls(); requestCanvasRender();
+        }
+        function setPresetAmount(amt) {
+            const pr = BUILTIN_PRESETS.find(p => p.id === editParams.presetId); if (!pr) return;
+            editParams.presetAmt = Math.round(amt * 100);
+            applyPresetKeys(editParams, curvePoints, pr, amt);
+            rebuildCurveLuts(); drawRgbCurveGraph();
+            SLIDER_KEYS.forEach(k => { if (k === 'profileIntensity') return; const el = $('param' + cap(k)); if (el) { el.value = editParams[k]; setValLabel(k); } });
+            syncHslSliders(); updateGradeKnob(); requestCanvasRender();
+        }
+
+
         // ---------- Recorte / giro ----------
         let cropRatio = 'free';
         const CROP_RATIOS = [['free', 'Libre'], ['orig', 'Original'], ['1:1', '1:1'], ['4:5', '4:5'], ['5:4', '5:4'], ['3:2', '3:2'], ['16:9', '16:9'], ['9:16', '9:16']];
@@ -3732,7 +3872,7 @@
         }
 
         // ---------- Perfiles con miniaturas ----------
-        const PROFILE_CATS = [['all', 'Todos'], ['mine', 'Mis preajustes'], ['leica_bw', 'B&N'], ['color', 'Color'], ['cine', 'Cine']];
+        const PROFILE_CATS = BUILTIN_CATS;
         const USER_PRESETS_KEY = 'diegoX_userPresets_v1';
         let userPresets = [];
         try { userPresets = JSON.parse(localStorage.getItem(USER_PRESETS_KEY) || '[]'); } catch (e) { userPresets = []; }
@@ -3782,12 +3922,11 @@
 
         function profileList() {
             const items = [{ id: 'none', name: 'Original', kind: 'profile' }];
-            if (activeCategoryFilter === 'mine') userPresets.forEach(u => items.push({ id: 'u:' + u.id, name: u.name, kind: 'user', preset: u }));
-            else {
-                colorProfiles.filter(p => !p.isNormal && (activeCategoryFilter === 'all' || p.cat === activeCategoryFilter))
-                    .forEach(p => items.push({ id: p.id, name: p.name.replace('Leica ', 'L. ').replace('Tono Normal (Original)', 'Original'), kind: 'profile' }));
-                if (activeCategoryFilter === 'all') userPresets.forEach(u => items.push({ id: 'u:' + u.id, name: u.name, kind: 'user', preset: u }));
-            }
+            const cat = activeCategoryFilter;
+            if (cat === 'mine') { userPresets.forEach(u => items.push({ id: 'u:' + u.id, name: u.name, kind: 'user', preset: u })); return items; }
+            BUILTIN_PRESETS.filter(p => cat === 'all' || p.cat === cat).forEach(p => items.push({ id: p.id, name: p.name, kind: 'builtin', preset: p }));
+            if (cat === 'all' || cat === 'legacy') colorProfiles.filter(p => !p.isNormal).forEach(p => items.push({ id: p.id, name: p.name.replace('Leica ', 'L. '), kind: 'profile' }));
+            if (cat === 'all') userPresets.forEach(u => items.push({ id: 'u:' + u.id, name: u.name, kind: 'user', preset: u }));
             return items;
         }
         function renderProfilesCatalog() {
@@ -3798,10 +3937,11 @@
             grid.innerHTML = '';
             profileList().forEach(it => {
                 const b = document.createElement('button');
-                const isOn = it.kind === 'user' ? false : editParams.profile === it.id;
+                const isOn = it.kind === 'user' ? false : it.kind === 'builtin' ? editParams.presetId === it.id : (!editParams.presetId && editParams.profile === it.id);
                 b.className = 'dk-thumb' + (isOn ? ' on' : '');
                 let cv;
                 if (it.kind === 'user') cv = thumbFor(it.id, mergeParams(it.preset.params), it.preset.curves);
+                else if (it.kind === 'builtin') { const st = builtinState(it.preset, 1); cv = thumbFor(it.id, st.params, st.curves); }
                 else { const p = mergeParams(null); p.profile = it.id; cv = thumbFor(it.id, p, defaultCurves()); }
                 cv.className = '';
                 b.appendChild(cv);
@@ -3809,11 +3949,13 @@
                 b.addEventListener('click', () => selectProfileItem(it));
                 grid.appendChild(b);
             });
-            $('valProfileIntensity').textContent = editParams.profileIntensity + '%';
-            const inp = $('paramProfileIntensity'); if (inp && document.activeElement !== inp) inp.value = editParams.profileIntensity;
+            const iv = editParams.presetId ? editParams.presetAmt : editParams.profileIntensity;
+            $('valProfileIntensity').textContent = iv + '%';
+            const inp = $('paramProfileIntensity'); if (inp && document.activeElement !== inp) inp.value = iv;
         }
         function filterProfileCategory(cat) { activeCategoryFilter = cat; renderProfilesCatalog(); }
         function selectProfileItem(it) {
+            if (it.kind === 'builtin') { selectBuiltinPreset(it.preset); return; }
             if (it.kind === 'user') {
                 pushHistoryState('Preajuste: ' + it.name);
                 const keep = { frameText: editParams.frameText };
@@ -3823,7 +3965,7 @@
                 return;
             }
             pushHistoryState('Perfil: ' + it.name);
-            editParams.profile = it.id;
+            editParams.profile = it.id; editParams.presetId = null;
             renderProfilesCatalog(); requestCanvasRender();
         }
         function selectColorProfile(id) { selectProfileItem({ id, kind: 'profile', name: id }); }
