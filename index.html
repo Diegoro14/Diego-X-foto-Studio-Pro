@@ -264,6 +264,14 @@
         .dk-head, .dk-section, .dk-pill, .dk-btn, .dk-hist-item, .dk-thumb span, .dk-cat, .dk-ratio, .dk-wheel-tabs button, .dk-panel p, .dk-hist-actions button, .dk-create, .dk-menu button span,
         #galleryView h2, #galleryView button, #galleryView p, #appContainer > nav span, #appContainer > header span { zoom: var(--tx); }
 
+
+        /* Cabecera: respeta la barra de estado / Dynamic Island del iPhone y tiene botones fáciles de tocar */
+        #appContainer > header { height: auto !important; min-height: calc(env(safe-area-inset-top) + 56px); padding-top: calc(env(safe-area-inset-top) + 6px) !important; padding-bottom: 6px; align-items: center; }
+        #appContainer > header img { width: 34px; height: 34px; }
+        #appContainer > header span { font-size: 17px !important; }
+        #btnSettingsGear { width: 48px; height: 48px; margin-right: -8px; border-radius: 50%; background: rgba(128,128,128,.16); }
+        #btnSettingsGear svg { width: 26px; height: 26px; }
+
         /* ===== Tema claro (editor, galería y barras; la cámara se queda oscura) ===== */
         html[data-theme="light"], html[data-theme="light"] body { background: var(--bg) !important; color: var(--txt); }
         html[data-theme="light"] #appContainer:not([data-view="camera"]) { background: var(--bg); }
@@ -315,7 +323,7 @@
                 <img src="diegox.png" alt="" class="w-7 h-7 rounded-lg">
                 <span class="font-bold tracking-wide text-sm text-zinc-100">Diego-X Studio</span>
             </div>
-            <button onclick="openSettings()" aria-label="Ajustes" class="ml-auto w-8 h-8 rounded-full flex items-center justify-center text-zinc-300 active:scale-95"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+            <button onclick="openSettings()" aria-label="Ajustes" id="btnSettingsGear" class="ml-auto flex items-center justify-center text-zinc-300 active:scale-95"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
         </header>
 
         <main class="flex-1 relative overflow-hidden flex flex-col app-body">
