@@ -12,6 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="application-name" content="Diego-X Studio">
     <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="diegox.png">
     <link rel="icon" type="image/png" href="diegox.png">
 
@@ -314,6 +315,30 @@
             #cameraVideo { object-fit: cover !important; }
             .dk-sheet { height: 46dvh; }
         }
+            #toolOverlay { position: absolute; left: 0; top: 0; touch-action: none; z-index: 5; }
+        #toolOverlay.hidden { display: none; }
+        html[data-layout="pc"] #toolOverlay { cursor: none; }
+        #canvasViewport.pipetting #photoCanvas { cursor: crosshair; }
+        #exportModal { position: fixed; inset: 0; z-index: 90; display: flex; align-items: flex-end; justify-content: center; }
+        #exportModal.hidden { display: none; }
+        html[data-layout="pc"] #exportModal { align-items: center; }
+        .lc-layers { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
+        .lc-chip { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; background: var(--chip); color: var(--fg); font-size: calc(14px * var(--tx,1)); font-weight: 600; }
+        .lc-chip.on { background: #ff9f0a; color: #000; }
+        .lc-chip.add { background: transparent; border: 1px dashed var(--txt-dim); }
+        .lc-chip b { font-size: 12px; opacity: .7; padding: 0 2px; }
+        .dk-pipettes { display: flex; align-items: center; gap: 8px; font-size: calc(13px * var(--tx,1)); color: var(--txt-dim); }
+        .dk-pipettes button { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--txt-dim); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+        .dk-pipettes button.on { border-color: #ff9f0a; box-shadow: 0 0 0 2px #ff9f0a55; }
+        .dk-menu button.active span { color: #ff9f0a; }
+.dk-opts summary { font-size: 13px; color: var(--txt-dim); padding: 4px 0; cursor: pointer; }
+        .dk-opts[open] { display: flex; flex-direction: column; gap: 6px; }
+        @media (max-width: 899px) { html:not([data-layout="pc"]) .dk-sheet[data-tab="curves"] { height: clamp(380px, 52dvh, 500px); } }
+        html:not([data-layout="pc"]) .dk-sheet[data-tab="curves"] .dk-body { padding-top: 6px; padding-bottom: 8px; }
+        html:not([data-layout="pc"]) .dk-sheet[data-tab="curves"] .dk-curves2 { flex-wrap: nowrap; }
+        html:not([data-layout="pc"]) .dk-sheet[data-tab="curves"] .dk-curve-wrap2 { width: min(52vw, 100%); }
+        html:not([data-layout="pc"]) .dk-sheet[data-tab="curves"] .dk-curve-side { min-width: 0; }
+        #pmPaintBtn { font-weight: 700; }
     </style>
 </head>
 <body class="h-full bg-black overflow-hidden flex flex-col justify-between viewport-full-mobile">
@@ -440,13 +465,8 @@
                     <button onclick="copyEdits(); closeEditorMenu()"><span>Copiar ajustes</span><i class="fa-regular fa-copy"></i></button>
                     <button onclick="pasteEdits(); closeEditorMenu()"><span>Pegar ajustes</span><i class="fa-regular fa-paste"></i></button>
                     <button onclick="openSettings()"><span>Ajustes de la app</span><i class="fa-solid fa-gear"></i></button>
-                    <div class="dk-menu-row"><span>Formato</span>
-                        <select id="exportFormatSelect">
-                            <option value="jpg">JPG</option>
-                            <option value="png">PNG</option>
-                            <option value="webp">WebP</option>
-                        </select>
-                    </div>
+                    <button id="btnSplitMenu" onclick="toggleSplit()"><span>Antes / después (dividido)</span><i class="fa-solid fa-table-columns"></i></button>
+                    <button onclick="openExportSheet()"><span>Opciones de exportación</span><i class="fa-solid fa-file-export"></i></button>
                 </div>
 
                 <!-- Gotero activo -->
@@ -466,6 +486,7 @@
                     <div id="canvasWrapper">
                         <canvas id="photoCanvas" onclick="handleCanvasEyedropperClick(event)"></canvas>
                         <canvas id="healOverlay" class="hidden"></canvas>
+                        <canvas id="toolOverlay" class="hidden"></canvas>
                         <div id="cropOverlay" class="hidden">
                             <div style="position:absolute;inset:0;pointer-events:none;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr)">
                                 <div style="border-right:1px solid rgba(255,255,255,.75);border-bottom:1px solid rgba(255,255,255,.75)"></div>
@@ -496,6 +517,7 @@
                     <div class="dk-tabs" id="toolTabsBar">
                         <button class="dk-tab on" data-tab="crop" aria-label="Recortar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/></svg></button>
                         <button class="dk-tab" data-tab="heal" aria-label="Corrector"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8.5" width="19" height="7" rx="3.5" transform="rotate(-45 12 12)"/><path d="M10.2 10.2l.01 0M13.8 13.8l.01 0M13.8 10.2l.01 0M10.2 13.8l.01 0"/></svg></button>
+                        <button class="dk-tab" data-tab="local" aria-label="Local"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5" stroke-dasharray="2.6 2.6"/><circle cx="12" cy="12" r="3.2"/></svg></button>
                         <button class="dk-tab" data-tab="profiles" aria-label="Perfiles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 16l4.5-4.5 3.5 3.5 3-3 5 5"/><circle cx="15.5" cy="8" r="1"/></svg></button>
                         <button class="dk-tab" data-tab="ajustes" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h7M16 6h5M3 12h2M11 12h10M3 18h8M17 18h4"/><circle cx="13" cy="6" r="2.4"/><circle cx="8" cy="12" r="2.4"/><circle cx="14" cy="18" r="2.4"/></svg></button>
                         <button class="dk-tab" data-tab="curves" aria-label="Curvas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M5 19C11 18 12 6 19 5"/></svg></button>
@@ -522,13 +544,32 @@
 
                         <!-- CORRECTOR -->
                         <div id="panel-heal" class="dk-panel">
+                            <div class="dk-pills" style="margin:0 0 8px"><button class="dk-pill on" id="healModeHeal" onclick="setHealMode('heal')">Corrector</button><button class="dk-pill" id="healModeClone" onclick="setHealMode('clone')">Clonar</button></div>
+                            <div id="cloneCtl" style="display:none;margin-bottom:8px"><button class="dk-btn st-wide" id="btnCloneSrc" onclick="startCloneSource()"><i class="fa-solid fa-crosshairs"></i>&nbsp; Fijar origen</button><p id="cloneStatus" style="font-size:13px;color:#8e8e93;margin-top:6px">1) Pulsa «Fijar origen» y toca la zona que quieres copiar. 2) Pinta donde quieras pegarla (la cruz verde muestra de dónde se copia).</p></div>
                             <div class="dk-row"><div class="dk-head"><span>Tamaño del pincel</span><span class="dk-val" id="valHealSize">2.5%</span></div>
                             <input type="range" class="ios-slider" id="paramHealSize" min="0.5" max="10" step="0.1" value="2.5" oninput="setHealSize(this.value)"></div>
                             <div class="dk-row"><div class="dk-head"><span>Dureza</span><span class="dk-val" id="valHealHard">55%</span></div>
                             <input type="range" class="ios-slider" id="paramHealHard" min="0" max="100" step="1" value="55" oninput="setHealHard(this.value)"></div>
                             <div class="dk-row"><div class="dk-head"><span>Suavidad</span><span class="dk-val" id="valHealSoft">0%</span></div>
                             <input type="range" class="ios-slider" id="paramHealSoft" min="0" max="100" step="1" value="0" oninput="setHealSoft(this.value)"></div>
-                            <p style="font-size:13px;color:#8e8e93;text-align:center;margin-top:8px">Toca o pasa el dedo sobre una mancha, grano o imperfección: se rellena con la textura de alrededor. Dureza = qué tan nítido es el borde del pincel; Suavidad = suaviza la textura que se copia (útil en piel). Deshaz con ↶ si no te gusta.</p>
+                            <p id="healHintHeal" style="font-size:13px;color:#8e8e93;text-align:center;margin-top:8px">Toca o pasa el dedo sobre una mancha, grano o imperfección: se rellena con la textura de alrededor. Dureza = qué tan nítido es el borde del pincel; Suavidad = suaviza la textura que se copia (útil en piel). Deshaz con ↶ si no te gusta.</p>
+                        </div>
+
+                        <!-- LOCAL -->
+                        <div id="panel-local" class="dk-panel">
+                            <div class="dk-pills" style="margin:0 0 6px"><button class="dk-pill on" id="lcTool_brush" onclick="setLocalTool('brush')">Pincel</button><button class="dk-pill" id="lcTool_linear" onclick="setLocalTool('linear')">Degradado</button><button class="dk-pill" id="lcTool_radial" onclick="setLocalTool('radial')">Radial</button></div>
+                            <div class="lc-layers" id="localLayers"></div>
+                            <div id="lcBrushCtl">
+                                <div class="dk-row" id="lcSizeRow"><div class="dk-head"><span>Tamaño del pincel</span><span class="dk-val" id="lcSizeVal">8%</span></div><input type="range" class="ios-slider" id="lcSize" min="1" max="30" step="1" value="8" oninput="onLocalBrush('size',this.value)"></div>
+                                <div class="dk-row"><div class="dk-head"><span>Suavidad del borde</span><span class="dk-val" id="lcSoftVal">60%</span></div><input type="range" class="ios-slider" id="lcSoft" min="0" max="100" step="1" value="60" oninput="onLocalBrush('soft',this.value)"></div>
+                            </div>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 6px">
+                                <button class="dk-btn" id="lcEraseBtn" onclick="toggleLocalErase()">Borrar zona</button>
+                                <button class="dk-btn" id="lcInvBtn" onclick="toggleLocalInvert()" style="display:none">Invertir</button>
+                                <label style="display:flex;align-items:center;gap:6px;font-size:14px;color:var(--txt-dim)"><input type="checkbox" checked onchange="toggleLocalMask(this.checked)"> Ver zona</label>
+                            </div>
+                            <div id="localAdj"></div>
+                            <p id="lcHint" style="font-size:13px;color:#8e8e93;text-align:center;margin-top:8px"></p>
                         </div>
 
                         <!-- PERFILES -->
@@ -565,8 +606,18 @@
                                             <button id="btnCurveChanG" onclick="setCurveChannel('g')" style="color:#5fe08a">G</button>
                                             <button id="btnCurveChanB" onclick="setCurveChannel('b')" style="color:#6ab4ff">B</button>
                                         </div>
+                                        <div class="dk-pipettes"><span>Pipetas</span>
+                                            <button id="pip_black" onclick="setCurvePipette('black')" style="background:#000;color:#fff" aria-label="Punto negro"><i class="fa-solid fa-eye-dropper"></i></button>
+                                            <button id="pip_gray" onclick="setCurvePipette('gray')" style="background:#808080;color:#fff" aria-label="Punto gris"><i class="fa-solid fa-eye-dropper"></i></button>
+                                            <button id="pip_white" onclick="setCurvePipette('white')" style="background:#fff;color:#000" aria-label="Punto blanco"><i class="fa-solid fa-eye-dropper"></i></button></div>
                                         <div class="dk-io"><span>Entrada <b id="curveIn">–</b></span><span>Salida <b id="curveOut">–</b></span></div>
-                                        <div class="dk-seg">
+                                        <div class="dk-curve-btns">
+                                            <button class="dk-btn" onclick="autoCurve()">Automático</button>
+                                            <button class="dk-btn" id="btnCurveDel" onclick="deleteCurvePoint()" style="opacity:.35">Quitar punto</button>
+                                            <button class="dk-btn" onclick="resetCurveChannelOnly()">Canal</button>
+                                            <button class="dk-btn" onclick="resetRgbCurves()">Todo</button>
+                                        </div>
+                                        <details class="dk-opts"><summary>Opciones del gráfico</summary><div class="dk-seg">
                                             <button id="btnModeLight" class="on" onclick="setCurveOpt('mode','light')">Luz</button>
                                             <button id="btnModePct" onclick="setCurveOpt('mode','pct')">% Tinta</button>
                                         </div>
@@ -579,12 +630,7 @@
                                             <label><input type="checkbox" checked onchange="setCurveOpt('base',this.checked)"> Línea de base</label>
                                             <label><input type="checkbox" checked onchange="setCurveOpt('inter',this.checked)"> Intersección</label>
                                         </div>
-                                        <div class="dk-curve-btns">
-                                            <button class="dk-btn" onclick="autoCurve()">Automático</button>
-                                            <button class="dk-btn" id="btnCurveDel" onclick="deleteCurvePoint()" style="opacity:.35">Quitar punto</button>
-                                            <button class="dk-btn" onclick="resetCurveChannelOnly()">Canal</button>
-                                            <button class="dk-btn" onclick="resetRgbCurves()">Todo</button>
-                                        </div>
+                                        </details>
                                     </div>
                                 </div>
                             </div>
@@ -654,7 +700,8 @@
                                 <button class="dk-pill" data-fx="prism" onclick="switchSubTab('efectos','prism')">Prisma</button>
                                 <button class="dk-pill" data-fx="vintageLens" onclick="switchSubTab('efectos','vintageLens')">Lentes</button>
                                 <button class="dk-pill" data-fx="datamosh" onclick="switchSubTab('efectos','datamosh')">Datamosh</button>
-                            </div>
+                            </div><div id="fxMask" style="margin:0 0 10px"><button class="dk-btn st-wide" id="pmPaintBtn" onclick="togglePrismPaint()"></button><div id="pmTools" style="display:none"><div class="dk-seg" style="margin:8px 0"><button id="pmModeRemove" class="on" onclick="setPrismMode(false)">Quitar efecto</button><button id="pmModeBack" onclick="setPrismMode(true)">Devolver efecto</button></div><div class="dk-row"><div class="dk-head"><span>Tamaño del pincel</span><span class="dk-val" id="pmSizeVal">10%</span></div><input type="range" class="ios-slider" id="pmSize" min="1" max="30" value="10" oninput="onPrismBrush('size',this.value)"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="dk-btn" id="pmInvBtn" onclick="togglePrismInvert()">Invertir</button><button class="dk-btn" onclick="clearPrismMask()">Borrar todo</button></div></div><p style="font-size:13px;color:#8e8e93;margin-top:6px">Pinta sobre la cara o el cuerpo para que ahí no se vea el efecto de la pestaña que tienes abierta. Cada efecto (Glitch, Prisma, Lentes, Datamosh) guarda sus propias zonas.</p></div>
+                            
                             <div id="panel-rgbGlitch">
                                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">
                                     <button onclick="setRgbGlitchMode('cyberGlitch')" id="rgbBtnCyber" class="dk-btn main">Glitch CRT</button>
@@ -823,6 +870,28 @@
                 <button class="dk-btn main st-wide" onclick="document.getElementById('importJsonInput').click()"><i class="fa-solid fa-file-import"></i>&nbsp; Importar respaldo</button>
                 <input type="file" id="importJsonInput" accept=".json,application/json" style="display:none" onchange="importBackupFile(this)">
                 <div class="st-note" id="stBackupMsg"></div>
+            </div>
+        </div>
+    </div>
+    <div id="exportModal" class="hidden" role="dialog" aria-label="Exportar">
+        <div class="st-backdrop" onclick="closeExportSheet()"></div>
+        <div class="st-panel">
+            <div class="st-head"><b>Exportar</b><button class="st-x" onclick="closeExportSheet()" aria-label="Cerrar">✕</button></div>
+            <div class="st-body" id="exMain">
+                <div class="st-row"><span>Formato</span><div class="dk-seg st-seg" id="exFmt"><button data-v="jpg" onclick="setExportOpt('fmt','jpg')">JPG</button><button data-v="png" onclick="setExportOpt('fmt','png')">PNG</button><button data-v="webp" onclick="setExportOpt('fmt','webp')">WebP</button></div></div>
+                <div class="st-row"><span>Tamaño</span><div class="dk-seg st-seg" id="exSize"><button data-v="0" onclick="setExportOpt('size',0)">Original</button><button data-v="2048" onclick="setExportOpt('size',2048)">2048</button><button data-v="1080" onclick="setExportOpt('size',1080)">1080</button></div></div>
+                <div class="st-row" id="exQRow"><span>Calidad</span><output id="exQVal">92%</output></div>
+                <input type="range" class="ios-slider" id="exQ" min="50" max="100" step="1" value="92" oninput="setExportOpt('q',+this.value)">
+                <div class="st-note">Tamaño = lado más largo en píxeles. «Original» llega hasta 16 MP (límite del iPhone).</div>
+                <button class="dk-btn main st-wide" onclick="exportCurrentPhoto()"><i class="fa-solid fa-arrow-up-from-bracket"></i>&nbsp; Exportar esta foto</button>
+                <button class="dk-btn st-wide" id="exBatchBtn" onclick="exportAllPhotos()"></button>
+                <div class="st-note">El lote aplica a cada foto sus propios ajustes. Al terminar podrás compartirlas juntas o bajar un .zip.</div>
+            </div>
+            <div class="st-body" id="exDone" style="display:none">
+                <div class="st-note" id="exDoneTxt" style="font-size:16px;color:var(--fg)"></div>
+                <button class="dk-btn main st-wide" id="exShareBtn" onclick="shareBatch()"><i class="fa-solid fa-share-nodes"></i>&nbsp; Compartir / guardar en Fotos</button>
+                <button class="dk-btn st-wide" onclick="zipBatch()"><i class="fa-solid fa-file-zipper"></i>&nbsp; Descargar .zip</button>
+                <button class="dk-btn st-wide" onclick="closeExportSheet()">Cerrar</button>
             </div>
         </div>
     </div>
@@ -2870,7 +2939,7 @@
                 profile: 'none', profileIntensity: 100, presetId: null, presetAmt: 100,
                 exposure: 0, contrast: 0, highlights: 0, shadows: 0, whites: 0, blacks: 0,
                 temp: 0, tint: 0, vibrance: 0, saturation: 0,
-                texture: 0, clarity: 0, dehaze: 0, vignette: 0, grain: 0, unsharpMask: 0, blur: 0,
+                texture: 0, clarity: 0, dehaze: 0, vignette: 0, grain: 0, unsharpMask: 0, blur: 0, denoise: 0, locals: [], fxMasks: {},
                 levels: { inBlack: 0, inGamma: 1, inWhite: 255, outBlack: 0, outWhite: 255, channels: {} },
                 selectiveColor: { channel: 'reds', method: 'relative', reds: sc(), yellows: sc(), greens: sc(), cyans: sc(), blues: sc(), magentas: sc(), whites: sc(), neutrals: sc(), blacks: sc() },
                 hsl, grade,
@@ -2915,7 +2984,7 @@
                 { sec: 'Detalle' },
                 { k: 'texture', l: 'Textura' },
                 { k: 'unsharpMask', l: 'Enfoque', min: 0, max: 200 },
-                { k: 'blur', l: 'Desenfoque', min: 0, max: 100 },
+                { k: 'blur', l: 'Desenfoque', min: 0, max: 100 }, { k: 'denoise', l: 'Reducción de ruido', min: 0, max: 100 },
                 { sec: 'Efectos' },
                 { k: 'vignette', l: 'Viñeta' },
                 { k: 'grain', l: 'Grano', min: 0, max: 100 }
@@ -3205,12 +3274,22 @@
             wctx.drawImage(src, 0, 0, w, h);
 
             runPixelStages(wctx, w, h);
+            if (editParams.denoise > 0) applyDenoise(wctx, w, h);
+            applyLocals(wctx, w, h);
             applyTextureClarityVignetteGrain(wctx, w, h);
+            const _m1 = fxMaskSave('glitch', wctx, w, h);
             if (editParams.rgbOffset > 0) applyRgbGlitchEffect(wctx, w, h);
+            fxMaskRestore('glitch', wctx, w, h, _m1);
+            const _m2 = fxMaskSave('prism', wctx, w, h);
             if (editParams.radialPrismEffect > 0) applyRadialSpectrumBlur(wctx, w, h);
             if (editParams.prismSpectrum > 0 || editParams.prismSplit > 0 || editParams.prismKaleido > 0) applyGlassPrismEffects(wctx, w, h);
+            fxMaskRestore('prism', wctx, w, h, _m2);
+            const _m3 = fxMaskSave('lens', wctx, w, h);
             if (editParams.anamorphicFlare > 0 || editParams.holgaLomo > 0) applyVintageLensAberrations(wctx, w, h);
+            fxMaskRestore('lens', wctx, w, h, _m3);
+            const _m4 = fxMaskSave('mosh', wctx, w, h);
             if (editParams.scanlines > 0 || editParams.vhsTape > 0) applyDatamoshAndScanlines(wctx, w, h);
+            fxMaskRestore('mosh', wctx, w, h, _m4);
 
             if (!fr.bg && fr.px === 0 && fr.py === 0) ctx.clearRect(0, 0, fr.W, fr.H);
             ctx.drawImage(work, 0, 0, w, h, fr.px, fr.py, w, h);
@@ -4548,7 +4627,7 @@
         function setupHealHandlers() {
             const ov = $('healOverlay'); if (!ov) return;
             ov.addEventListener('pointerdown', (e) => {
-                if (healBusy) return; e.preventDefault(); e.stopPropagation(); ov.setPointerCapture(e.pointerId);
+                if (healBusy) return; e.preventDefault(); e.stopPropagation(); if (cloneHandleDown(e)) return; ov.setPointerCapture(e.pointerId);
                 const p = healToImage(e); healStroke = { pts: [p], css: [{ x: p.cx, y: p.cy }] }; healDrawOverlay({ x: p.cx, y: p.cy });
             });
             ov.addEventListener('pointermove', (e) => {
@@ -4694,7 +4773,7 @@
                 ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); moved = false;
                 if (ptrs.size === 2) {
                     // cancela cualquier trazo del corrector o comparación en curso
-                    if (typeof healStroke !== 'undefined') { healStroke = null; if (isHealActive) healDrawOverlay(null); }
+                    if (typeof healStroke !== 'undefined') { healStroke = null; if (isHealActive) healDrawOverlay(null); } if (typeof localCancelStroke === 'function') localCancelStroke();
                     window.dispatchEvent(new Event('x-cancel-compare'));
                     const r = vp.getBoundingClientRect(), m = mid();
                     g = { d0: dist(), s0: zoomS, mx: m.x - (r.left + r.width / 2), my: m.y - (r.top + r.height / 2), x0: zoomX, y0: zoomY };
@@ -4712,7 +4791,7 @@
                     // mantiene bajo los dedos el punto donde empezó el gesto
                     zoomX = cx - (g.mx - g.x0) * ns / g.s0; zoomY = cy - (g.my - g.y0) * ns / g.s0; zoomS = ns;
                     clampZoomPan(); applyZoomTransform(); moved = true;
-                } else if (ptrs.size === 1 && g && g.single && zoomS > 1.02 && !isHealActive && !isEyedropperActive) {
+                } else if (ptrs.size === 1 && g && g.single && zoomS > 1.02 && !isHealActive && !isLocalActive && !isEyedropperActive) {
                     const dx = e.clientX - g.x, dy = e.clientY - g.y;
                     if (Math.hypot(dx, dy) > 6) { moved = true; window.dispatchEvent(new Event('x-cancel-compare')); zoomX = g.x0 + dx; zoomY = g.y0 + dy; clampZoomPan(); applyZoomTransform(); }
                 }
@@ -4721,7 +4800,7 @@
                 if (!ptrs.has(e.pointerId)) return;
                 const was2 = ptrs.size >= 2; ptrs.delete(e.pointerId);
                 if (was2) { g = null; if (ptrs.size === 1) { const p = [...ptrs.values()][0]; g = { single: true, x: p.x, y: p.y, x0: zoomX, y0: zoomY, afterPinch: true }; } if (zoomS < 1.05) resetZoom(); else scheduleZoomRes(); e.stopPropagation(); return; }
-                if (g && g.single && !g.afterPinch && !moved && !isHealActive && !isEyedropperActive && e.type === 'pointerup') {
+                if (g && g.single && !g.afterPinch && !moved && !isHealActive && !isLocalActive && !isEyedropperActive && e.type === 'pointerup') {
                     const now = Date.now();
                     if (now - lastTap < 300) { lastTap = 0; if (zoomS > 1.02) resetZoom(); else { zoomS = 2.5; zoomX = 0; zoomY = 0; applyZoomTransform(); scheduleZoomRes(); } }
                     else lastTap = now;
@@ -4883,6 +4962,727 @@
             });
         })();
 
+
+        // =====================================================================
+        //  FASE 2: galería guardada, ajustes locales, exportar, antes/después,
+        //  pipetas de curvas, clonar, reducción de ruido, modo sin internet
+        // =====================================================================
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+        function canvasToBlob(c, type, q) { return new Promise(res => c.toBlob(b => res(b), type, q)); }
+        function loadImg(url) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; }); }
+        function imgToCanvas(img) { const c = document.createElement('canvas'); c.width = img.naturalWidth || img.width; c.height = img.naturalHeight || img.height; c.getContext('2d').drawImage(img, 0, 0); return c; }
+        function makeThumb(img) {
+            try {
+                const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height, s = 260 / Math.max(w, h), t = document.createElement('canvas');
+                t.width = Math.max(1, Math.round(w * s)); t.height = Math.max(1, Math.round(h * s));
+                t.getContext('2d').drawImage(img, 0, 0, t.width, t.height);
+                return t.toDataURL('image/jpeg', 0.8);
+            } catch (e) { return null; }
+        }
+
+        // ---------- 1) Galería guardada (IndexedDB) ----------
+        const DB_NAME = 'diegoX_gallery', DB_STORE = 'photos';
+        let _dbp = null;
+        function dbOpen() {
+            if (_dbp) return _dbp;
+            _dbp = new Promise((res, rej) => {
+                if (!window.indexedDB) { rej(new Error('sin IndexedDB')); return; }
+                const rq = indexedDB.open(DB_NAME, 1);
+                rq.onupgradeneeded = () => { rq.result.createObjectStore(DB_STORE, { keyPath: 'id' }); };
+                rq.onsuccess = () => res(rq.result);
+                rq.onerror = () => rej(rq.error);
+            });
+            _dbp.catch(() => { _dbp = null; });
+            return _dbp;
+        }
+        function dbDo(mode, fn) {
+            return dbOpen().then(db => new Promise((res, rej) => {
+                const tx = db.transaction(DB_STORE, mode), r = fn(tx.objectStore(DB_STORE));
+                tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
+            }));
+        }
+        function schedulePersist(item, delay) {
+            if (!item || !item.id) return;
+            clearTimeout(item._pt);
+            item._pt = setTimeout(() => persistItem(item), delay == null ? 900 : delay);
+        }
+        async function persistItem(item) {
+            try {
+                if (!item.blob || !galleryPhotos.includes(item)) return;
+                let edited = item.blobEdited || null;
+                if (item.img && item.img !== item._savedImg) {
+                    const src = item.img;
+                    edited = await canvasToBlob(src, 'image/jpeg', 0.95);
+                    item.blobEdited = edited; item._savedImg = src;
+                }
+                await dbDo('readwrite', st => st.put({ id: item.id, order: item.order, orig: item.blob, edited, params: item.params, curves: item.curves, thumb: item.thumb }));
+                if (item !== currentItem) { item.img = null; item.imgOriginal = null; item._savedImg = null; }
+            } catch (e) { console.warn('No se pudo guardar', e); }
+        }
+        async function loadGalleryFromDb() {
+            try {
+                const recs = await dbDo('readonly', st => st.getAll());
+                if (!recs || !recs.length) return;
+                recs.sort((a, b) => b.order - a.order);
+                const have = new Set(galleryPhotos.map(g => g.id));
+                recs.forEach(r => {
+                    if (have.has(r.id) || !r.orig) return;
+                    const url = URL.createObjectURL(r.orig);
+                    galleryPhotos.push({ id: r.id, order: r.order, blob: r.orig, blobEdited: r.edited || null, url, thumb: r.thumb || url, params: r.params || null, curves: r.curves || null, img: null, imgOriginal: null });
+                });
+                updateGalleryUI();
+                if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+            } catch (e) { console.warn('Galería no disponible', e); }
+        }
+        async function ensureItemImages(item) {
+            if (!item.imgOriginal) item.imgOriginal = await loadImg(item.url || URL.createObjectURL(item.blob));
+            if (!item.img && item.blobEdited) {
+                const u = URL.createObjectURL(item.blobEdited);
+                try { item.img = imgToCanvas(await loadImg(u)); } finally { URL.revokeObjectURL(u); }
+                item._savedImg = item.img;
+            }
+        }
+        addPhotoFromUrl = function (url, blobIn) {
+            const img = new Image();
+            img.onload = async () => {
+                saveCurrentEdits();
+                let blob = blobIn || null;
+                if (!blob) { try { blob = await (await fetch(url)).blob(); } catch (e) {} }
+                const item = { id: 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), order: Date.now(), url, blob, thumb: makeThumb(img) || url, params: null, curves: null, img: null, imgOriginal: img };
+                galleryPhotos.unshift(item);
+                setCurrentImage(item, img, true);
+                updateGalleryUI();
+                switchMainTab('editor');
+                if (item.blob) schedulePersist(item, 300);
+            };
+            img.onerror = () => showToast('No se pudo abrir la imagen');
+            img.src = url;
+        };
+        openGalleryItem = async function (i) {
+            const item = galleryPhotos[i]; if (!item) return;
+            saveCurrentEdits();
+            if (item === currentItem) { switchMainTab('editor'); return; }
+            try { await ensureItemImages(item); } catch (e) { showToast('No se pudo abrir la foto'); return; }
+            setCurrentImage(item, item.imgOriginal, false);
+            switchMainTab('editor');
+        };
+        const _saveCur = saveCurrentEdits;
+        saveCurrentEdits = function () { _saveCur(); if (currentItem && currentItem.id) schedulePersist(currentItem, 150); };
+        const _confirmDelete = confirmDelete;
+        confirmDelete = function () {
+            const ids = Array.from(selectedPhotoIndexes).map(i => galleryPhotos[i] && galleryPhotos[i].id).filter(Boolean);
+            _confirmDelete();
+            ids.forEach(id => dbDo('readwrite', st => st.delete(id)).catch(() => {}));
+        };
+        let _curPT = null;
+        const _rcr = requestCanvasRender;
+        requestCanvasRender = function () {
+            _rcr();
+            if (currentItem && currentItem.id) { clearTimeout(_curPT); _curPT = setTimeout(() => { if (currentItem && imageLoaded && !isSliderInteracting) saveCurrentEdits(); }, 1800); }
+        };
+        function flushCurrent() { if (currentItem && currentItem.id && imageLoaded) { try { saveCurrentEdits(); } catch (e) {} } }
+        document.addEventListener('visibilitychange', () => { if (document.hidden) flushCurrent(); });
+        window.addEventListener('pagehide', flushCurrent);
+
+        // ---------- Modo sin internet ----------
+        function registerSW() {
+            if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+
+        // ---------- 4) Exportar: calidad, tamaño, lote ----------
+        const EXPORT_KEY = 'diegoX_export_v1';
+        let exportOpts = { fmt: 'jpg', size: 0, q: 92 };
+        try { Object.assign(exportOpts, JSON.parse(localStorage.getItem(EXPORT_KEY) || '{}')); } catch (e) {}
+        function syncExportUi() {
+            document.querySelectorAll('#exFmt button').forEach(b => b.classList.toggle('on', b.dataset.v === exportOpts.fmt));
+            document.querySelectorAll('#exSize button').forEach(b => b.classList.toggle('on', +b.dataset.v === +exportOpts.size));
+            const q = $('exQ'); if (q) q.value = exportOpts.q;
+            const qv = $('exQVal'); if (qv) qv.textContent = exportOpts.fmt === 'png' ? 'sin pérdida' : exportOpts.q + '%';
+            const row = $('exQRow'); if (row) row.style.opacity = exportOpts.fmt === 'png' ? .4 : 1;
+            const bb = $('exBatchBtn'); if (bb) bb.innerHTML = '<i class="fa-solid fa-images"></i>&nbsp; Exportar toda la galería (' + galleryPhotos.length + ')';
+        }
+        function setExportOpt(k, v) { exportOpts[k] = v; try { localStorage.setItem(EXPORT_KEY, JSON.stringify(exportOpts)); } catch (e) {} syncExportUi(); }
+        function exView(v) { $('exMain').style.display = v === 'main' ? '' : 'none'; $('exDone').style.display = v === 'done' ? '' : 'none'; }
+        function openExportSheet() { if (!imageLoaded) return; if (typeof closeEditorMenu === 'function') closeEditorMenu(); syncExportUi(); exView('main'); $('exportModal').classList.remove('hidden'); }
+        function closeExportSheet() { $('exportModal').classList.add('hidden'); }
+        exportEditedPhoto = openExportSheet;
+        async function renderToBlob() {
+            let out = renderFullToCanvas();
+            const L = +exportOpts.size;
+            if (L > 0) {
+                const m = Math.max(out.width, out.height);
+                if (m > L) {
+                    const s = L / m, c = document.createElement('canvas'); c.width = Math.max(1, Math.round(out.width * s)); c.height = Math.max(1, Math.round(out.height * s));
+                    const cx = c.getContext('2d'); cx.imageSmoothingQuality = 'high'; cx.drawImage(out, 0, 0, c.width, c.height); out = c;
+                }
+            }
+            const f = exportOpts.fmt, mime = f === 'png' ? 'image/png' : f === 'webp' ? 'image/webp' : 'image/jpeg';
+            return canvasToBlob(out, mime, exportOpts.q / 100);
+        }
+        const exExt = () => exportOpts.fmt === 'png' ? 'png' : exportOpts.fmt === 'webp' ? 'webp' : 'jpg';
+        async function exportCurrentPhoto() {
+            closeExportSheet();
+            if (!imageLoaded) return;
+            if (isCropActive) stopCropTool();
+            showToast('Procesando foto…', 0);
+            await sleep(40);
+            try { await document.fonts.load('bold 24px "Space Mono"'); } catch (_) {}
+            let blob;
+            try { blob = await renderToBlob(); } catch (err) { showToast('No se pudo procesar a máxima resolución'); return; }
+            showToast('Listo', 600);
+            if (!blob) return;
+            currentExportBlob = blob;
+            if (currentExportUrl) URL.revokeObjectURL(currentExportUrl);
+            const blobUrl = currentExportUrl = URL.createObjectURL(blob), filename = `DiegoX_${Date.now()}.${exExt()}`;
+            const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            if (isIos) {
+                $('iosSaveImage').src = blobUrl;
+                const dl = $('btnIosDirectDownload'); dl.href = blobUrl; dl.download = filename;
+                $('iosSaveModal').classList.remove('hidden');
+            } else {
+                const a = document.createElement('a'); a.download = filename; a.href = blobUrl;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            }
+        }
+        const _crcT = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+        function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = _crcT[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+        async function makeZip(files) {
+            const enc = new TextEncoder(), parts = [], cen = []; let off = 0;
+            for (const f of files) {
+                const data = new Uint8Array(await f.blob.arrayBuffer()), name = enc.encode(f.name), crc = crc32(data);
+                const lh = new DataView(new ArrayBuffer(30));
+                lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true); lh.setUint16(10, 0, true); lh.setUint16(12, 0x21, true);
+                lh.setUint32(14, crc, true); lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true); lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+                parts.push(lh.buffer, name, data);
+                const ch = new DataView(new ArrayBuffer(46));
+                ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true); ch.setUint16(12, 0, true); ch.setUint16(14, 0x21, true);
+                ch.setUint32(16, crc, true); ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true); ch.setUint16(28, name.length, true); ch.setUint32(42, off, true);
+                cen.push(ch.buffer, name);
+                off += 30 + name.length + data.length;
+            }
+            let cs = 0; cen.forEach(b => cs += b.byteLength);
+            const end = new DataView(new ArrayBuffer(22));
+            end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, cs, true); end.setUint32(16, off, true);
+            return new Blob([...parts, ...cen, end.buffer], { type: 'application/zip' });
+        }
+        let batchFiles = [];
+        async function exportAllPhotos() {
+            if (!galleryPhotos.length) return;
+            closeExportSheet(); saveCurrentEdits(); if (isCropActive) stopCropTool();
+            const keep = { rawImage, editParams, curvePoints };
+            const n = galleryPhotos.length; batchFiles = [];
+            try { await document.fonts.load('bold 24px "Space Mono"'); } catch (_) {}
+            for (let i = 0; i < n; i++) {
+                showToast(`Procesando ${i + 1} de ${n}…`, 0); await sleep(30);
+                const it = galleryPhotos[i], was = !!(it.imgOriginal || it.img);
+                try {
+                    await ensureItemImages(it);
+                    rawImage = it.img || it.imgOriginal;
+                    editParams = it.params ? mergeParams(it.params) : defaultParams();
+                    curvePoints = it.curves ? clone(it.curves) : defaultCurves();
+                    rebuildCurveLuts();
+                    const b = await renderToBlob();
+                    if (b) batchFiles.push({ name: `DiegoX_${String(i + 1).padStart(2, '0')}.${exExt()}`, blob: b });
+                } catch (e) { console.warn('Lote', i, e); }
+                if (!was && it !== currentItem) { it.img = null; it.imgOriginal = null; it._savedImg = null; }
+                maskCache.clear();
+            }
+            rawImage = keep.rawImage; editParams = keep.editParams; curvePoints = keep.curvePoints; rebuildCurveLuts();
+            _pxScale = Math.max(previewSrc.width, previewSrc.height) / Math.max(rawImage.width, rawImage.height);
+            requestCanvasRender();
+            showToast('Listo', 600);
+            $('exDoneTxt').textContent = batchFiles.length + ' de ' + n + ' fotos listas.';
+            const canShare = !!(navigator.canShare && batchFiles.length && navigator.canShare({ files: batchFiles.map(f => new File([f.blob], f.name, { type: f.blob.type })) }));
+            $('exShareBtn').style.display = canShare ? '' : 'none';
+            exView('done'); $('exportModal').classList.remove('hidden');
+        }
+        async function shareBatch() {
+            try { await navigator.share({ files: batchFiles.map(f => new File([f.blob], f.name, { type: f.blob.type })), title: 'Diego-X Studio' }); }
+            catch (e) { if (e && e.name !== 'AbortError') showToast('No se pudo compartir'); }
+        }
+        async function zipBatch() {
+            if (!batchFiles.length) return;
+            showToast('Creando ZIP…', 0);
+            const z = await makeZip(batchFiles), url = URL.createObjectURL(z);
+            const a = document.createElement('a'); a.href = url; a.download = `DiegoX_${Date.now()}.zip`; document.body.appendChild(a); a.click();
+            setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 4000);
+            showToast('ZIP listo', 800);
+        }
+
+        // ---------- 5) Antes / después ----------
+        let splitOn = false, splitPos = 0.5, _lastRender = null;
+        const _ret = renderEditToCanvas;
+        renderEditToCanvas = function (out, src, w, h) { if (out && out.id === 'photoCanvas') _lastRender = { w, h }; return _ret.apply(this, arguments); };
+        function toggleSplit() {
+            splitOn = !splitOn; if (splitOn) splitPos = 0.5;
+            const b = $('btnSplitMenu'); if (b) b.classList.toggle('active', splitOn);
+            if (typeof closeEditorMenu === 'function') closeEditorMenu();
+            requestCanvasRender();
+        }
+        function drawSplit() {
+            const cv = $('photoCanvas'); if (!cv || !previewSrc || !_lastRender) return;
+            const { w, h } = _lastRender, fr = computeFrame(w, h), c = cv.getContext('2d');
+            const s = Math.max(1, cv.width / Math.max(1, cv.clientWidth)), x = fr.px + w * splitPos;
+            c.save(); c.beginPath(); c.rect(fr.px, fr.py, w * splitPos, h); c.clip();
+            c.drawImage(previewSrc, 0, 0, previewSrc.width, previewSrc.height, fr.px, fr.py, w, h); c.restore();
+            c.save(); c.strokeStyle = '#fff'; c.lineWidth = 2 * s; c.shadowColor = 'rgba(0,0,0,.6)'; c.shadowBlur = 4 * s;
+            c.beginPath(); c.moveTo(x, fr.py); c.lineTo(x, fr.py + h); c.stroke();
+            const cy = fr.py + h / 2, R = 16 * s;
+            c.fillStyle = '#fff'; c.beginPath(); c.arc(x, cy, R, 0, Math.PI * 2); c.fill(); c.shadowBlur = 0;
+            c.fillStyle = '#111'; c.beginPath(); c.moveTo(x - R * .62, cy); c.lineTo(x - R * .22, cy - R * .38); c.lineTo(x - R * .22, cy + R * .38); c.fill();
+            c.beginPath(); c.moveTo(x + R * .62, cy); c.lineTo(x + R * .22, cy - R * .38); c.lineTo(x + R * .22, cy + R * .38); c.fill();
+            c.font = `bold ${Math.round(11 * s)}px sans-serif`; c.fillStyle = 'rgba(0,0,0,.55)';
+            const lab = (t, lx, al) => { c.textAlign = al; const tw = c.measureText(t).width; c.fillRect(al === 'left' ? lx - 6 * s : lx - tw - 6 * s, fr.py + 8 * s, tw + 12 * s, 20 * s); c.fillStyle = '#fff'; c.fillText(t, lx, fr.py + 22 * s); c.fillStyle = 'rgba(0,0,0,.55)'; };
+            if (splitPos > .15) lab('ANTES', fr.px + 10 * s, 'left');
+            if (splitPos < .85) lab('DESPUÉS', fr.px + w - 10 * s, 'right');
+            c.restore();
+        }
+        function setupSplitHandlers() {
+            const root = $('editorView'); if (!root) return;
+            let drag = null;
+            const lineClientX = () => { const cv = $('photoCanvas'), r = cv.getBoundingClientRect(), fr = computeFrame(_lastRender.w, _lastRender.h); return r.left + (fr.px + _lastRender.w * splitPos) / fr.W * r.width; };
+            const setFrom = (e) => { const cv = $('photoCanvas'), r = cv.getBoundingClientRect(), fr = computeFrame(_lastRender.w, _lastRender.h); const x = (e.clientX - r.left) / r.width * fr.W; splitPos = Math.max(0.02, Math.min(0.98, (x - fr.px) / _lastRender.w)); requestCanvasRender(); };
+            root.addEventListener('pointerdown', (e) => {
+                if (!splitOn || !_lastRender || !e.target.closest || !e.target.closest('#canvasViewport')) return;
+                if (Math.abs(e.clientX - lineClientX()) > 34) return;
+                drag = e.pointerId; e.stopPropagation(); e.preventDefault(); setFrom(e);
+            }, true);
+            root.addEventListener('pointermove', (e) => { if (drag === e.pointerId) { e.stopPropagation(); e.preventDefault(); setFrom(e); } }, true);
+            const up = (e) => { if (drag === e.pointerId) { drag = null; e.stopPropagation(); } };
+            root.addEventListener('pointerup', up, true); root.addEventListener('pointercancel', up, true);
+        }
+
+        // ---------- 6) Pipetas de curvas ----------
+        let curvePip = null;
+        function setCurvePipette(t) {
+            curvePip = curvePip === t ? null : t;
+            ['black', 'gray', 'white'].forEach(k => { const b = $('pip_' + k); if (b) b.classList.toggle('on', curvePip === k); });
+            const vp = $('canvasViewport'); if (vp) vp.classList.toggle('pipetting', !!curvePip);
+            if (curvePip) showToast('Toca un punto de la foto', 1600);
+        }
+        function setPointOnCurve(pts, x, y) {
+            x = Math.max(0, Math.min(255, Math.round(x)));
+            if (x <= 1) { pts[0].y = y; }
+            else if (x >= 254) { pts[pts.length - 1].y = y; }
+            else {
+                for (let i = pts.length - 2; i > 0; i--) if (Math.abs(pts[i].x - x) <= 2) pts.splice(i, 1);
+                let k = 1; while (k < pts.length - 1 && pts[k].x < x) k++;
+                pts.splice(k, 0, { x, y });
+                for (let i = 0; i < pts.length; i++) { if (i < k) pts[i].y = Math.min(pts[i].y, y); else if (i > k) pts[i].y = Math.max(pts[i].y, y); }
+            }
+        }
+        function samplePreviewRGB(fx, fy) {
+            const pw = previewSrc.width, ph = previewSrc.height, sx = Math.round(fx * pw), sy = Math.round(fy * ph);
+            const t = samplePreviewRGB.c || (samplePreviewRGB.c = document.createElement('canvas'));
+            t.width = t.height = 1; const x = t.getContext('2d', { willReadFrequently: true });
+            x.drawImage(previewSrc, Math.max(0, sx - 2), Math.max(0, sy - 2), 5, 5, 0, 0, 1, 1);
+            const d = x.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2]];
+        }
+        function setupPipetteHandler() {
+            const cv = $('photoCanvas'); if (!cv) return;
+            cv.addEventListener('click', (e) => {
+                if (!curvePip || !imageLoaded || !previewSrc) return;
+                const p = healToImage(e); if (p.x < 0 || p.y < 0 || p.x > 1 || p.y > 1) return;
+                e.stopPropagation();
+                const v = samplePreviewRGB(p.x, p.y), tgt = curvePip === 'black' ? 0 : curvePip === 'white' ? 255 : 128;
+                pushHistoryState('Pipeta de curvas');
+                ['r', 'g', 'b'].forEach((ch, i) => setPointOnCurve(curvePoints[ch], v[i], tgt));
+                curveSel = -1; rebuildCurveLuts(); drawRgbCurveGraph(); requestCanvasRender();
+                showToast(curvePip === 'black' ? 'Punto negro fijado' : curvePip === 'white' ? 'Punto blanco fijado' : 'Gris neutro fijado', 1200);
+            });
+        }
+
+        // ---------- 2 y 7) Ajustes locales (pincel y degradados, con nitidez / suavizado) ----------
+        let isLocalActive = false, localSel = null, localTool = 'brush', localRevCtr = Date.now(), localIdCtr = Date.now(), localShowMask = true;
+        const localBrush = { size: 8, soft: 60, erase: false };
+        const maskCache = new Map();
+        const LC_ADJ = [['exposure', 'Brillo'], ['contrast', 'Contraste'], ['saturation', 'Saturación'], ['temp', 'Temperatura'], ['sharp', 'Nitidez  (− suaviza / reduce ruido)']];
+        function localLayer() { return (editParams.locals || []).find(l => l.id === localSel) || null; }
+        function createLocal(type) {
+            if (!editParams.locals) editParams.locals = [];
+            const l = { id: ++localIdCtr, type, strokes: [], g: null, inv: false, soft: 50, adj: { exposure: 0, contrast: 0, saturation: 0, temp: 0, sharp: 0 }, rev: ++localRevCtr };
+            editParams.locals.push(l); return l;
+        }
+        function buildLocalAdj() {
+            const box = $('localAdj'); if (!box || box.dataset.built) return; box.dataset.built = 1;
+            box.innerHTML = LC_ADJ.map(a => `<div class="dk-row"><div class="dk-head"><span>${a[1]}</span><span class="dk-val" id="lcv_${a[0]}">0</span></div><input type="range" class="ios-slider" id="lc_${a[0]}" min="-100" max="100" value="0" oninput="onLocalAdj('${a[0]}')"></div>`).join('');
+        }
+        function refreshLocalUi() {
+            const L = editParams.locals || [];
+            if (localSel != null && !L.some(l => l.id === localSel)) localSel = null;
+            buildLocalAdj();
+            const names = { brush: 'Pincel', linear: 'Lineal', radial: 'Radial' }, box = $('localLayers'); if (!box) return;
+            box.innerHTML = L.map((l, i) => `<span class="lc-chip${l.id === localSel ? ' on' : ''}" onclick="selectLocal(${l.id})">${names[l.type]} ${i + 1}<b onclick="event.stopPropagation();deleteLocal(${l.id})" aria-label="Quitar capa">✕</b></span>`).join('') + `<span class="lc-chip add" onclick="newLocal()">＋ Nueva</span>`;
+            const l = localLayer();
+            LC_ADJ.forEach(a => { const el = $('lc_' + a[0]); if (!el) return; el.value = l ? l.adj[a[0]] : 0; el.disabled = !l; $('lcv_' + a[0]).textContent = el.value; });
+            ['brush', 'linear', 'radial'].forEach(t => { const b = $('lcTool_' + t); if (b) b.classList.toggle('on', localTool === t); });
+            const br = $('lcBrushCtl'); if (br) br.style.display = (localTool === 'brush' || localTool === 'radial') ? '' : 'none';
+            const sz = $('lcSizeRow'); if (sz) sz.style.display = localTool === 'brush' ? '' : 'none';
+            const er = $('lcEraseBtn'); if (er) { er.style.display = localTool === 'brush' ? '' : 'none'; er.classList.toggle('main', localBrush.erase); }
+            const iv = $('lcInvBtn'); if (iv) { iv.style.display = localTool === 'brush' ? 'none' : ''; iv.classList.toggle('main', !!(l && l.inv)); }
+            const sl = $('lcSoft'); if (sl) { const v = (l && l.type === 'radial') ? l.soft : localBrush.soft; sl.value = v; $('lcSoftVal').textContent = v + '%'; }
+            const sv = $('lcSize'); if (sv) { sv.value = localBrush.size; $('lcSizeVal').textContent = localBrush.size + '%'; }
+            const hint = $('lcHint');
+            if (hint) hint.textContent = localTool === 'brush' ? 'Pinta con el dedo sobre la zona que quieres cambiar y luego ajusta los controles. Con «Borrar» quitas parte de la zona.' : localTool === 'linear' ? 'Arrastra en la foto: el efecto es total donde empiezas y se desvanece hacia donde terminas.' : 'Toca el centro y arrastra para definir el tamaño del óvalo. «Invertir» aplica el efecto afuera.';
+        }
+        function setLocalTool(t) { localTool = t; const l = localLayer(); if (l && l.type !== t) localSel = null; refreshLocalUi(); drawLocalOverlay(null); }
+        function selectLocal(id) { localSel = id; const l = localLayer(); if (l) localTool = l.type; refreshLocalUi(); drawLocalOverlay(null); }
+        function newLocal() { localSel = null; refreshLocalUi(); drawLocalOverlay(null); showToast('Pinta o arrastra en la foto para crear la capa', 1800); }
+        function deleteLocal(id) { pushHistoryState('Quitar capa local'); editParams.locals = (editParams.locals || []).filter(l => l.id !== id); if (localSel === id) localSel = null; refreshLocalUi(); drawLocalOverlay(null); requestCanvasRender(); }
+        function onLocalAdj(k) {
+            const l = localLayer(); if (!l) return;
+            commitDragHistory('Ajuste local');
+            l.adj[k] = parseFloat($('lc_' + k).value); $('lcv_' + k).textContent = l.adj[k]; l.rev = ++localRevCtr; requestCanvasRender();
+        }
+        function onLocalBrush(k, v) {
+            v = parseFloat(v);
+            if (k === 'size') { localBrush.size = v; $('lcSizeVal').textContent = v + '%'; }
+            else {
+                const l = localLayer();
+                if (l && l.type === 'radial') { commitDragHistory('Ajuste local'); l.soft = v; l.rev = ++localRevCtr; requestCanvasRender(); } else localBrush.soft = v;
+                $('lcSoftVal').textContent = v + '%';
+            }
+        }
+        function toggleLocalErase() { localBrush.erase = !localBrush.erase; refreshLocalUi(); }
+        function toggleLocalInvert() { const l = localLayer(); if (!l) return; pushHistoryState('Invertir capa'); l.inv = !l.inv; l.rev = ++localRevCtr; refreshLocalUi(); requestCanvasRender(); drawLocalOverlay(null); }
+        function toggleLocalMask(v) { localShowMask = v; drawLocalOverlay(null); }
+
+        function getLocalMask(l, w, h) {
+            const key = l.id + '|' + l.rev + '|' + w + 'x' + h; let m = maskCache.get(key); if (m) return m;
+            const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+            const c = cv.getContext('2d', { willReadFrequently: true }), L = Math.max(w, h);
+            if (l.type === 'brush') {
+                for (const s of l.strokes) {
+                    const r = Math.max(1, s.s / 100 * L / 2), D = Math.ceil(r * 2) + 2, hard = Math.max(0, Math.min(.98, 1 - s.f / 100));
+                    const sp = document.createElement('canvas'); sp.width = sp.height = D; const sx = sp.getContext('2d');
+                    const g = sx.createRadialGradient(D / 2, D / 2, 0, D / 2, D / 2, r);
+                    g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(hard, 'rgba(0,0,0,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+                    sx.fillStyle = g; sx.fillRect(0, 0, D, D);
+                    c.globalCompositeOperation = s.e ? 'destination-out' : 'source-over';
+                    const step = Math.max(1, r * 0.3), P = s.p; let n = 0;
+                    const dab = (x, y) => { if (n++ < 4000) c.drawImage(sp, x - D / 2, y - D / 2); };
+                    dab(P[0][0] * w, P[0][1] * h);
+                    let acc = step;
+                    for (let i = 1; i < P.length; i++) {
+                        const ax = P[i - 1][0] * w, ay = P[i - 1][1] * h, bx = P[i][0] * w, by = P[i][1] * h, d = Math.hypot(bx - ax, by - ay); let t = 0;
+                        while (acc <= d - t) { t += acc; dab(ax + (bx - ax) * t / d, ay + (by - ay) * t / d); acc = step; }
+                        acc -= (d - t);
+                    }
+                }
+                c.globalCompositeOperation = 'source-over';
+            } else if (l.type === 'linear' && l.g) {
+                const g = c.createLinearGradient(l.g.x1 * w, l.g.y1 * h, l.g.x2 * w, l.g.y2 * h), a0 = l.inv ? 0 : 1;
+                g.addColorStop(0, `rgba(0,0,0,${a0})`); g.addColorStop(1, `rgba(0,0,0,${1 - a0})`); c.fillStyle = g; c.fillRect(0, 0, w, h);
+            } else if (l.type === 'radial' && l.g) {
+                const r = Math.max(2, l.g.r * L), inner = r * (1 - Math.min(.98, l.soft / 100)), cx = l.g.cx * w, cy = l.g.cy * h;
+                const g = c.createRadialGradient(cx, cy, inner, cx, cy, r), a0 = l.inv ? 0 : 1;
+                g.addColorStop(0, `rgba(0,0,0,${a0})`); g.addColorStop(1, `rgba(0,0,0,${1 - a0})`); c.fillStyle = g; c.fillRect(0, 0, w, h);
+            }
+            m = { cv, a: null };
+            if (maskCache.size > 14) maskCache.delete(maskCache.keys().next().value);
+            maskCache.set(key, m); return m;
+        }
+        function maskAlpha(m, w, h) {
+            if (m.a) return m.a;
+            const d = m.cv.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, w, h).data, a = new Uint8Array(w * h);
+            for (let i = 0, j = 3; i < a.length; i++, j += 4) a[i] = d[j];
+            return m.a = a;
+        }
+        // desenfoque de caja rápido (RGB), usado por nitidez local y reducción de ruido
+        function boxBlurRGB(src, w, h, r) {
+            const tmp = new Uint8ClampedArray(src.length), out = new Uint8ClampedArray(src.length), win = 2 * r + 1, W4 = w * 4;
+            for (let y = 0; y < h; y++) {
+                const row = y * W4;
+                for (let c = 0; c < 3; c++) {
+                    let s = 0; for (let x = -r; x <= r; x++) s += src[row + Math.min(w - 1, Math.max(0, x)) * 4 + c];
+                    for (let x = 0; x < w; x++) { tmp[row + x * 4 + c] = s / win; s += src[row + Math.min(w - 1, x + r + 1) * 4 + c] - src[row + Math.max(0, x - r) * 4 + c]; }
+                }
+            }
+            for (let x = 0; x < w; x++) {
+                for (let c = 0; c < 3; c++) {
+                    const o = x * 4 + c; let s = 0; for (let y = -r; y <= r; y++) s += tmp[Math.min(h - 1, Math.max(0, y)) * W4 + o];
+                    for (let y = 0; y < h; y++) { out[y * W4 + o] = s / win; s += tmp[Math.min(h - 1, y + r + 1) * W4 + o] - tmp[Math.max(0, y - r) * W4 + o]; }
+                }
+            }
+            for (let i = 3; i < out.length; i += 4) out[i] = 255;
+            return out;
+        }
+        function applyLocals(wctx, w, h) {
+            const act = (editParams.locals || []).filter(l => l.adj && Object.values(l.adj).some(v => v));
+            if (!act.length) return;
+            const id = wctx.getImageData(0, 0, w, h), d = id.data, long = Math.max(w, h);
+            for (const l of act) {
+                const A = maskAlpha(getLocalMask(l, w, h), w, h), a = l.adj;
+                let bl = null; if (a.sharp) bl = boxBlurRGB(d, w, h, Math.max(1, Math.round(long / 700 * (a.sharp < 0 ? 2 : 1))));
+                const T = (f) => { const t = new Float32Array(256); for (let i = 0; i < 256; i++) t[i] = f(i / 255); return t; };
+                const kE = T(m => Math.pow(2, a.exposure * 0.015 * m)), kC = T(m => 1 + a.contrast * 0.008 * m), kS = T(m => 1 + a.saturation * 0.01 * m), kT = T(m => a.temp * 0.0025 * m), kH = T(m => a.sharp > 0 ? a.sharp * 0.03 * m : -a.sharp * 0.01 * m);
+                for (let i = 0, p = 0; i < A.length; i++, p += 4) {
+                    const mi = A[i]; if (!mi) continue;
+                    let r = d[p], g = d[p + 1], b = d[p + 2];
+                    if (a.exposure) { const k = kE[mi]; r *= k; g *= k; b *= k; }
+                    if (a.contrast) { const k = kC[mi]; r = 128 + (r - 128) * k; g = 128 + (g - 128) * k; b = 128 + (b - 128) * k; }
+                    if (a.saturation) { const k = kS[mi], y = .299 * r + .587 * g + .114 * b; r = y + (r - y) * k; g = y + (g - y) * k; b = y + (b - y) * k; }
+                    if (a.temp) { const t = kT[mi]; r *= 1 + t; b *= 1 - t; }
+                    if (bl) {
+                        const k = kH[mi];
+                        if (a.sharp > 0) { r += (r - bl[p]) * k; g += (g - bl[p + 1]) * k; b += (b - bl[p + 2]) * k; }
+                        else { r += (bl[p] - r) * k; g += (bl[p + 1] - g) * k; b += (bl[p + 2] - b) * k; }
+                    }
+                    d[p] = r < 0 ? 0 : r > 255 ? 255 : r; d[p + 1] = g < 0 ? 0 : g > 255 ? 255 : g; d[p + 2] = b < 0 ? 0 : b > 255 ? 255 : b;
+                }
+            }
+            wctx.putImageData(id, 0, 0);
+        }
+        // reducción de ruido global (protege los bordes)
+        function applyDenoise(wctx, w, h) {
+            const am = editParams.denoise / 100; if (am <= 0) return;
+            const id = wctx.getImageData(0, 0, w, h), d = id.data, bl = boxBlurRGB(d, w, h, Math.max(1, Math.round(Math.max(w, h) / 900 * (1 + am))));
+            const T = 14 + 40 * am, mix = Math.min(1, am * 1.3);
+            for (let p = 0; p < d.length; p += 4) {
+                const dr = bl[p] - d[p], dg = bl[p + 1] - d[p + 1], db = bl[p + 2] - d[p + 2];
+                const dif = Math.max(Math.abs(dr), Math.abs(dg), Math.abs(db)), t = Math.min(1, dif / T), k = (1 - t) * (1 - t) * mix;
+                d[p] += dr * k; d[p + 1] += dg * k; d[p + 2] += db * k;
+            }
+            wctx.putImageData(id, 0, 0);
+        }
+
+        // overlay del pincel local
+        function ovCtx(id) {
+            const ov = $(id), cv = $('photoCanvas'), dpr = window.devicePixelRatio || 1;
+            if (ov.width !== Math.round(cv.clientWidth * dpr) || ov.height !== Math.round(cv.clientHeight * dpr)) { ov.width = Math.round(cv.clientWidth * dpr); ov.height = Math.round(cv.clientHeight * dpr); }
+            ov.style.width = cv.clientWidth + 'px'; ov.style.height = cv.clientHeight + 'px';
+            const c = ov.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, cv.clientWidth, cv.clientHeight); return c;
+        }
+        function fracToCss(fx, fy) { const inf = healFrameInfo(); return { x: (fx * inf.pw + inf.f.px) / inf.f.W * inf.cW, y: (fy * inf.ph + inf.f.py) / inf.f.H * inf.cH }; }
+        let localStroke = null;
+        function drawLocalOverlay(cur) {
+            if (!isLocalActive || !previewSrc) return;
+            const c = ovCtx('toolOverlay'), inf = healFrameInfo(), l = prismPaint ? fxMaskLayer(curFx().key, false) : localLayer();
+            if (l && (localShowMask || prismPaint) && !isSliderInteracting) {
+                try {
+                    const pw = previewSrc.width, ph = previewSrc.height, m = getLocalMask(l, pw, ph);
+                    const t = drawLocalOverlay.t || (drawLocalOverlay.t = document.createElement('canvas'));
+                    if (t.width !== pw) t.width = pw; if (t.height !== ph) t.height = ph;
+                    const tx = t.getContext('2d'); tx.globalCompositeOperation = 'source-over'; tx.clearRect(0, 0, pw, ph); tx.fillStyle = 'rgba(255,45,85,.5)'; tx.fillRect(0, 0, pw, ph);
+                    tx.globalCompositeOperation = 'destination-in'; tx.drawImage(m.cv, 0, 0);
+                    c.drawImage(t, inf.f.px / inf.f.W * inf.cW, inf.f.py / inf.f.H * inf.cH, pw / inf.f.W * inf.cW, ph / inf.f.H * inf.cH);
+                } catch (e) {}
+            }
+            c.lineWidth = 1.5;
+            if (!prismPaint && l && l.g && l.type === 'linear') { const a = fracToCss(l.g.x1, l.g.y1), b = fracToCss(l.g.x2, l.g.y2); c.strokeStyle = '#fff'; c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke(); c.fillStyle = '#fff'; c.beginPath(); c.arc(a.x, a.y, 5, 0, 7); c.fill(); c.beginPath(); c.arc(b.x, b.y, 5, 0, 7); c.stroke(); }
+            if (!prismPaint && l && l.g && l.type === 'radial') { const a = fracToCss(l.g.cx, l.g.cy), r = l.g.r * Math.max(inf.pw, inf.ph) / inf.f.W * inf.cW; c.strokeStyle = '#fff'; c.beginPath(); c.arc(a.x, a.y, r, 0, 7); c.stroke(); c.setLineDash([4, 4]); c.beginPath(); c.arc(a.x, a.y, Math.max(1, r * (1 - l.soft / 100)), 0, 7); c.stroke(); c.setLineDash([]); }
+            if (cur && (localTool === 'brush' || prismPaint)) {
+                const lb = prismPaint ? prismBrush : localBrush;
+                const r = Math.max(4, Math.max(inf.pw, inf.ph) * lb.size / 100 / 2 / inf.f.W * inf.cW);
+                c.strokeStyle = '#fff'; c.beginPath(); c.arc(cur.x, cur.y, r, 0, 7); c.stroke();
+                c.strokeStyle = 'rgba(255,255,255,.5)'; c.setLineDash([3, 3]); c.beginPath(); c.arc(cur.x, cur.y, Math.max(1, r * (1 - lb.soft / 100)), 0, 7); c.stroke(); c.setLineDash([]);
+            }
+        }
+        function startLocalTool() { if (!imageLoaded) return; if (isEyedropperActive) toggleEyedropperTool(false); isLocalActive = true; $('toolOverlay').classList.remove('hidden'); refreshLocalUi(); drawLocalOverlay(null); }
+        function stopLocalTool() { isLocalActive = false; localCancelStroke(); const o = $('toolOverlay'); if (o) o.classList.add('hidden'); }
+        function localCancelStroke() { if (localStroke) { localStroke = null; isSliderInteracting = false; } }
+        function setupLocalHandlers() {
+            const ov = $('toolOverlay'); if (!ov) return;
+            ov.addEventListener('pointerdown', (e) => {
+                if (!imageLoaded || prismPaint) return; e.preventDefault(); e.stopPropagation(); ov.setPointerCapture(e.pointerId);
+                const p = healToImage(e); let l = localLayer();
+                pushHistoryState('Ajuste local');
+                if (!l || l.type !== localTool) { l = createLocal(localTool); localSel = l.id; refreshLocalUi(); }
+                localStroke = { l, p0: p };
+                if (localTool === 'brush') { const s = { p: [[p.x, p.y]], s: localBrush.size, f: localBrush.soft, e: localBrush.erase ? 1 : 0 }; l.strokes.push(s); localStroke.s = s; localStroke.last = p; }
+                else if (localTool === 'linear') l.g = { x1: p.x, y1: p.y, x2: p.x, y2: p.y + 0.0005 };
+                else l.g = { cx: p.x, cy: p.y, r: 0.002 };
+                l.rev = ++localRevCtr; isSliderInteracting = true; requestCanvasRender(); drawLocalOverlay({ x: p.cx, y: p.cy });
+            });
+            ov.addEventListener('pointermove', (e) => {
+                if (!imageLoaded || prismPaint) return;
+                const p = healToImage(e), st = localStroke;
+                if (st) {
+                    const l = st.l;
+                    if (localTool === 'brush') { if (Math.hypot(p.cx - st.last.cx, p.cy - st.last.cy) > 3) { st.s.p.push([p.x, p.y]); st.last = p; l.rev = ++localRevCtr; requestCanvasRender(); } }
+                    else if (localTool === 'linear') { l.g.x2 = p.x; l.g.y2 = p.y; l.rev = ++localRevCtr; requestCanvasRender(); }
+                    else { const inf = healFrameInfo(); l.g.r = Math.max(0.002, Math.hypot((p.x - st.p0.x) * inf.pw, (p.y - st.p0.y) * inf.ph) / Math.max(inf.pw, inf.ph)); l.rev = ++localRevCtr; requestCanvasRender(); }
+                }
+                const c = (localTool === 'brush') ? { x: p.cx, y: p.cy } : null;
+                if (st && localTool !== 'brush') { drawLocalOverlay(null); } else drawLocalOverlay(c);
+            });
+            const end = (e) => {
+                const st = localStroke; if (!st || prismPaint) return; localStroke = null; isSliderInteracting = false;
+                const l = st.l;
+                if (e.type !== 'pointercancel') {
+                    if (localTool === 'linear' && Math.hypot(l.g.x2 - l.g.x1, l.g.y2 - l.g.y1) < 0.01) { l.g.y2 = Math.min(1, l.g.y1 + 0.25); }
+                    if (localTool === 'radial' && l.g.r < 0.01) l.g.r = 0.2;
+                    l.rev = ++localRevCtr;
+                }
+                requestCanvasRender(); drawLocalOverlay(null);
+            };
+            ov.addEventListener('pointerup', end); ov.addEventListener('pointercancel', end);
+            ov.addEventListener('pointerleave', () => { if (!localStroke) drawLocalOverlay(null); });
+        }
+
+        // ---------- Clonar (sello) ----------
+        let healMode = 'heal', cloneSrc = null, cloneOffset = null, cloneSetting = false;
+        function setHealMode(m) {
+            healMode = m; cloneSetting = false;
+            $('healModeHeal').classList.toggle('on', m === 'heal'); $('healModeClone').classList.toggle('on', m === 'clone');
+            $('cloneCtl').style.display = m === 'clone' ? '' : 'none'; $('healHintHeal').style.display = m === 'heal' ? '' : 'none';
+            healDrawOverlay(null);
+        }
+        function startCloneSource() { cloneSetting = true; showToast('Toca la foto donde quieres copiar', 1800); $('btnCloneSrc').classList.add('main'); }
+        function cloneHandleDown(e) {
+            if (healMode !== 'clone') return false;
+            if (cloneSetting) {
+                const p = healToImage(e); cloneSrc = { x: p.x, y: p.y }; cloneOffset = null; cloneSetting = false; $('btnCloneSrc').classList.remove('main');
+                $('cloneStatus').textContent = 'Origen fijado ✓ — ahora pinta donde quieras pegar.'; healDrawOverlay({ x: p.cx, y: p.cy }); return true;
+            }
+            if (!cloneSrc) { showToast('Primero pulsa «Fijar origen»', 1800); return true; }
+            return false;
+        }
+        const _hdo = healDrawOverlay;
+        healDrawOverlay = function (cur) {
+            _hdo(cur);
+            if (healMode !== 'clone' || !cloneSrc) return;
+            const ov = $('healOverlay'), c = ov.getContext('2d'), r = healRadiusCss();
+            let fx = cloneSrc.x, fy = cloneSrc.y;
+            if (healStroke) {
+                const f = healStroke.pts[0], lp = healStroke.pts[healStroke.pts.length - 1];
+                if (!cloneOffset) cloneOffset = { x: cloneSrc.x - f.x, y: cloneSrc.y - f.y };
+                fx = lp.x + cloneOffset.x; fy = lp.y + cloneOffset.y;
+            }
+            const q = fracToCss(fx, fy);
+            c.strokeStyle = '#4cd964'; c.lineWidth = 1.5; c.beginPath(); c.arc(q.x, q.y, r, 0, 7); c.moveTo(q.x - 8, q.y); c.lineTo(q.x + 8, q.y); c.moveTo(q.x, q.y - 8); c.lineTo(q.x, q.y + 8); c.stroke();
+        };
+        const _applyHeal = applyHeal;
+        applyHeal = function (pts) { if (healMode === 'clone') return applyClone(pts); return _applyHeal(pts); };
+        function applyClone(ptsFrac) {
+            if (!imageLoaded || healBusy || !cloneSrc) return;
+            if (!cloneOffset) cloneOffset = { x: cloneSrc.x - ptsFrac[0].x, y: cloneSrc.y - ptsFrac[0].y };
+            const RW = rawImage.width, RH = rawImage.height, r = Math.max(2, Math.max(RW, RH) * healSize / 100 / 2);
+            healBusy = true;
+            setTimeout(() => {
+                try {
+                    const nc = document.createElement('canvas'); nc.width = RW; nc.height = RH;
+                    const ctx = nc.getContext('2d'); ctx.drawImage(rawImage, 0, 0);
+                    const ox = cloneOffset.x * RW, oy = cloneOffset.y * RH, D = Math.ceil(r * 2) + 2;
+                    const tmp = document.createElement('canvas'); tmp.width = tmp.height = D; const tx = tmp.getContext('2d');
+                    const hard = Math.max(0, Math.min(.98, healHard / 100)), step = Math.max(1, r * 0.25);
+                    const g = tx.createRadialGradient(D / 2, D / 2, 0, D / 2, D / 2, r);
+                    g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(hard, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+                    const P = ptsFrac.map(p => ({ x: p.x * RW, y: p.y * RH })); let n = 0;
+                    const dab = (x, y) => {
+                        if (n++ > 2500) return;
+                        tx.globalCompositeOperation = 'source-over'; tx.clearRect(0, 0, D, D); tx.fillStyle = g; tx.fillRect(0, 0, D, D);
+                        tx.globalCompositeOperation = 'source-in'; tx.drawImage(rawImage, x + ox - D / 2, y + oy - D / 2, D, D, 0, 0, D, D);
+                        ctx.drawImage(tmp, x - D / 2, y - D / 2);
+                    };
+                    dab(P[0].x, P[0].y); let acc = step;
+                    for (let i = 1; i < P.length; i++) {
+                        const a = P[i - 1], b = P[i], d = Math.hypot(b.x - a.x, b.y - a.y); let t = 0;
+                        while (acc <= d - t) { t += acc; dab(a.x + (b.x - a.x) * t / d, a.y + (b.y - a.y) * t / d); acc = step; }
+                        acc -= (d - t);
+                    }
+                    replaceRawImage(nc, 'Clonar'); showToast('Clonado');
+                } catch (err) { console.error(err); showToast('No se pudo clonar'); }
+                healBusy = false; healDrawOverlay(null);
+            }, 16);
+        }
+
+
+        // ---------- Máscara del efecto prisma (revertir zonas: cara, cuerpo…) ----------
+        let prismPaint = false;
+        const prismBrush = { size: 10, soft: 60, erase: false };
+        let prismStroke = null;
+        const FX_GROUPS = {
+            rgbGlitch: { key: 'glitch', name: 'Glitch RGB', params: ['rgbOffset'] },
+            prism: { key: 'prism', name: 'Prisma', params: ['radialPrismEffect', 'prismSpectrum', 'prismSplit', 'prismKaleido'] },
+            vintageLens: { key: 'lens', name: 'Lentes', params: ['anamorphicFlare', 'holgaLomo'] },
+            datamosh: { key: 'mosh', name: 'Datamosh', params: ['scanlines', 'vhsTape'] }
+        };
+        const FX_BY_KEY = {}; Object.values(FX_GROUPS).forEach(g => FX_BY_KEY[g.key] = g);
+        let fxCurrent = 'rgbGlitch';
+        const curFx = () => FX_GROUPS[fxCurrent];
+        function fxMaskLayer(key, create) {
+            if (!editParams.fxMasks) { if (!create) return null; editParams.fxMasks = {}; }
+            let m = editParams.fxMasks[key];
+            if (!m && create) m = editParams.fxMasks[key] = { id: 'fx_' + key, type: 'brush', strokes: [], inv: false, rev: ++localRevCtr };
+            return m || null;
+        }
+        function fxMaskSave(key, wctx, w, h) {
+            const m = fxMaskLayer(key, false);
+            if (!m || !m.strokes || !m.strokes.length || !FX_BY_KEY[key].params.some(k => editParams[k] > 0)) return null;
+            const t = document.createElement('canvas'); t.width = w; t.height = h;
+            t.getContext('2d').drawImage(wctx.canvas, 0, 0); return t;
+        }
+        function fxMaskRestore(key, wctx, w, h, snap) {
+            if (!snap) return;
+            const pm = fxMaskLayer(key, false), A = maskAlpha(getLocalMask(pm, w, h), w, h);
+            const o = snap.getContext('2d').getImageData(0, 0, w, h).data, id = wctx.getImageData(0, 0, w, h), d = id.data, inv = !!pm.inv;
+            for (let i = 0, p = 0; i < A.length; i++, p += 4) {
+                let m = A[i] / 255; if (inv) m = 1 - m; if (m <= 0) continue;
+                d[p] += (o[p] - d[p]) * m; d[p + 1] += (o[p + 1] - d[p + 1]) * m; d[p + 2] += (o[p + 2] - d[p + 2]) * m;
+            }
+            wctx.putImageData(id, 0, 0);
+        }
+        const ensurePrismMask = () => fxMaskLayer(curFx().key, true);
+        function refreshPrismUi() {
+            const pm = fxMaskLayer(curFx().key, false), b = $('pmPaintBtn'); if (!b) return;
+            b.classList.toggle('main', prismPaint); b.innerHTML = prismPaint ? '<i class="fa-solid fa-check"></i>&nbsp; Listo' : '<i class="fa-solid fa-paintbrush"></i>&nbsp; Quitar «' + curFx().name + '» de una zona' + (pm && pm.strokes.length ? ' ✓' : '');
+            $('pmTools').style.display = prismPaint ? '' : 'none';
+            $('pmModeRemove').classList.toggle('on', !prismBrush.erase); $('pmModeBack').classList.toggle('on', prismBrush.erase);
+            $('pmInvBtn').classList.toggle('main', !!(pm && pm.inv));
+            $('pmSize').value = prismBrush.size; $('pmSizeVal').textContent = prismBrush.size + '%';
+        }
+        function setPrismMode(back) { prismBrush.erase = !!back; refreshPrismUi(); }
+        function togglePrismPaint() { if (prismPaint) stopPrismPaint(); else startPrismPaint(); }
+        function startPrismPaint() {
+            if (!imageLoaded) return; if (isEyedropperActive) toggleEyedropperTool(false);
+            prismPaint = true; isLocalActive = true; $('toolOverlay').classList.remove('hidden'); refreshPrismUi(); drawLocalOverlay(null);
+            showToast('Pinta donde NO quieres los efectos (cara, cuerpo…)', 2400);
+        }
+        function stopPrismPaint() { if (!prismPaint) return; prismPaint = false; prismStroke = null; isSliderInteracting = false; if (currentEditTab !== 'local') { isLocalActive = false; $('toolOverlay').classList.add('hidden'); } refreshPrismUi(); }
+        function onPrismBrush(k, v) { v = parseFloat(v); prismBrush[k] = v; $('pmSizeVal').textContent = v + '%'; }
+        function togglePrismInvert() { pushHistoryState('Invertir zonas'); const pm = ensurePrismMask(); pm.inv = !pm.inv; pm.rev = ++localRevCtr; refreshPrismUi(); requestCanvasRender(); }
+        function clearPrismMask() { if (!fxMaskLayer(curFx().key, false)) return; pushHistoryState('Borrar zonas'); delete editParams.fxMasks[curFx().key]; refreshPrismUi(); requestCanvasRender(); drawLocalOverlay(null); }
+        function setupPrismHandlers() {
+            const ov = $('toolOverlay'); if (!ov) return;
+            ov.addEventListener('pointerdown', (e) => {
+                if (!prismPaint || !imageLoaded) return; e.preventDefault(); e.stopPropagation(); ov.setPointerCapture(e.pointerId);
+                const p = healToImage(e); pushHistoryState('Zonas sin efecto'); const pm = ensurePrismMask();
+                const s = { p: [[p.x, p.y]], s: prismBrush.size, f: prismBrush.soft, e: prismBrush.erase ? 1 : 0 };
+                pm.strokes.push(s); prismStroke = { s, last: p, m: pm }; pm.rev = ++localRevCtr; isSliderInteracting = true; requestCanvasRender();
+            });
+            ov.addEventListener('pointermove', (e) => {
+                if (!prismPaint || !imageLoaded) return; const p = healToImage(e);
+                if (prismStroke && Math.hypot(p.cx - prismStroke.last.cx, p.cy - prismStroke.last.cy) > 3) { prismStroke.s.p.push([p.x, p.y]); prismStroke.last = p; prismStroke.m.rev = ++localRevCtr; requestCanvasRender(); }
+                drawLocalOverlay({ x: p.cx, y: p.cy });
+            });
+            const end = () => { if (!prismStroke) return; const m = prismStroke.m; prismStroke = null; isSliderInteracting = false; m.rev = ++localRevCtr; requestCanvasRender(); drawLocalOverlay(null); };
+            ov.addEventListener('pointerup', end); ov.addEventListener('pointercancel', end);
+        }
+
+        // ---------- Enganches con lo existente ----------
+        EDIT_TABS.push('local');
+        const _set = switchEditTab;
+        switchEditTab = function (tab) { if (tab !== 'efectos') stopPrismPaint(); _set(tab); const sh = $('editorToolsSidebar'); if (sh) sh.dataset.tab = tab; if (tab === 'local') startLocalTool(); else if (isLocalActive) stopLocalTool(); if (tab !== 'curves' && curvePip) setCurvePipette(curvePip); };
+        const _sci = setCurrentImage;
+        setCurrentImage = function () { cloneSrc = null; cloneOffset = null; localSel = null; maskCache.clear(); _sci.apply(this, arguments); };
+        const _sst = switchSubTab;
+        switchSubTab = function (g, s) { _sst(g, s); if (g === 'efectos' && FX_GROUPS[s]) { fxCurrent = s; refreshPrismUi(); if (prismPaint) drawLocalOverlay(null); } };
+        const _sync = syncAllUiControls;
+        syncAllUiControls = function () { _sync(); refreshLocalUi(); refreshPrismUi(); };
+                const _rpc = renderPhotoCanvas;
+        renderPhotoCanvas = function () {
+            _rpc();
+            if (splitOn && !isComparingOriginal) drawSplit();
+            if (isLocalActive && !localStroke && !prismStroke && !isSliderInteracting) drawLocalOverlay(null);
+        };
+        window.addEventListener('resize', () => { if (isLocalActive) drawLocalOverlay(null); });
+        const _ol = window.onload;
+        window.onload = function () {
+            _ol.apply(this, arguments);
+            setupLocalHandlers(); setupPrismHandlers(); setupSplitHandlers(); setupPipetteHandler(); buildLocalAdj(); refreshLocalUi();
+            loadGalleryFromDb(); registerSW();
+        };
     </script>
 </body>
 </html>
