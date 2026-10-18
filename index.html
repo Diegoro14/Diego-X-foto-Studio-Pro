@@ -331,7 +331,8 @@
         .dk-pipettes button { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--txt-dim); display: flex; align-items: center; justify-content: center; font-size: 15px; }
         .dk-pipettes button.on { border-color: #ff9f0a; box-shadow: 0 0 0 2px #ff9f0a55; }
         .dk-menu button.active span { color: #ff9f0a; }
-.dk-opts summary { font-size: 13px; color: var(--txt-dim); padding: 4px 0; cursor: pointer; }
+.dk-hist-item { cursor: pointer; } .dk-hist-item.cur { font-weight: 700; color: #ff9f0a; }
+        .dk-opts summary { font-size: 13px; color: var(--txt-dim); padding: 4px 0; cursor: pointer; }
         .dk-opts[open] { display: flex; flex-direction: column; gap: 6px; }
         @media (max-width: 899px) { html:not([data-layout="pc"]) .dk-sheet[data-tab="curves"] { height: clamp(380px, 52dvh, 500px); } }
         html:not([data-layout="pc"]) .dk-sheet[data-tab="curves"] .dk-body { padding-top: 6px; padding-bottom: 8px; }
@@ -735,6 +736,7 @@
                         <div id="panel-history" class="dk-panel" style="height:100%">
                             <div style="display:flex;flex-direction:column;height:100%">
                                 <div class="dk-hist-list" id="historyList" style="flex:1 1 auto;padding-top:2px"></div>
+                                <button class="dk-btn st-wide" style="margin:6px 0" onclick="resetToOriginal()"><i class="fa-solid fa-rotate-left"></i>&nbsp; Volver al original</button>
                                 <div class="dk-hist-actions">
                                     <button id="btnHistUndo" onclick="undoLastAction()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>Deshacer</button>
                                     <button id="btnHistRedo" onclick="redoLastAction()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg>Rehacer</button>
@@ -856,6 +858,10 @@
                 <div class="st-row"><span>Modo</span>
                     <div class="dk-seg st-seg" id="stLayout"><button data-v="auto" onclick="setSetting('layout','auto')">Auto</button><button data-v="mobile" onclick="setSetting('layout','mobile')">Móvil</button><button data-v="pc" onclick="setSetting('layout','pc')">PC</button></div></div>
                 <div class="st-note">Modo PC: foto a la izquierda y panel a la derecha, galería en cuadrícula amplia, rueda del mouse para zoom y atajos de teclado (Ctrl+Z deshacer, Ctrl+Shift+Z rehacer, +/− zoom, 0 ajustar, [ ] tamaño del pincel).</div>
+
+                <div class="st-sec">Sliders</div>
+                <div class="st-row"><span>Vibrar en el cero</span><div class="dk-seg st-seg" id="stHaptics"><button data-v="on" onclick="setSetting('haptics','on')">Sí</button><button data-v="off" onclick="setSetting('haptics','off')">No</button></div></div>
+                <div class="st-note">Al mover cualquier slider, el teléfono vibra suave al pasar por el valor neutro (0 o el valor inicial).</div>
 
                 <div class="st-sec">Tamaño</div>
                 <div class="st-row"><span>Interfaz</span><div class="st-step"><button onclick="stepSetting('uiScale',-1)" aria-label="Interfaz más pequeña">A−</button><output id="stUiVal">100%</output><button onclick="stepSetting('uiScale',1)" aria-label="Interfaz más grande">A+</button></div></div>
@@ -3068,10 +3074,10 @@
         function pushHistoryState(label) {
             redoStack = [];
             historyStack.push(Object.assign(snapshot(), { label: label || 'Ajuste' }));
-            if (historyStack.length > 40) historyStack.shift();
+            if (historyStack.length > 300) historyStack.shift();
             // limita la memoria: máximo 6 versiones distintas de la imagen en el historial
-            const uniq = () => new Set(historyStack.map(h => h.image)).size;
-            while (historyStack.length > 1 && uniq() > 6) historyStack.shift();
+            const imgs = () => { const s = new Set(historyStack.map(h => h.image)); let px = 0; s.forEach(c => { px += (c.width || 0) * (c.height || 0); }); return { n: s.size, px }; };
+            while (historyStack.length > 1) { const u = imgs(); if (u.n <= 3 || (u.n <= 40 && u.px <= 150e6)) break; historyStack.shift(); }
             updateHistoryUI();
         }
 
@@ -3082,7 +3088,7 @@
                 dragCommitted = true;
                 redoStack = [];
                 historyStack.push(Object.assign({}, dragSnap, { label }));
-                if (historyStack.length > 40) historyStack.shift();
+                if (historyStack.length > 300) historyStack.shift();
                 updateHistoryUI();
             } else {
                 pushHistoryState(label);
@@ -3515,7 +3521,7 @@
                 const { r, g } = geom();
                 return { x: ((e.clientX - r.left - g.gx) / g.gw) * 255, y: 255 - ((e.clientY - r.top - g.gy) / g.gh) * 255, g, r };
             };
-            const commit = (label) => { redoStack = []; historyStack.push(Object.assign({}, snap, { label: label || 'Curvas' })); if (historyStack.length > 40) historyStack.shift(); updateHistoryUI(); };
+            const commit = (label) => { redoStack = []; historyStack.push(Object.assign({}, snap, { label: label || 'Curvas' })); if (historyStack.length > 300) historyStack.shift(); updateHistoryUI(); };
             canvas.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
                 const p = toData(e), pts = curvePoints[activeCurveChannel], g = p.g;
@@ -3799,7 +3805,7 @@
                 const r = c.getBoundingClientRect(), R = r.width / 2;
                 const dx = e.clientX - r.left - R, dy = e.clientY - r.top - R;
                 const rr = Math.min(1, Math.hypot(dx, dy) / R);
-                if (!committed) { committed = true; redoStack = []; historyStack.push(Object.assign({}, snap, { label: 'Graduación de color' })); if (historyStack.length > 40) historyStack.shift(); updateHistoryUI(); }
+                if (!committed) { committed = true; redoStack = []; historyStack.push(Object.assign({}, snap, { label: 'Graduación de color' })); if (historyStack.length > 300) historyStack.shift(); updateHistoryUI(); }
                 editParams.grade[activeGrade] = { h: Math.round((Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360), s: Math.round(rr * 100) };
                 updateGradeKnob(); requestCanvasRender();
             };
@@ -5659,6 +5665,85 @@
             const end = () => { if (!prismStroke) return; const m = prismStroke.m; prismStroke = null; isSliderInteracting = false; m.rev = ++localRevCtr; requestCanvasRender(); drawLocalOverlay(null); };
             ov.addEventListener('pointerup', end); ov.addEventListener('pointercancel', end);
         }
+
+
+        // ---------- Vibración al pasar por el cero de cualquier slider ----------
+        let _hapLabel = null;
+        function hapticTick() {
+            if (appSettings.haptics === 'off') return;
+            try { if (navigator.vibrate && navigator.vibrate(10)) return; } catch (e) {}
+            try {
+                if (!_hapLabel) {
+                    const l = document.createElement('label'); l.setAttribute('aria-hidden', 'true');
+                    l.style.cssText = 'position:fixed;left:-100px;top:-100px;opacity:0;pointer-events:none';
+                    const i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); l.appendChild(i); document.body.appendChild(l); _hapLabel = l;
+                }
+                _hapLabel.click();
+            } catch (e) {}
+        }
+        const _sliderPrev = new WeakMap();
+        function sliderZero(el) {
+            if (el._zero !== undefined) return el._zero;
+            let z = null;
+            const lab = el.id ? document.querySelector('.dk-val[data-for="' + el.id + '"]') : null;
+            if (lab && lab.dataset.def !== undefined && lab.dataset.def !== '') z = parseFloat(lab.dataset.def);
+            else if (+el.min < 0 && +el.max > 0) z = 0;
+            if (z !== null && !(z > +el.min && z < +el.max)) z = null;
+            return el._zero = z;
+        }
+        document.addEventListener('input', (e) => {
+            const el = e.target; if (!el || el.tagName !== 'INPUT' || el.type !== 'range') return;
+            const z = sliderZero(el); const v = parseFloat(el.value);
+            const prev = _sliderPrev.has(el) ? _sliderPrev.get(el) : null; _sliderPrev.set(el, v);
+            if (z === null || prev === null || prev === v) return;
+            if ((prev - z) * (v - z) < 0 || (v === z && prev !== z)) hapticTick();
+        }, true);
+        document.addEventListener('pointerdown', (e) => { const el = e.target; if (el && el.tagName === 'INPUT' && el.type === 'range') _sliderPrev.set(el, parseFloat(el.value)); }, true);
+        if (!appSettings.haptics) appSettings.haptics = 'on';
+        const _aa = applyAppearance;
+        applyAppearance = function () { _aa(); const h = document.getElementById('stHaptics'); if (h) h.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === appSettings.haptics)); };
+        applyAppearance();
+
+
+        // ---------- Historial: saltar a cualquier paso y volver de verdad al original ----------
+        updateHistoryUI = function () {
+            const u = $('btnHeaderUndo'); if (u) u.disabled = historyStack.length === 0;
+            const hu = $('btnHistUndo'); if (hu) hu.disabled = historyStack.length === 0;
+            const hr = $('btnHistRedo'); if (hr) hr.disabled = redoStack.length === 0;
+            const hp = $('btnHistPaste'); if (hp) hp.disabled = !clipboardEdits;
+            const list = $('historyList');
+            if (list && currentEditTab === 'history') {
+                const esc = (t) => String(t).replace(/[<>&]/g, '');
+                let h = '';
+                for (let j = redoStack.length - 1; j >= 0; j--) h += `<div class="dk-hist-item dim" onclick="jumpHistory('redo',${j})">${esc(redoStack[j].label)}</div>`;
+                for (let i = historyStack.length - 1; i >= 0; i--) h += `<div class="dk-hist-item${i === historyStack.length - 1 ? ' cur' : ''}" onclick="jumpHistory('undo',${i})">${esc(historyStack[i].label)}</div>`;
+                h += `<div class="dk-hist-item${historyStack.length === 0 ? ' cur' : ''}" onclick="jumpHistory('undo',-1)">Original</div>`;
+                list.innerHTML = h;
+            }
+        };
+        function jumpHistory(kind, idx) {
+            if (kind === 'undo') { const keep = idx + 1; while (historyStack.length > keep) undoLastAction(); }
+            else { while (redoStack.length > idx) redoLastAction(); }
+        }
+        function resetToOriginal() {
+            if (!imageLoaded) return;
+            if (isCropActive) stopCropTool();
+            pushHistoryState('Volver al original');
+            const orig = currentItem && currentItem.imgOriginal;
+            if (orig && rawImage !== orig) {
+                rawImage = orig; currentItem.img = null; currentItem.blobEdited = null; currentItem._savedImg = null;
+                buildPreviewSource(); regenerateThumbs();
+            }
+            const ft = editParams.frameText;
+            editParams = defaultParams(); if (ft) editParams.frameText = ft;
+            curvePoints = defaultCurves(); rebuildCurveLuts();
+            cloneSrc = null; cloneOffset = null; localSel = null; maskCache.clear();
+            if (prismPaint) stopPrismPaint();
+            syncAllUiControls(); drawRgbCurveGraph();
+            _fitKey = ''; fitCanvasToViewport(); requestCanvasRender();
+            showToast('Foto vuelta al original (puedes deshacer)', 2200);
+        }
+        resetEditParams = resetToOriginal;
 
         // ---------- Enganches con lo existente ----------
         EDIT_TABS.push('local');
