@@ -314,6 +314,15 @@
             #mainShutterBtn { width: 46px !important; height: 46px !important; border-width: 3px !important; flex-shrink: 0; }
             #cameraVideo { object-fit: cover !important; }
             .dk-sheet { height: 46dvh; }
+            html:not([data-layout="pc"]) .dk-sheet[data-tab="profiles"] { height: 56dvh; }
+            #panel-profiles.dk-panel.on { display: grid !important; grid-template-columns: 250px 1fr; grid-template-rows: auto auto minmax(0, 1fr); column-gap: 14px; height: calc(56dvh - 74px); align-content: start; }
+            #panel-profiles .dk-presets-top { grid-column: 1; grid-row: 1; gap: 6px; }
+            #panel-profiles .dk-create { font-size: 13px; padding: 8px 4px; white-space: nowrap; }
+            #panel-profiles .dk-cats { grid-column: 1; grid-row: 3; flex-wrap: wrap; gap: 2px 14px; overflow-y: auto; align-content: flex-start; min-height: 0; padding-top: 4px; }
+            #panel-profiles .dk-cat { font-size: 15px; }
+            #panel-profiles .dk-row { grid-column: 1; grid-row: 2; margin: 4px 0 0 !important; }
+            #profilesGrid.dk-thumbs { grid-column: 2; grid-row: 1 / span 3; display: grid; grid-template-columns: repeat(auto-fill, 92px); justify-content: center; align-content: start; gap: 10px 12px; overflow-x: hidden; overflow-y: auto; height: 100%; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 4px 0 8px; }
+            #profilesGrid .dk-thumb { flex: none; width: 92px; }
         }
             #toolOverlay { position: absolute; left: 0; top: 0; touch-action: none; z-index: 5; }
         #toolOverlay.hidden { display: none; }
@@ -701,7 +710,16 @@
                                 <button class="dk-pill" data-fx="prism" onclick="switchSubTab('efectos','prism')">Prisma</button>
                                 <button class="dk-pill" data-fx="vintageLens" onclick="switchSubTab('efectos','vintageLens')">Lentes</button>
                                 <button class="dk-pill" data-fx="datamosh" onclick="switchSubTab('efectos','datamosh')">Datamosh</button>
-                            </div><div id="fxMask" style="margin:0 0 10px"><button class="dk-btn st-wide" id="pmPaintBtn" onclick="togglePrismPaint()"></button><div id="pmTools" style="display:none"><div class="dk-seg" style="margin:8px 0"><button id="pmModeRemove" class="on" onclick="setPrismMode(false)">Quitar efecto</button><button id="pmModeBack" onclick="setPrismMode(true)">Devolver efecto</button></div><div class="dk-row"><div class="dk-head"><span>Tamaño del pincel</span><span class="dk-val" id="pmSizeVal">10%</span></div><input type="range" class="ios-slider" id="pmSize" min="1" max="30" value="10" oninput="onPrismBrush('size',this.value)"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="dk-btn" id="pmInvBtn" onclick="togglePrismInvert()">Invertir</button><button class="dk-btn" onclick="clearPrismMask()">Borrar todo</button></div></div><p style="font-size:13px;color:#8e8e93;margin-top:6px">Pinta sobre la cara o el cuerpo para que ahí no se vea el efecto de la pestaña que tienes abierta. Cada efecto (Glitch, Prisma, Lentes, Datamosh) guarda sus propias zonas.</p></div>
+                                <button class="dk-pill" data-fx="bloom" onclick="switchSubTab('efectos','bloom')">Bloom</button>
+                                <button class="dk-pill" data-fx="leaks" onclick="switchSubTab('efectos','leaks')">Fugas de luz</button>
+                                <button class="dk-pill" data-fx="filmDust" onclick="switchSubTab('efectos','filmDust')">Película</button>
+                                <button class="dk-pill" data-fx="tilt" onclick="switchSubTab('efectos','tilt')">Tilt-shift</button>
+                                <button class="dk-pill" data-fx="dblExp" onclick="switchSubTab('efectos','dblExp')">Doble exp.</button>
+                                <button class="dk-pill" data-fx="duotone" onclick="switchSubTab('efectos','duotone')">Duotono</button>
+                                <button class="dk-pill" data-fx="pixel" onclick="switchSubTab('efectos','pixel')">Pixelar</button>
+                                <button class="dk-pill" data-fx="comic" onclick="switchSubTab('efectos','comic')">Cómic</button>
+                                <button class="dk-pill" data-fx="fog" onclick="switchSubTab('efectos','fog')">Neblina</button>
+                            </div><div id="fxMask" style="margin:0 0 10px"><button class="dk-btn st-wide" id="pmPaintBtn" onclick="togglePrismPaint()"></button><div id="pmTools" style="display:none"><div class="dk-seg" style="margin:8px 0"><button id="pmModeRemove" class="on" onclick="setPrismMode(false)">Quitar efecto</button><button id="pmModeBack" onclick="setPrismMode(true)">Devolver efecto</button></div><div class="dk-row"><div class="dk-head"><span>Tamaño del pincel</span><span class="dk-val" id="pmSizeVal">10%</span></div><input type="range" class="ios-slider" id="pmSize" min="1" max="30" value="10" oninput="onPrismBrush('size',this.value)"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="dk-btn" id="pmInvBtn" onclick="togglePrismInvert()">Invertir</button><button class="dk-btn" onclick="clearPrismMask()">Borrar todo</button></div></div><p style="font-size:13px;color:#8e8e93;margin-top:6px">Pinta sobre la cara o el cuerpo para que ahí no se vea el efecto de la pestaña que tienes abierta. Cada efecto guarda sus propias zonas.</p></div>
                             
                             <div id="panel-rgbGlitch">
                                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">
@@ -714,6 +732,15 @@
                             <div id="panel-prism" style="display:none"><div id="sl-prism"></div></div>
                             <div id="panel-vintageLens" style="display:none"><div id="sl-vintageLens"></div></div>
                             <div id="panel-datamosh" style="display:none"><div id="sl-datamosh"></div></div>
+                            <div id="panel-bloom" style="display:none"><div id="sl-bloom"></div></div>
+                            <div id="panel-leaks" style="display:none"><div id="sl-leaks"></div></div>
+                            <div id="panel-filmDust" style="display:none"><div id="sl-filmDust"></div></div>
+                            <div id="panel-tilt" style="display:none"><div id="sl-tilt"></div></div>
+                            <div id="panel-dblExp" style="display:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px"><button class="dk-btn main" onclick="pickDoubleExposure()"><i class="fa-solid fa-image"></i>&nbsp; Elegir imagen</button><button class="dk-btn" onclick="clearDoubleExposure()">Quitar imagen</button></div><div id="dblStatus" style="font-size:13px;color:var(--dim2);margin:0 0 8px"></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px"><button class="dk-btn" id="dblMode0" onclick="setDblMode(0)" style="font-size:12px;padding:8px 2px">Pantalla</button><button class="dk-btn" id="dblMode1" onclick="setDblMode(1)" style="font-size:12px;padding:8px 2px">Multiplicar</button><button class="dk-btn" id="dblMode2" onclick="setDblMode(2)" style="font-size:12px;padding:8px 2px">Superponer</button><button class="dk-btn" id="dblMode3" onclick="setDblMode(3)" style="font-size:12px;padding:8px 2px">Aclarar</button></div><input type="file" id="dblFile" accept="image/*" style="display:none" onchange="onDblFile(this)"><div id="sl-dblExp"></div></div>
+                            <div id="panel-duotone" style="display:none"><div id="sl-duotone"></div></div>
+                            <div id="panel-pixel" style="display:none"><div id="sl-pixel"></div></div>
+                            <div id="panel-comic" style="display:none"><div id="sl-comic"></div></div>
+                            <div id="panel-fog" style="display:none"><div id="sl-fog"></div></div>
                         </div>
 
                         <!-- MARCO -->
@@ -735,6 +762,7 @@
                         <!-- HISTORIAL -->
                         <div id="panel-history" class="dk-panel" style="height:100%">
                             <div style="display:flex;flex-direction:column;height:100%">
+                                <div id="hbBox" style="margin:0 0 6px"><button class="dk-btn st-wide" id="hbPaintBtn" onclick="toggleHistPaint()"></button><div id="hbTools" style="display:none"><div class="dk-seg" style="margin:8px 0"><button id="hbModeRemove" class="on" onclick="setPrismMode(false)">Recuperar original</button><button id="hbModeBack" onclick="setPrismMode(true)">Borrar recuperación</button></div><div class="dk-row"><div class="dk-head small"><span>Tamaño del pincel</span><span class="dk-val" id="hbSizeVal">10%</span></div><input type="range" class="ios-slider" id="hbSize" min="1" max="30" value="10" oninput="onPrismBrush('size',this.value)"></div><div id="sl-hist"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="dk-btn" id="hbInvBtn" onclick="togglePrismInvert()">Invertir</button><button class="dk-btn" onclick="clearPrismMask()">Borrar todo</button></div></div></div>
                                 <div class="dk-hist-list" id="historyList" style="flex:1 1 auto;padding-top:2px"></div>
                                 <button class="dk-btn st-wide" style="margin:6px 0" onclick="resetToOriginal()"><i class="fa-solid fa-rotate-left"></i>&nbsp; Volver al original</button>
                                 <div class="dk-hist-actions">
@@ -1408,7 +1436,7 @@
         // Sub-tabs nested inside each top-level group tab.
         const subTabGroups = {
             ajustes: ['light', 'color', 'effects', 'curves', 'levels'],
-            efectos: ['rgbGlitch', 'prism', 'vintageLens', 'datamosh']
+            efectos: ['rgbGlitch', 'prism', 'vintageLens', 'datamosh', 'bloom', 'leaks', 'filmDust', 'tilt', 'dblExp', 'duotone', 'pixel', 'comic', 'fog']
         };
 
 
@@ -2699,6 +2727,215 @@
             ctx.restore();
         }
 
+        // ================= Efectos nuevos (Bloom, Halation, Fugas, Polvo, Tilt-shift, Doble exposición, Duotono, Pixelar, Cómic, Neblina) =================
+        function fxCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+        function fxRng(seed) { let a = seed >>> 0; return function () { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+        function fxHsl(hh, s, l) {
+            hh = ((hh % 360) + 360) % 360 / 360;
+            const f = (n) => { const k = (n + hh * 12) % 12, a = s * Math.min(l, 1 - l); return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); };
+            return [f(0) * 255, f(8) * 255, f(4) * 255];
+        }
+        // Desenfoque rápido por reducción progresiva (funciona igual en iPhone: no usa ctx.filter)
+        function fxBlur(src, w, h, r) {
+            r = Math.max(1, r); const k = Math.max(1, Math.round(r * 1.2));
+            if (k <= 1) { const o = fxCanvas(w, h), c = o.getContext('2d'); c.imageSmoothingQuality = 'high'; c.drawImage(src, 0, 0, w, h); return o; }
+            const sw = Math.max(2, Math.round(w / k)), sh = Math.max(2, Math.round(h / k));
+            let cur = src, cw = w, ch = h; const steps = [];
+            while (cw / 2 > sw && ch / 2 > sh) { cw = Math.max(sw, Math.round(cw / 2)); ch = Math.max(sh, Math.round(ch / 2)); const t = fxCanvas(cw, ch), c = t.getContext('2d'); c.imageSmoothingQuality = 'high'; c.drawImage(cur, 0, 0, cw, ch); cur = t; steps.push([cw, ch]); }
+            if (cw !== sw || ch !== sh) { const t = fxCanvas(sw, sh), c = t.getContext('2d'); c.imageSmoothingQuality = 'high'; c.drawImage(cur, 0, 0, sw, sh); cur = t; cw = sw; ch = sh; }
+            while (cw < w || ch < h) { cw = Math.min(w, cw * 2); ch = Math.min(h, ch * 2); const t = fxCanvas(cw, ch), c = t.getContext('2d'); c.imageSmoothingQuality = 'high'; c.drawImage(cur, 0, 0, cw, ch); cur = t; }
+            return cur;
+        }
+        // Canvas con solo las luces (alpha = cuánto pasa el umbral). tint = [r,g,b] opcional
+        function fxBright(ctx, w, h, thr, tint) {
+            const id = ctx.getImageData(0, 0, w, h), d = id.data, den = Math.max(0.02, 1 - thr);
+            for (let p = 0; p < d.length; p += 4) {
+                const l = (0.299 * d[p] + 0.587 * d[p + 1] + 0.114 * d[p + 2]) / 255;
+                let a = (l - thr) / den; a = a <= 0 ? 0 : a >= 1 ? 1 : a * a * (3 - 2 * a);
+                if (tint) { d[p] = tint[0]; d[p + 1] = tint[1]; d[p + 2] = tint[2]; }
+                d[p + 3] = a * 255;
+            }
+            const o = fxCanvas(w, h); o.getContext('2d').putImageData(id, 0, 0); return o;
+        }
+        function fxScreen(ctx, layer, w, h, alpha, op) {
+            ctx.save(); ctx.globalCompositeOperation = op || 'screen'; ctx.globalAlpha = Math.max(0, Math.min(1, alpha)); ctx.drawImage(layer, 0, 0, w, h); ctx.restore();
+        }
+
+        function applyBloom(ctx, w, h) {
+            const m = Math.min(w, h), amt = editParams.bloomAmt / 100;
+            const b = fxBright(ctx, w, h, 0.15 + editParams.bloomThresh / 100 * 0.75);
+            const r = (0.01 + editParams.bloomRadius / 100 * 0.07) * m;
+            fxScreen(ctx, fxBlur(b, w, h, r), w, h, amt * 1.1);
+            if (amt > 0.4) fxScreen(ctx, fxBlur(b, w, h, r * 2.4), w, h, (amt - 0.4) * 0.9);
+        }
+        function applyHalation(ctx, w, h) {
+            const m = Math.min(w, h), amt = editParams.halAmt / 100;
+            const b = fxBright(ctx, w, h, 0.62, [255, 60, 20]);
+            const r = (0.012 + editParams.halSize / 100 * 0.06) * m;
+            const b1 = fxBlur(b, w, h, r); fxScreen(ctx, b1, w, h, amt * 2); fxScreen(ctx, b1, w, h, amt * 1.2, 'lighter');
+            fxScreen(ctx, fxBlur(b, w, h, r * 2.2), w, h, amt);
+        }
+        function applyLightLeaks(ctx, w, h) {
+            const amt = editParams.leakAmt / 100, hue = editParams.leakHue, th = editParams.leakPos * Math.PI / 180, M = Math.max(w, h);
+            const L = fxCanvas(w, h), c = L.getContext('2d');
+            const blob = (cx, cy, rad, hh, a, l) => {
+                const rgb = fxHsl(hh, 1, l), g = c.createRadialGradient(cx, cy, 0, cx, cy, rad);
+                g.addColorStop(0, `rgba(${rgb[0] | 0},${rgb[1] | 0},${rgb[2] | 0},${a})`);
+                g.addColorStop(0.45, `rgba(${rgb[0] | 0},${rgb[1] | 0},${rgb[2] | 0},${a * 0.45})`);
+                g.addColorStop(1, `rgba(${rgb[0] | 0},${rgb[1] | 0},${rgb[2] | 0},0)`);
+                c.fillStyle = g; c.fillRect(0, 0, w, h);
+            };
+            const cx = w / 2 + Math.cos(th) * w * 0.52, cy = h / 2 - Math.sin(th) * h * 0.52;
+            blob(cx, cy, M * 0.62, hue, 1, 0.52);
+            blob(cx, cy, M * 0.22, hue + 25, 0.9, 0.78);
+            const cx2 = w / 2 + Math.cos(th + 1.25) * w * 0.55, cy2 = h / 2 - Math.sin(th + 1.25) * h * 0.55;
+            blob(cx2, cy2, M * 0.42, hue + 45, 0.75, 0.55);
+            fxScreen(ctx, L, w, h, amt * 0.95);
+        }
+        function applyFilmDust(ctx, w, h) {
+            const m = Math.min(w, h), area = w * h / 1e6, rng = fxRng(90210);
+            const nSpeck = Math.round(editParams.dustAmt / 100 * 220 * Math.max(0.6, area)), nHair = Math.round(editParams.dustAmt / 100 * 16 * Math.max(0.6, area));
+            const nScr = Math.round(editParams.scratchAmt / 100 * 14);
+            ctx.save();
+            const maxS = 330, maxH = 24, maxScr = 14;
+            for (let i = 0; i < maxS; i++) {
+                const x = rng() * w, y = rng() * h, rr = m * (0.0005 + Math.pow(rng(), 3) * 0.0026), dark = rng() < 0.3, a = 0.45 + rng() * 0.45, el = 0.6 + rng() * 0.8;
+                if (i >= nSpeck) continue;
+                ctx.fillStyle = dark ? `rgba(15,12,10,${a})` : `rgba(255,252,240,${a})`;
+                ctx.beginPath(); ctx.ellipse(x, y, rr * el, rr, rng() * 3, 0, 6.2832); ctx.fill();
+            }
+            for (let i = 0; i < maxH; i++) {
+                const x = rng() * w, y = rng() * h, len = m * (0.012 + rng() * 0.05), ang = rng() * 6.28, bend = (rng() - 0.5) * len, dark = rng() < 0.35;
+                if (i >= nHair) continue;
+                ctx.strokeStyle = dark ? 'rgba(20,16,12,0.7)' : 'rgba(255,250,235,0.75)'; ctx.lineWidth = Math.max(1, m * 0.0009); ctx.lineCap = 'round';
+                ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + Math.cos(ang) * len / 2 - Math.sin(ang) * bend, y + Math.sin(ang) * len / 2 + Math.cos(ang) * bend, x + Math.cos(ang) * len, y + Math.sin(ang) * len); ctx.stroke();
+            }
+            for (let i = 0; i < maxScr; i++) {
+                const x = rng() * w, y0 = rng() * h * 0.6, len = h * (0.2 + rng() * 0.75), a = 0.22 + rng() * 0.4, jit = (rng() - 0.5) * w * 0.004, dark = rng() < 0.25;
+                if (i >= nScr) continue;
+                ctx.strokeStyle = dark ? `rgba(20,16,12,${a})` : `rgba(255,252,240,${a})`; ctx.lineWidth = Math.max(1, m * 0.0007);
+                ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x + jit, y0 + len * 0.5); ctx.lineTo(x - jit * 0.5, y0 + len); ctx.stroke();
+            }
+            ctx.restore();
+        }
+        function applyTiltShift(ctx, w, h) {
+            const m = Math.min(w, h), al = editParams.tiltAngle * Math.PI / 180;
+            const ux = -Math.sin(al) * -1, uy = Math.cos(al); // eje perpendicular a la franja
+            const ax = Math.sin(al), ay = Math.cos(al);
+            const L = (Math.abs(w * ax) + Math.abs(h * ay)) / 2;
+            const sh = (editParams.tiltPos - 50) / 50 * L * 0.8;
+            const cx = w / 2 + ax * sh, cy = h / 2 + ay * sh;
+            const g = ctx.createLinearGradient(cx - ax * L, cy - ay * L, cx + ax * L, cy + ay * L);
+            const f = editParams.tiltSize / 100 * 0.5, fall = 0.4;
+            const cl = (v) => Math.max(0, Math.min(1, v));
+            g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(cl(0.5 - f - fall), 'rgba(0,0,0,1)'); g.addColorStop(cl(0.5 - f), 'rgba(0,0,0,0)');
+            g.addColorStop(cl(0.5 + f), 'rgba(0,0,0,0)'); g.addColorStop(cl(0.5 + f + fall), 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,1)');
+            const bl = fxBlur(ctx.canvas, w, h, editParams.tiltBlur / 100 * 0.03 * m + 1);
+            const bc = bl.getContext('2d'); bc.globalCompositeOperation = 'destination-in'; bc.fillStyle = g; bc.fillRect(0, 0, w, h);
+            ctx.drawImage(bl, 0, 0, w, h);
+        }
+        // Doble exposición: la segunda imagen se elige desde el panel
+        let dblImg = null;
+        const DBL_OPS = ['screen', 'multiply', 'overlay', 'lighten'];
+        function applyDoubleExposure(ctx, w, h) {
+            if (!dblImg) return;
+            const t = fxCanvas(w, h), c = t.getContext('2d');
+            const sc = Math.max(w / dblImg.width, h / dblImg.height) * (editParams.dblScale / 100), dw = dblImg.width * sc, dh = dblImg.height * sc;
+            c.imageSmoothingQuality = 'high'; c.drawImage(dblImg, (w - dw) / 2, (h - dh) / 2, dw, dh);
+            fxScreen(ctx, t, w, h, editParams.dblAmt / 100, DBL_OPS[editParams.dblMode] || 'screen');
+        }
+        function pickDoubleExposure() { const i = $('dblFile'); if (i) i.click(); }
+        function onDblFile(inp) {
+            const f = inp.files && inp.files[0]; if (!f) return;
+            const url = URL.createObjectURL(f), im = new Image();
+            im.onload = () => {
+                const k = Math.min(1, 1800 / Math.max(im.width, im.height)), c = fxCanvas(Math.round(im.width * k), Math.round(im.height * k));
+                c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url); dblImg = c;
+                if (editParams.dblAmt === 0) { pushHistoryState('Doble exposición'); editParams.dblAmt = 60; }
+                syncAllUiControls(); requestCanvasRender(); showToast('Segunda imagen cargada', 1800);
+            };
+            im.onerror = () => { URL.revokeObjectURL(url); showToast('No se pudo abrir la imagen', 2000); };
+            im.src = url; inp.value = '';
+        }
+        function clearDoubleExposure() { dblImg = null; syncAllUiControls(); requestCanvasRender(); }
+        function setDblMode(i) { pushHistoryState('Doble exposición'); editParams.dblMode = i; syncAllUiControls(); requestCanvasRender(); }
+        function syncFx2Ui() {
+            ['Pantalla', 'Multiplicar', 'Superponer', 'Aclarar'].forEach((n, i) => { const b = $('dblMode' + i); if (b) b.className = 'dk-btn' + (editParams.dblMode === i ? ' main' : ''); });
+            const s = $('dblStatus'); if (s) s.textContent = dblImg ? 'Imagen cargada ✓' : 'Elige una imagen para mezclar';
+        }
+        function applyDuotone(ctx, w, h) {
+            const amt = editParams.duoAmt / 100, sh = fxHsl(editParams.duoShadow, 0.8, 0.17), hi = fxHsl(editParams.duoHigh, 0.9, 0.82);
+            const id = ctx.getImageData(0, 0, w, h), d = id.data;
+            for (let p = 0; p < d.length; p += 4) {
+                let l = (0.299 * d[p] + 0.587 * d[p + 1] + 0.114 * d[p + 2]) / 255; l = l * 0.5 + l * l * (3 - 2 * l) * 0.5;
+                d[p] += (sh[0] + (hi[0] - sh[0]) * l - d[p]) * amt; d[p + 1] += (sh[1] + (hi[1] - sh[1]) * l - d[p + 1]) * amt; d[p + 2] += (sh[2] + (hi[2] - sh[2]) * l - d[p + 2]) * amt;
+            }
+            ctx.putImageData(id, 0, 0);
+        }
+        function applyPixelate(ctx, w, h) {
+            const size = Math.max(2, Math.round(editParams.pixSize / 100 * 0.07 * Math.min(w, h))), sw = Math.ceil(w / size), sh = Math.ceil(h / size);
+            const t = fxCanvas(sw, sh), c = t.getContext('2d'); c.imageSmoothingQuality = 'high'; c.drawImage(ctx.canvas, 0, 0, sw, sh);
+            ctx.save(); ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, w, h); ctx.drawImage(t, 0, 0, sw, sh, 0, 0, sw * size, sh * size); ctx.restore();
+        }
+        function applyHalftone(ctx, w, h) {
+            const m = Math.min(w, h), s = Math.max(3, m * (0.004 + editParams.halftoneSize / 100 * 0.03)), col = editParams.halftoneColor / 100;
+            const id = ctx.getImageData(0, 0, w, h), d = id.data, o = fxCanvas(w, h), c = o.getContext('2d');
+            c.fillStyle = '#f6f2ea'; c.fillRect(0, 0, w, h);
+            const ca = Math.cos(0.785), sa = Math.sin(0.785), n = Math.ceil(Math.hypot(w, h) / s / 2) + 1, cx = w / 2, cy = h / 2;
+            c.fillStyle = '#111'; if (col <= 0.01) c.beginPath();
+            for (let i = -n; i <= n; i++) for (let j = -n; j <= n; j++) {
+                const x = cx + (i * ca - j * sa) * s, y = cy + (i * sa + j * ca) * s;
+                if (x < -s || y < -s || x > w + s || y > h + s) continue;
+                const px = Math.min(w - 1, Math.max(0, x | 0)), py = Math.min(h - 1, Math.max(0, y | 0)), p = (py * w + px) * 4;
+                const l = (0.299 * d[p] + 0.587 * d[p + 1] + 0.114 * d[p + 2]) / 255, r = s * 0.74 * Math.sqrt(1 - l * 0.96);
+                if (r < 0.3) continue;
+                if (col > 0.01) { c.fillStyle = `rgb(${(d[p] * col + 17 * (1 - col)) | 0},${(d[p + 1] * col + 17 * (1 - col)) | 0},${(d[p + 2] * col + 17 * (1 - col)) | 0})`; c.beginPath(); c.arc(x, y, r, 0, 6.2832); c.fill(); }
+                else { c.moveTo(x + r, y); c.arc(x, y, r, 0, 6.2832); }
+            }
+            if (col <= 0.01) c.fill();
+            ctx.save(); ctx.globalAlpha = editParams.halftoneAmt / 100; ctx.drawImage(o, 0, 0, w, h); ctx.restore();
+        }
+        function applySketch(ctx, w, h) {
+            const m = Math.min(w, h), id = ctx.getImageData(0, 0, w, h), d = id.data;
+            const g = new Uint8ClampedArray(w * h), inv = ctx.createImageData(w, h), q = inv.data;
+            for (let i = 0, p = 0; i < g.length; i++, p += 4) { const l = 0.299 * d[p] + 0.587 * d[p + 1] + 0.114 * d[p + 2]; g[i] = l; q[p] = q[p + 1] = q[p + 2] = 255 - l; q[p + 3] = 255; }
+            const ic = fxCanvas(w, h); ic.getContext('2d').putImageData(inv, 0, 0);
+            const bd = fxBlur(ic, w, h, 0.006 * m + 1.5).getContext('2d').getImageData(0, 0, w, h).data;
+            const out = ctx.createImageData(w, h), o = out.data;
+            for (let i = 0, p = 0; i < g.length; i++, p += 4) { const v = Math.min(255, g[i] * 255 / (256 - bd[p])); o[p] = v; o[p + 1] = v * 0.99; o[p + 2] = v * 0.96; o[p + 3] = 255; }
+            const sc = fxCanvas(w, h); sc.getContext('2d').putImageData(out, 0, 0);
+            ctx.save(); ctx.globalAlpha = editParams.sketchAmt / 100; ctx.drawImage(sc, 0, 0, w, h); ctx.restore();
+        }
+        function applyFogRays(ctx, w, h) {
+            const m = Math.min(w, h), M = Math.max(w, h);
+            if (editParams.fogAmt > 0) {
+                const L = fxCanvas(w, h), c = L.getContext('2d'), cover = editParams.fogHeight / 100;
+                const g = c.createLinearGradient(0, h, 0, h * (1 - cover));
+                g.addColorStop(0, 'rgba(228,234,242,1)'); g.addColorStop(0.55, 'rgba(228,234,242,0.55)'); g.addColorStop(1, 'rgba(228,234,242,0)');
+                c.fillStyle = g; c.fillRect(0, 0, w, h);
+                const rng = fxRng(777), nz = fxCanvas(40, 28), nc = nz.getContext('2d'), nd = nc.createImageData(40, 28);
+                for (let i = 0; i < nd.data.length; i += 4) { nd.data[i] = nd.data[i + 1] = nd.data[i + 2] = 255; nd.data[i + 3] = 110 + rng() * 145; }
+                nc.putImageData(nd, 0, 0);
+                const qw = Math.max(8, w >> 2), qh = Math.max(8, h >> 2), nb = fxCanvas(qw, qh), nbc = nb.getContext('2d'); nbc.imageSmoothingQuality = 'high'; nbc.drawImage(nz, 0, 0, qw, qh);
+                c.globalCompositeOperation = 'destination-in'; c.imageSmoothingQuality = 'high'; c.drawImage(fxBlur(nb, qw, qh, 0.05 * m / 4), 0, 0, w, h);
+                ctx.save(); ctx.globalAlpha = Math.min(1, editParams.fogAmt / 100 * 0.9); ctx.drawImage(L, 0, 0, w, h); ctx.restore();
+            }
+            if (editParams.raysAmt > 0) {
+                const th = editParams.raysAngle * Math.PI / 180, R = M * 0.9, ox = w / 2 + Math.cos(th) * R, oy = h / 2 - Math.sin(th) * R;
+                const base = Math.atan2(h / 2 - oy, w / 2 - ox), rng = fxRng(4242), L = fxCanvas(w, h), c = L.getContext('2d');
+                c.globalCompositeOperation = 'lighter';
+                const far = M * 2.4;
+                for (let i = 0; i < 16; i++) {
+                    const a = base + (rng() - 0.5) * 0.95, wd = 0.012 + rng() * 0.05, al = 0.12 + rng() * 0.3;
+                    const g = c.createLinearGradient(ox, oy, ox + Math.cos(a) * far, oy + Math.sin(a) * far);
+                    g.addColorStop(0, `rgba(255,236,190,${al})`); g.addColorStop(0.6, `rgba(255,226,170,${al * 0.5})`); g.addColorStop(1, 'rgba(255,220,160,0)');
+                    c.fillStyle = g; c.beginPath(); c.moveTo(ox, oy);
+                    c.lineTo(ox + Math.cos(a - wd) * far, oy + Math.sin(a - wd) * far); c.lineTo(ox + Math.cos(a + wd) * far, oy + Math.sin(a + wd) * far); c.closePath(); c.fill();
+                }
+                fxScreen(ctx, fxBlur(L, w, h, 0.012 * m + 1), w, h, editParams.raysAmt / 100 * 1.4);
+            }
+        }
+
         function applyDatamoshAndScanlines(ctx, w, h) {
             ctx.save();
             if (editParams.scanlines > 0) {
@@ -2951,7 +3188,8 @@
                 hsl, grade,
                 rgbMode: 'cyberGlitch', rgbOffset: 0, rgbAngle: 0,
                 radialPrismEffect: 0, prismSpectrum: 0, prismSplit: 0, prismKaleido: 0,
-                anamorphicFlare: 0, holgaLomo: 0, scanlines: 0, vhsTape: 0,
+                anamorphicFlare: 0, holgaLomo: 0, scanlines: 0, vhsTape: 0, histAmt: 100,
+                bloomAmt: 0, bloomRadius: 40, bloomThresh: 60, halAmt: 0, halSize: 40, leakAmt: 0, leakHue: 20, leakPos: 0, dustAmt: 0, scratchAmt: 0, tiltBlur: 0, tiltPos: 50, tiltSize: 25, tiltAngle: 0, dblAmt: 0, dblScale: 100, duoAmt: 0, duoShadow: 230, duoHigh: 40, pixSize: 0, halftoneAmt: 0, halftoneSize: 30, halftoneColor: 0, sketchAmt: 0, fogAmt: 0, fogHeight: 50, raysAmt: 0, raysAngle: 45, dblMode: 0,
                 leicaFrame: false, frameStyle: 'polaroid', showLogoText: true, showExifText: true,
                 frameText: 'iPhone 13 Pro Max',
                 logoTextScale: 130, metaTextScale: 130, logoTextOffsetY: 0, metaTextOffsetY: 0,
@@ -3012,6 +3250,61 @@
             datamosh: [
                 { k: 'scanlines', l: 'Scanlines RGB', min: 0, max: 100 },
                 { k: 'vhsTape', l: 'Cinta VHS', min: 0, max: 100 }
+            ],
+            bloom: [
+                { sec: 'Bloom' },
+                { k: 'bloomAmt', l: 'Resplandor', min: 0, max: 100, def: 0 },
+                { k: 'bloomRadius', l: 'Radio', min: 0, max: 100, def: 40 },
+                { k: 'bloomThresh', l: 'Umbral de luces', min: 0, max: 100, def: 60 },
+                { sec: 'Halation (borde rojizo)' },
+                { k: 'halAmt', l: 'Halation', min: 0, max: 100, def: 0 },
+                { k: 'halSize', l: 'Tamaño', min: 0, max: 100, def: 40 }
+            ],
+            leaks: [
+                { k: 'leakAmt', l: 'Intensidad', min: 0, max: 100, def: 0 },
+                { k: 'leakHue', l: 'Color', min: 0, max: 360, def: 20, unit: '°', trk: 'linear-gradient(90deg,#ff3b30,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff3b30)' },
+                { k: 'leakPos', l: 'Posición', min: 0, max: 360, def: 0, unit: '°' }
+            ],
+            filmDust: [
+                { k: 'dustAmt', l: 'Polvo y pelusas', min: 0, max: 100, def: 0 },
+                { k: 'scratchAmt', l: 'Rayones verticales', min: 0, max: 100, def: 0 }
+            ],
+            tilt: [
+                { k: 'tiltBlur', l: 'Desenfoque', min: 0, max: 100, def: 0 },
+                { k: 'tiltPos', l: 'Posición del foco', min: 0, max: 100, def: 50 },
+                { k: 'tiltSize', l: 'Tamaño del foco', min: 5, max: 60, def: 25 },
+                { k: 'tiltAngle', l: 'Ángulo', min: -90, max: 90, def: 0, unit: '°' }
+            ],
+            dblExp: [
+                { k: 'dblAmt', l: 'Intensidad', min: 0, max: 100, def: 0 },
+                { k: 'dblScale', l: 'Escala de la imagen', min: 50, max: 200, def: 100, unit: '%' }
+            ],
+            duotone: [
+                { k: 'duoAmt', l: 'Intensidad', min: 0, max: 100, def: 0 },
+                { k: 'duoShadow', l: 'Color de sombras', min: 0, max: 360, def: 230, unit: '°', trk: 'linear-gradient(90deg,#ff3b30,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff3b30)' },
+                { k: 'duoHigh', l: 'Color de luces', min: 0, max: 360, def: 40, unit: '°', trk: 'linear-gradient(90deg,#ff3b30,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff3b30)' }
+            ],
+            pixel: [
+                { k: 'pixSize', l: 'Tamaño del píxel', min: 0, max: 100, def: 0 }
+            ],
+            comic: [
+                { sec: 'Medios tonos (puntos)' },
+                { k: 'halftoneAmt', l: 'Intensidad', min: 0, max: 100, def: 0 },
+                { k: 'halftoneSize', l: 'Tamaño del punto', min: 0, max: 100, def: 30 },
+                { k: 'halftoneColor', l: 'Color de los puntos', min: 0, max: 100, def: 0 },
+                { sec: 'Boceto a lápiz' },
+                { k: 'sketchAmt', l: 'Intensidad', min: 0, max: 100, def: 0 }
+            ],
+            fog: [
+                { sec: 'Neblina' },
+                { k: 'fogAmt', l: 'Neblina', min: 0, max: 100, def: 0 },
+                { k: 'fogHeight', l: 'Altura', min: 0, max: 100, def: 50 },
+                { sec: 'Rayos de sol' },
+                { k: 'raysAmt', l: 'Rayos', min: 0, max: 100, def: 0 },
+                { k: 'raysAngle', l: 'Dirección', min: 0, max: 360, def: 45, unit: '°' }
+            ],
+            hist: [
+                { k: 'histAmt', l: 'Fuerza de recuperación', min: 0, max: 100, def: 100, unit: '%' }
             ],
             frame: [
                 { k: 'logoTextScale', l: 'Tamaño texto logo', min: 50, max: 250, unit: '%', def: 130 },
@@ -3267,13 +3560,7 @@
         }
 
         // Pipeline completo: src (Image/Canvas) -> out (canvas con marco incluido)
-        function renderEditToCanvas(out, src, w, h, work, wctx, forHistogram) {
-            const fr = computeFrame(w, h);
-            if (out.width !== fr.W) out.width = fr.W;
-            if (out.height !== fr.H) out.height = fr.H;
-            const ctx = out.getContext('2d');
-            if (fr.bg) { ctx.fillStyle = fr.bg; ctx.fillRect(0, 0, fr.W, fr.H); }
-
+        function renderEditCore(src, w, h, work, wctx) {
             if (work.width !== w) work.width = w;
             if (work.height !== h) work.height = h;
             wctx.globalCompositeOperation = 'source-over';
@@ -3296,6 +3583,112 @@
             const _m4 = fxMaskSave('mosh', wctx, w, h);
             if (editParams.scanlines > 0 || editParams.vhsTape > 0) applyDatamoshAndScanlines(wctx, w, h);
             fxMaskRestore('mosh', wctx, w, h, _m4);
+            const _n_bloom = fxMaskSave('bloom', wctx, w, h);
+            if (editParams.bloomAmt > 0) applyBloom(wctx, w, h);
+            if (editParams.halAmt > 0) applyHalation(wctx, w, h);
+            fxMaskRestore('bloom', wctx, w, h, _n_bloom);
+            const _n_leak = fxMaskSave('leak', wctx, w, h);
+            if (editParams.leakAmt > 0) applyLightLeaks(wctx, w, h);
+            fxMaskRestore('leak', wctx, w, h, _n_leak);
+            const _n_dust = fxMaskSave('dust', wctx, w, h);
+            if (editParams.dustAmt > 0 || editParams.scratchAmt > 0) applyFilmDust(wctx, w, h);
+            fxMaskRestore('dust', wctx, w, h, _n_dust);
+            const _n_tilt = fxMaskSave('tilt', wctx, w, h);
+            if (editParams.tiltBlur > 0) applyTiltShift(wctx, w, h);
+            fxMaskRestore('tilt', wctx, w, h, _n_tilt);
+            const _n_dbl = fxMaskSave('dbl', wctx, w, h);
+            if (editParams.dblAmt > 0) applyDoubleExposure(wctx, w, h);
+            fxMaskRestore('dbl', wctx, w, h, _n_dbl);
+            const _n_duo = fxMaskSave('duo', wctx, w, h);
+            if (editParams.duoAmt > 0) applyDuotone(wctx, w, h);
+            fxMaskRestore('duo', wctx, w, h, _n_duo);
+            const _n_pix = fxMaskSave('pix', wctx, w, h);
+            if (editParams.pixSize > 0) applyPixelate(wctx, w, h);
+            fxMaskRestore('pix', wctx, w, h, _n_pix);
+            const _n_comic = fxMaskSave('comic', wctx, w, h);
+            if (editParams.halftoneAmt > 0) applyHalftone(wctx, w, h);
+            if (editParams.sketchAmt > 0) applySketch(wctx, w, h);
+            fxMaskRestore('comic', wctx, w, h, _n_comic);
+            const _n_fogg = fxMaskSave('fogg', wctx, w, h);
+            if (editParams.fogAmt > 0 || editParams.raysAmt > 0) applyFogRays(wctx, w, h);
+            fxMaskRestore('fogg', wctx, w, h, _n_fogg);
+        }
+        // ---------- Pincel de historia por capas ----------
+        // Cada vez que usas el pincel se guarda el estado de ese momento (base). La zona pintada se muestra
+        // SIN lo que ya estaba aplicado en ese momento, pero con todo lo que apliques después (filtros, ajustes…).
+        let inHistRender = false, histSession = 0;
+        const histKeys = () => Object.keys((editParams.fxMasks) || {}).filter(k => /^hist\d+$/.test(k) && editParams.fxMasks[k].strokes && editParams.fxMasks[k].strokes.length).sort();
+        const HIST_SKIP = new Set(['histAmt', 'presetAmt', 'profileIntensity', 'logoTextScale', 'metaTextScale', 'logoTextOffsetY', 'metaTextOffsetY', 'insetWidth']);
+        function histStateOf(ep, cp) {
+            const o = clone(ep); delete o.fxMasks; delete o.locals; delete o.histBase; return { p: o, c: clone(cp) };
+        }
+        function histZoneParams(base) {
+            const cur = editParams, def = defaultParams(), zp = clone(cur), bp = base.p, dc = defaultCurves(), zc = clone(curvePoints);
+            Object.keys(def).forEach(k => {
+                if (HIST_SKIP.has(k)) return;
+                if (typeof def[k] === 'number' && typeof bp[k] === 'number' && typeof cur[k] === 'number') zp[k] = cur[k] - (bp[k] - def[k]);
+            });
+            ['hsl', 'grade'].forEach(g => { if (bp[g] && cur[g]) Object.keys(def[g]).forEach(c => {
+                const o = {}; Object.keys(def[g][c]).forEach(q => { o[q] = ((cur[g][c] || {})[q] || 0) - (((bp[g][c] || {})[q] || 0) - def[g][c][q]); }); zp[g][c] = o;
+            }); });
+            ['levels', 'selectiveColor'].forEach(k => { if (JSON.stringify(cur[k]) === JSON.stringify(bp[k])) zp[k] = def[k]; });
+            ['profile', 'presetId', 'userPresetId'].forEach(k => { if (cur[k] === bp[k]) zp[k] = def[k] !== undefined ? def[k] : null; });
+            if (zp.presetId === undefined) zp.presetId = null;
+            Object.keys(dc).forEach(ch => { if (JSON.stringify(curvePoints[ch]) === JSON.stringify(base.c[ch])) zc[ch] = dc[ch]; });
+            return { zp, zc };
+        }
+        function applyHistoryLayers(wctx, src, w, h, work) {
+            if (inHistRender || !(editParams.histAmt > 0)) return;
+            const keys = histKeys(); if (!keys.length) return;
+            const amt = editParams.histAmt / 100, saveEp = editParams, saveCp = curvePoints;
+            inHistRender = true;
+            try {
+                keys.forEach(key => {
+                    const m = editParams.fxMasks[key], base = editParams.histBase && editParams.histBase[key];
+                    const A = maskAlpha(getLocalMask(m, w, h), w, h), inv = !!m.inv;
+                    let o;
+                    if (base) {
+                        const z = histZoneParams(base);
+                        editParams = z.zp; curvePoints = z.zc; rebuildCurveLuts();
+                        const t = document.createElement('canvas'); t.width = w; t.height = h; const tc = t.getContext('2d');
+                        renderEditCore(src, w, h, t, tc);
+                        editParams = saveEp; curvePoints = saveCp; rebuildCurveLuts();
+                        o = tc.getImageData(0, 0, w, h).data;
+                    } else {
+                        const t = document.createElement('canvas'); t.width = w; t.height = h; const tc = t.getContext('2d'); tc.drawImage(src, 0, 0, w, h); o = tc.getImageData(0, 0, w, h).data;
+                    }
+                    const id = wctx.getImageData(0, 0, w, h), d = id.data;
+                    for (let i = 0, p = 0; i < A.length; i++, p += 4) {
+                        let k = A[i] / 255; if (inv) k = 1 - k; k *= amt; if (k <= 0) continue;
+                        d[p] += (o[p] - d[p]) * k; d[p + 1] += (o[p + 1] - d[p + 1]) * k; d[p + 2] += (o[p + 2] - d[p + 2]) * k;
+                    }
+                    wctx.putImageData(id, 0, 0);
+                });
+            } finally { editParams = saveEp; curvePoints = saveCp; rebuildCurveLuts(); inHistRender = false; }
+        }
+
+        // Pipeline completo: src (Image/Canvas) -> out (canvas con marco incluido)
+        // Pincel de historia: devuelve las zonas pintadas a como están en la foto original (sin ajustes de color, curvas ni efectos)
+        function applyHistoryBrush(wctx, src, w, h) {
+            const m = fxMaskLayer('hist', false); if (!m || !m.strokes || !m.strokes.length || !(editParams.histAmt > 0)) return;
+            const amt = editParams.histAmt / 100, A = maskAlpha(getLocalMask(m, w, h), w, h), inv = !!m.inv;
+            const t = document.createElement('canvas'); t.width = w; t.height = h; const tc = t.getContext('2d'); tc.drawImage(src, 0, 0, w, h);
+            const o = tc.getImageData(0, 0, w, h).data, id = wctx.getImageData(0, 0, w, h), d = id.data;
+            for (let i = 0, p = 0; i < A.length; i++, p += 4) {
+                let k = A[i] / 255; if (inv) k = 1 - k; k *= amt; if (k <= 0) continue;
+                d[p] += (o[p] - d[p]) * k; d[p + 1] += (o[p + 1] - d[p + 1]) * k; d[p + 2] += (o[p + 2] - d[p + 2]) * k;
+            }
+            wctx.putImageData(id, 0, 0);
+        }
+        function renderEditToCanvas(out, src, w, h, work, wctx, forHistogram) {
+            const fr = computeFrame(w, h);
+            if (out.width !== fr.W) out.width = fr.W;
+            if (out.height !== fr.H) out.height = fr.H;
+            const ctx = out.getContext('2d');
+            if (fr.bg) { ctx.fillStyle = fr.bg; ctx.fillRect(0, 0, fr.W, fr.H); }
+
+            renderEditCore(src, w, h, work, wctx);
+            applyHistoryLayers(wctx, src, w, h, work);
 
             if (!fr.bg && fr.px === 0 && fr.py === 0) ctx.clearRect(0, 0, fr.W, fr.H);
             ctx.drawImage(work, 0, 0, w, h, fr.px, fr.py, w, h);
@@ -3644,6 +4037,7 @@
             const s = $('checkShowLogoText'); if (s) s.checked = !!editParams.showLogoText;
             const e = $('checkShowExifText'); if (e) e.checked = !!editParams.showExifText;
             const t = $('frameTextInput'); if (t && document.activeElement !== t) t.value = editParams.frameText || '';
+            syncFx2Ui();
             ['cyberGlitch', 'anaglyph3d', 'radialAberr'].forEach(m => {
                 const id = m === 'cyberGlitch' ? 'rgbBtnCyber' : m === 'anaglyph3d' ? 'rgbBtnAnaglyph' : 'rgbBtnRadial';
                 const b = $(id); if (b) b.className = 'dk-btn' + (editParams.rgbMode === m ? ' main' : '');
@@ -3669,11 +4063,33 @@
             requestCanvasRender();
         }
 
+        // "Original" en Preajustes: quita solo lo que aportó el preajuste y conserva los ajustes manuales
         function resetProfileToNormal() {
-            pushHistoryState('Perfil');
-            editParams.profile = 'none';
-            renderProfilesCatalog();
-            requestCanvasRender();
+            pushHistoryState('Original');
+            const def = defaultParams(), dc = defaultCurves();
+            const resetCurve = (ch) => { if (dc[ch]) curvePoints[ch] = clone(dc[ch]); };
+            const pr = editParams.presetId && BUILTIN_PRESETS.find(p => p.id === editParams.presetId);
+            const up = !pr && editParams.userPresetId && userPresets.find(u => u.id === editParams.userPresetId);
+            if (pr) {
+                const amt = (editParams.presetAmt != null ? editParams.presetAmt : 100) / 100;
+                Object.keys(pr.p).forEach(k => { editParams[k] = (editParams[k] || 0) - Math.round(pr.p[k] * amt); });
+                Object.keys(pr.h).forEach(c => { const v = pr.h[c], cur = editParams.hsl[c] || { h: 0, s: 0, l: 0 }; editParams.hsl[c] = { h: cur.h - Math.round(v[0] * amt), s: cur.s - Math.round(v[1] * amt), l: cur.l - Math.round(v[2] * amt) }; });
+                Object.keys(pr.g).forEach(r => { editParams.grade[r] = { h: 0, s: 0 }; });
+                Object.keys(pr.c).forEach(resetCurve);
+            } else if (up) {
+                const sp = up.params || {};
+                Object.keys(def).forEach(k => {
+                    if (typeof def[k] === 'number' && typeof sp[k] === 'number' && !FRAME_KEYS.includes(k) && k !== 'profileIntensity' && k !== 'presetAmt') editParams[k] = (editParams[k] || 0) - (sp[k] - def[k]);
+                });
+                ['hsl', 'grade'].forEach(g => { if (sp[g]) Object.keys(sp[g]).forEach(c => {
+                    const sv = sp[g][c] || {}, cur = editParams[g][c] || {}, o = {};
+                    Object.keys(def[g][c] || {}).forEach(q => { o[q] = (cur[q] || 0) - ((sv[q] || 0) - (def[g][c][q] || 0)); });
+                    editParams[g][c] = o;
+                }); });
+                if (up.curves) Object.keys(up.curves).forEach(ch => { if (JSON.stringify(up.curves[ch]) !== JSON.stringify(dc[ch])) resetCurve(ch); });
+            }
+            editParams.profile = 'none'; editParams.presetId = null; editParams.userPresetId = null; editParams.profileIntensity = 100; editParams.presetAmt = 100;
+            rebuildCurveLuts(); syncAllUiControls(); requestCanvasRender();
         }
 
         // ---------- HSL + graduación de color (motor nuevo) ----------
@@ -3845,7 +4261,7 @@
         const SUB_GROUPS = {
             curves: { items: ['curvesMain', 'levels'], pills: { curvesMain: 'pillCurves', levels: 'pillLevels' } },
             color: { items: ['hsl', 'cmyk'], pills: { hsl: 'pillHsl', cmyk: 'pillCmyk' } },
-            efectos: { items: ['rgbGlitch', 'prism', 'vintageLens', 'datamosh'], pills: null }
+            efectos: { items: ['rgbGlitch', 'prism', 'vintageLens', 'datamosh', 'bloom', 'leaks', 'filmDust', 'tilt', 'dblExp', 'duotone', 'pixel', 'comic', 'fog'], pills: null }
         };
         function switchSubTab(group, sub) {
             const g = SUB_GROUPS[group]; if (!g) return;
@@ -3982,7 +4398,7 @@
         }
 
         // ---------- Preajustes integrados ----------
-        const BUILTIN_CATS = [['all', 'Todos'], ['mine', 'Mis preajustes'], ['portrait', 'Retrato'], ['landscape', 'Paisaje'], ['film', 'Película'], ['cine', 'Cine'], ['vintage', 'Vintage'], ['moody', 'Moody'], ['bw', 'B&N'], ['urban', 'Urbano'], ['legacy', 'Clásicos']];
+        const BUILTIN_CATS = [['all', 'Todos'], ['mine', 'Mis preajustes'], ['leica', 'Leica LUX'], ['portrait', 'Retrato'], ['landscape', 'Paisaje'], ['film', 'Película'], ['cine', 'Cine'], ['vintage', 'Vintage'], ['moody', 'Moody'], ['bw', 'B&N'], ['urban', 'Urbano'], ['legacy', 'Clásicos']];
         // c: curvas (valores Y en X = 0, 64, 128, 192, 255) · g: graduación [tono, cantidad] · h: HSL [matiz, saturación, luminosidad]
         function P(cat, name, p, c, g, h) { return { cat, name, p: p || {}, c: c || {}, g: g || {}, h: h || {} }; }
         const BUILTIN_PRESETS = [
@@ -4052,6 +4468,16 @@
             P('urban', 'Cyber Rosa', { contrast: 14, temp: -6, tint: 14, saturation: 8, vibrance: 12, vignette: 18 }, {}, { shadows: [260, 24], highs: [330, 26] }),
             P('urban', 'Asfalto', { contrast: 20, saturation: -24, clarity: 22, highlights: -10, blacks: -4, temp: -3, grain: 16 }, {}, { shadows: [210, 10] }),
             P('urban', 'Hora Azul', { exposure: -2, contrast: 12, temp: -18, tint: 4, vibrance: 14, highlights: -10 }, {}, { shadows: [225, 22], highs: [200, 10] }, { blue: [0, 14, -4] }),
+            P('leica', 'Standard', { contrast: 8, vibrance: 6, highlights: -8, shadows: 6, clarity: 6, vignette: 8 }, { rgb: [4, 62, 130, 198, 252] }),
+            P('leica', 'Classic', { contrast: 6, temp: 5, tint: 2, saturation: -10, vibrance: 4, highlights: -12, shadows: 8, blacks: 8, clarity: 4, grain: 12, vignette: 14 }, { rgb: [18, 68, 128, 190, 244] }, { shadows: [40, 10], highs: [45, 10] }, { green: [4, -14, 0], blue: [0, -8, -4] }),
+            P('leica', 'Contemporary', { contrast: 18, saturation: -4, vibrance: 4, highlights: -22, shadows: 4, blacks: -4, whites: -4, clarity: 10, vignette: 10 }, { rgb: [0, 54, 130, 204, 252] }, { shadows: [200, 6] }),
+            P('leica', 'Vivid', { contrast: 16, saturation: 14, vibrance: 14, highlights: -10, shadows: 6, clarity: 8, vignette: 10 }, { rgb: [0, 56, 130, 202, 255] }, {}, { red: [0, 10, 0], blue: [0, 12, -4], green: [0, 8, -2] }),
+            P('leica', 'Pure', { contrast: -2, saturation: -8, vibrance: 6, highlights: -10, shadows: 10, blacks: 4, clarity: 0 }, { rgb: [8, 66, 130, 194, 250] }),
+            P('leica', 'Cine', { contrast: 14, temp: -4, tint: 2, saturation: -10, highlights: -14, shadows: 8, blacks: 6, grain: 10, vignette: 20 }, { rgb: [10, 60, 128, 198, 248] }, { shadows: [195, 18], highs: [38, 14] }, { orange: [0, 4, 0], blue: [0, -6, -6] }),
+            P('leica', 'Artist Warm', { exposure: 2, contrast: 14, temp: 12, tint: 3, saturation: 4, vibrance: 8, highlights: -12, shadows: 6, grain: 12, vignette: 18 }, { rgb: [10, 62, 128, 198, 248] }, { shadows: [30, 12], highs: [42, 16] }, { red: [0, 8, 0], yellow: [-4, 6, 0] }),
+            P('leica', 'B&N Natural', { saturation: -100, contrast: 10, highlights: -14, shadows: 8, clarity: 6, grain: 10, vignette: 10 }, { rgb: [6, 62, 130, 198, 250] }),
+            P('leica', 'B&N Alto Contraste', { saturation: -100, contrast: 30, highlights: -8, blacks: -8, clarity: 16, grain: 16, vignette: 14 }, { rgb: [0, 44, 128, 212, 255] }),
+            P('leica', 'B&N Suave', { saturation: -100, contrast: -6, highlights: -12, shadows: 12, blacks: 8, grain: 12 }, { rgb: [14, 70, 130, 190, 244] }),
             P('urban', 'Metro', { exposure: -2, contrast: 14, temp: -8, tint: -10, saturation: -10, clarity: 14, grain: 16, vignette: 24 }, {}, { global: [170, 14], shadows: [180, 18] })
         ];
         BUILTIN_PRESETS.forEach((pr, i) => { pr.id = 'b' + i; });
@@ -4071,10 +4497,21 @@
             params.presetId = pr.id; params.presetAmt = Math.round(amt * 100);
             return { params, curves };
         }
+        // Al elegir un preajuste se parte de cero, pero las zonas del pincel de historia se conservan
+        // (con base en cero: así el preajuste sí se aplica también en esas zonas)
+        function carryHist(oldP, newP) {
+            const ks = Object.keys(oldP.fxMasks || {}).filter(k => /^hist\d+$/.test(k));
+            if (!ks.length) return;
+            newP.fxMasks = newP.fxMasks || {}; newP.histBase = {};
+            const z = histStateOf(defaultParams(), defaultCurves());
+            ks.forEach(k => { newP.fxMasks[k] = oldP.fxMasks[k]; newP.histBase[k] = clone(z); });
+            newP.histAmt = oldP.histAmt;
+        }
         function selectBuiltinPreset(pr) {
             pushHistoryState('Preajuste: ' + pr.name);
             const st = builtinState(pr, 1);
             FRAME_KEYS.forEach(k => { st.params[k] = editParams[k]; });
+            carryHist(editParams, st.params);
             editParams = st.params; curvePoints = st.curves;
             rebuildCurveLuts(); syncAllUiControls(); requestCanvasRender();
         }
@@ -4309,11 +4746,14 @@
             if (it.kind === 'user') {
                 pushHistoryState('Preajuste: ' + it.name);
                 const keep = { frameText: editParams.frameText };
-                editParams = Object.assign(mergeParams(clone(it.preset.params)), keep);
+                const oldP = editParams;
+                editParams = Object.assign(mergeParams(clone(it.preset.params)), keep); carryHist(oldP, editParams);
+                editParams.userPresetId = it.id; editParams.presetId = null;
                 curvePoints = clone(it.preset.curves);
                 rebuildCurveLuts(); syncAllUiControls(); requestCanvasRender();
                 return;
             }
+            if (it.id === 'none') { resetProfileToNormal(); return; }
             pushHistoryState('Perfil: ' + it.name);
             editParams.profile = it.id; editParams.presetId = null;
             renderProfilesCatalog(); requestCanvasRender();
@@ -4559,6 +4999,16 @@
             buildSliders('sl-prism', SLIDERS.prism);
             buildSliders('sl-vintageLens', SLIDERS.vintageLens);
             buildSliders('sl-datamosh', SLIDERS.datamosh);
+            buildSliders('sl-hist', SLIDERS.hist);
+            buildSliders('sl-bloom', SLIDERS.bloom);
+            buildSliders('sl-leaks', SLIDERS.leaks);
+            buildSliders('sl-filmDust', SLIDERS.filmDust);
+            buildSliders('sl-tilt', SLIDERS.tilt);
+            buildSliders('sl-dblExp', SLIDERS.dblExp);
+            buildSliders('sl-duotone', SLIDERS.duotone);
+            buildSliders('sl-pixel', SLIDERS.pixel);
+            buildSliders('sl-comic', SLIDERS.comic);
+            buildSliders('sl-fog', SLIDERS.fog);
             buildSliders('sl-frame', SLIDERS.frame);
             buildLevelsSliders();
             buildHslUi(); buildCropRatios(); buildFrameUi();
@@ -5463,7 +5913,7 @@
         let localStroke = null;
         function drawLocalOverlay(cur) {
             if (!isLocalActive || !previewSrc) return;
-            const c = ovCtx('toolOverlay'), inf = healFrameInfo(), l = prismPaint ? fxMaskLayer(curFx().key, false) : localLayer();
+            const c = ovCtx('toolOverlay'), inf = healFrameInfo(), l = prismPaint ? fxMaskLayer(mtKey(), false) : localLayer();
             if (l && (localShowMask || prismPaint) && !isSliderInteracting) {
                 try {
                     const pw = previewSrc.width, ph = previewSrc.height, m = getLocalMask(l, pw, ph);
@@ -5595,14 +6045,24 @@
 
 
         // ---------- Máscara del efecto prisma (revertir zonas: cara, cuerpo…) ----------
-        let prismPaint = false;
+        let prismPaint = false, maskTarget = 'fx';
+        const mtKey = () => maskTarget === 'hist' ? 'hist' + histSession : curFx().key;
         const prismBrush = { size: 10, soft: 60, erase: false };
         let prismStroke = null;
         const FX_GROUPS = {
             rgbGlitch: { key: 'glitch', name: 'Glitch RGB', params: ['rgbOffset'] },
             prism: { key: 'prism', name: 'Prisma', params: ['radialPrismEffect', 'prismSpectrum', 'prismSplit', 'prismKaleido'] },
             vintageLens: { key: 'lens', name: 'Lentes', params: ['anamorphicFlare', 'holgaLomo'] },
-            datamosh: { key: 'mosh', name: 'Datamosh', params: ['scanlines', 'vhsTape'] }
+            datamosh: { key: 'mosh', name: 'Datamosh', params: ['scanlines', 'vhsTape'] },
+            bloom: { key: 'bloom', name: 'Bloom y halo', params: ['bloomAmt', 'halAmt'] },
+            leaks: { key: 'leak', name: 'Fugas de luz', params: ['leakAmt'] },
+            filmDust: { key: 'dust', name: 'Polvo y rayones', params: ['dustAmt', 'scratchAmt'] },
+            tilt: { key: 'tilt', name: 'Tilt-shift', params: ['tiltBlur'] },
+            dblExp: { key: 'dbl', name: 'Doble exposición', params: ['dblAmt'] },
+            duotone: { key: 'duo', name: 'Duotono', params: ['duoAmt'] },
+            pixel: { key: 'pix', name: 'Pixelar', params: ['pixSize'] },
+            comic: { key: 'comic', name: 'Cómic y boceto', params: ['halftoneAmt', 'sketchAmt'] },
+            fog: { key: 'fogg', name: 'Neblina y rayos', params: ['fogAmt', 'raysAmt'] }
         };
         const FX_BY_KEY = {}; Object.values(FX_GROUPS).forEach(g => FX_BY_KEY[g.key] = g);
         let fxCurrent = 'rgbGlitch';
@@ -5629,26 +6089,52 @@
             }
             wctx.putImageData(id, 0, 0);
         }
-        const ensurePrismMask = () => fxMaskLayer(curFx().key, true);
+        const ensurePrismMask = () => {
+            const k = mtKey(), m = fxMaskLayer(k, true);
+            if (maskTarget === 'hist') { if (!editParams.histBase) editParams.histBase = {}; if (!editParams.histBase[k]) editParams.histBase[k] = histStateOf(editParams, curvePoints); }
+            return m;
+        };
         function refreshPrismUi() {
-            const pm = fxMaskLayer(curFx().key, false), b = $('pmPaintBtn'); if (!b) return;
-            b.classList.toggle('main', prismPaint); b.innerHTML = prismPaint ? '<i class="fa-solid fa-check"></i>&nbsp; Listo' : '<i class="fa-solid fa-paintbrush"></i>&nbsp; Quitar «' + curFx().name + '» de una zona' + (pm && pm.strokes.length ? ' ✓' : '');
-            $('pmTools').style.display = prismPaint ? '' : 'none';
-            $('pmModeRemove').classList.toggle('on', !prismBrush.erase); $('pmModeBack').classList.toggle('on', prismBrush.erase);
-            $('pmInvBtn').classList.toggle('main', !!(pm && pm.inv));
-            $('pmSize').value = prismBrush.size; $('pmSizeVal').textContent = prismBrush.size + '%';
+            const fxOn = prismPaint && maskTarget === 'fx', hOn = prismPaint && maskTarget === 'hist';
+            const b = $('pmPaintBtn');
+            if (b) {
+                const pm = fxMaskLayer(curFx().key, false);
+                b.classList.toggle('main', fxOn); b.innerHTML = fxOn ? '<i class="fa-solid fa-check"></i>&nbsp; Listo' : '<i class="fa-solid fa-paintbrush"></i>&nbsp; Quitar «' + curFx().name + '» de una zona' + (pm && pm.strokes.length ? ' ✓' : '');
+                $('pmTools').style.display = fxOn ? '' : 'none';
+                $('pmModeRemove').classList.toggle('on', !prismBrush.erase); $('pmModeBack').classList.toggle('on', prismBrush.erase);
+                $('pmInvBtn').classList.toggle('main', !!(pm && pm.inv));
+                $('pmSize').value = prismBrush.size; $('pmSizeVal').textContent = prismBrush.size + '%';
+            }
+            const hb = $('hbPaintBtn');
+            if (hb) {
+                const hm = fxMaskLayer('hist' + histSession, false), hAny = histKeys().length > 0;
+                hb.classList.toggle('main', hOn); hb.innerHTML = hOn ? '<i class="fa-solid fa-check"></i>&nbsp; Listo' : '<i class="fa-solid fa-clock-rotate-left"></i>&nbsp; Pincel de historia' + (hAny ? ' ✓' : '');
+                $('hbTools').style.display = hOn ? '' : 'none';
+                $('hbModeRemove').classList.toggle('on', !prismBrush.erase); $('hbModeBack').classList.toggle('on', prismBrush.erase);
+                $('hbInvBtn').classList.toggle('main', !!(hm && hm.inv));
+                $('hbSize').value = prismBrush.size; $('hbSizeVal').textContent = prismBrush.size + '%';
+            }
         }
         function setPrismMode(back) { prismBrush.erase = !!back; refreshPrismUi(); }
-        function togglePrismPaint() { if (prismPaint) stopPrismPaint(); else startPrismPaint(); }
+        function togglePrismPaint() { if (prismPaint && maskTarget === 'fx') { stopPrismPaint(); return; } if (prismPaint) stopPrismPaint(); maskTarget = 'fx'; startPrismPaint(); }
+        function toggleHistPaint() {
+            if (prismPaint && maskTarget === 'hist') { stopPrismPaint(); return; } if (prismPaint) stopPrismPaint();
+            // ¿hubo cambios desde la última capa? si no, se sigue en la misma; si sí, se crea una nueva (máx. 4)
+            const ks = histKeys(), last = ks.length ? ks[ks.length - 1] : null, cur = JSON.stringify(histStateOf(editParams, curvePoints));
+            if (last && editParams.histBase && editParams.histBase[last] && JSON.stringify(editParams.histBase[last]) === cur) histSession = parseInt(last.slice(4), 10);
+            else { let n = 0; while (editParams.fxMasks && editParams.fxMasks['hist' + n] && n < 3) n++; histSession = n; }
+            maskTarget = 'hist'; startPrismPaint();
+        }
         function startPrismPaint() {
             if (!imageLoaded) return; if (isEyedropperActive) toggleEyedropperTool(false);
             prismPaint = true; isLocalActive = true; $('toolOverlay').classList.remove('hidden'); refreshPrismUi(); drawLocalOverlay(null);
-            showToast('Pinta donde NO quieres los efectos (cara, cuerpo…)', 2400);
+            showToast(maskTarget === 'hist' ? 'Pinta las zonas que quieres devolver a como eran en la foto original' : 'Pinta donde NO quieres los efectos (cara, cuerpo…)', 2600);
         }
         function stopPrismPaint() { if (!prismPaint) return; prismPaint = false; prismStroke = null; isSliderInteracting = false; if (currentEditTab !== 'local') { isLocalActive = false; $('toolOverlay').classList.add('hidden'); } refreshPrismUi(); }
-        function onPrismBrush(k, v) { v = parseFloat(v); prismBrush[k] = v; $('pmSizeVal').textContent = v + '%'; }
+        function onPrismBrush(k, v) { v = parseFloat(v); prismBrush[k] = v; $('pmSizeVal').textContent = v + '%'; $('hbSizeVal').textContent = v + '%'; }
         function togglePrismInvert() { pushHistoryState('Invertir zonas'); const pm = ensurePrismMask(); pm.inv = !pm.inv; pm.rev = ++localRevCtr; refreshPrismUi(); requestCanvasRender(); }
-        function clearPrismMask() { if (!fxMaskLayer(curFx().key, false)) return; pushHistoryState('Borrar zonas'); delete editParams.fxMasks[curFx().key]; refreshPrismUi(); requestCanvasRender(); drawLocalOverlay(null); }
+        function clearPrismMask() { if (maskTarget === 'hist') { if (!histKeys().length) return; pushHistoryState('Borrar zonas'); Object.keys(editParams.fxMasks).filter(k => /^hist\d+$/.test(k)).forEach(k => delete editParams.fxMasks[k]); editParams.histBase = {}; histSession = 0; refreshPrismUi(); requestCanvasRender(); drawLocalOverlay(null); return; }
+            if (!fxMaskLayer(mtKey(), false)) return; pushHistoryState('Borrar zonas'); delete editParams.fxMasks[mtKey()]; refreshPrismUi(); requestCanvasRender(); drawLocalOverlay(null); }
         function setupPrismHandlers() {
             const ov = $('toolOverlay'); if (!ov) return;
             ov.addEventListener('pointerdown', (e) => {
